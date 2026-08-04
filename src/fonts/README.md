@@ -8,6 +8,10 @@ IBM Plex Sans + IBM Plex Mono, лицензия **SIL Open Font License 1.1** (`
 Пакеты оставлены в `devDependencies` — только чтобы можно было обновить или
 досабсетить файлы; в рантайме сайт их не использует, шрифты отдаются отсюда.
 
+Лежат в `src/`, а не в `public/`, намеренно: так Vite сам проставляет хеш в имени
+(вечный кеш) и префикс `base`. На GitHub Pages сайт живёт в подпапке `/locus`, и
+абсолютные пути вида `/fonts/…` там бы отвалились.
+
 ## Что лежит
 
 | Файл | Гарнитура | Начертание | Сабсет |
@@ -29,5 +33,5 @@ npm i -D @fontsource/ibm-plex-sans@latest @fontsource/ibm-plex-mono@latest
 ```
 
 затем скопировать нужные файлы из `node_modules/@fontsource/*/files/` сюда.
-`@font-face` и `unicode-range` описаны в `src/styles/fonts.css`, preload — в
-`src/layouts/BaseLayout.astro`.
+`@font-face` и `unicode-range` описаны в `src/styles/fonts.css` (пути относительные,
+`../fonts/…`), preload — в `src/layouts/BaseLayout.astro` через импорт `?url`.

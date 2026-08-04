@@ -1,6 +1,13 @@
 ---
 import '../styles/global.css';
 
+// ?url — чтобы Vite отдал финальный путь с хешем и префиксом base.
+// Руками писать «/fonts/…» нельзя: на GitHub Pages сайт лежит в подпапке.
+import sansCyr400 from '../fonts/ibm-plex-sans-cyrillic-400-normal.woff2?url';
+import sansCyr500 from '../fonts/ibm-plex-sans-cyrillic-500-normal.woff2?url';
+import monoCyr400 from '../fonts/ibm-plex-mono-cyrillic-400-normal.woff2?url';
+import { withBase } from '../lib/url';
+
 interface Props {
   title: string;
   description?: string;
@@ -32,31 +39,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
     <meta property="og:locale" content="ru_RU" />
     {/* TODO(раздел 8): og-изображение, favicon-набор, реальные title/description */}
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <meta name="theme-color" content="#071F29" />
 
     {/* Ключевые начертания — кириллица, чтобы не ловить FOUT на первом экране */}
-    <link
-      rel="preload"
-      href="/fonts/ibm-plex-sans-cyrillic-400-normal.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/ibm-plex-sans-cyrillic-500-normal.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/ibm-plex-mono-cyrillic-400-normal.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <link rel="preload" href={sansCyr400} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansCyr500} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoCyr400} as="font" type="font/woff2" crossorigin />
   </head>
 
   <body>

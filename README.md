@@ -30,10 +30,12 @@ npm run dev
 ## Структура
 
 ```text
+.github/workflows/    деплой на GitHub Pages
 design/refs/          референс-скрины из Figma (в гит не коммитятся)
-public/fonts/         IBM Plex, self-host
+public/               favicon и прочее, что должно лежать по фиксированному пути
 src/
   components/         компоненты блоков и атомы
+  fonts/              IBM Plex, self-host (импортируются, не из public)
   layouts/
     BaseLayout.astro  общий каркас страницы, мета, preload шрифтов
   pages/
@@ -54,6 +56,15 @@ src/
 Верстка идёт **строго поблочно**: сначала весь десктоп блок за блоком, потом так же
 поблочно адаптив. Каждый блок сверяется с Figma и уходит отдельным коммитом.
 Подробности и правила — в [AGENTS.md](AGENTS.md).
+
+## Деплой
+
+Пуш в `main` → GitHub Actions собирает и выкладывает на GitHub Pages:
+**https://s00n3.github.io/locus/**
+
+Сайт лежит в подпапке, поэтому в `astro.config.mjs` задан `base: '/locus'`.
+Внутренние ссылки и ассеты строятся с учётом этого — см. [AGENTS.md](AGENTS.md).
+Когда появится свой домен, `base` убирается, `site` меняется на домен.
 
 ## Что ещё не решено
 
