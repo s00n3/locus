@@ -7,15 +7,19 @@ import sansCyr400 from '../fonts/ibm-plex-sans-cyrillic-400-normal.woff2?url';
 import sansCyr500 from '../fonts/ibm-plex-sans-cyrillic-500-normal.woff2?url';
 import monoCyr400 from '../fonts/ibm-plex-mono-cyrillic-400-normal.woff2?url';
 import { withBase } from '../lib/url';
+import Header from '../components/Header.astro';
 
 interface Props {
   title: string;
   description?: string;
+  /** На главной логотип в шапке не нужен — он в герое (макет 9:110) */
+  headerLogo?: boolean;
 }
 
 const {
   title,
   description = 'ЛОКУС — цифровая проектная школа Цифровой кафедры Сеченовского университета.',
+  headerLogo = true,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
@@ -51,8 +55,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
   <body>
     <a class="visually-hidden" href="#main">К основному содержимому</a>
 
-    {/* Блок 1 (раздел 9.1) — хедер */}
-    <slot name="header" />
+    <Header showLogo={headerLogo} />
 
     <main id="main">
       <slot />

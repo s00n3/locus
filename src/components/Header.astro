@@ -1,0 +1,140 @@
+---
+import { withBase } from '../lib/url';
+
+interface Props {
+  /**
+   * На главной лого в шапке нет — оно в герое крупным планом (макет 9:110).
+   * На «Проектах» и «Сообществе» шапка несёт компактный логотип (9:1552).
+   */
+  showLogo?: boolean;
+}
+
+const { showLogo = true } = Astro.props;
+
+// В макете пункты названы иначе, чем разделы в ТЗ: «Люди» ведёт на «Сообщество».
+// «Контакты» отдельной страницы не имеют — это якорь на футер (блок 2).
+const items = [
+  { label: 'О школе', href: withBase('/') },
+  { label: 'Проекты', href: withBase('/projects') },
+  { label: 'Люди', href: withBase('/community') },
+  { label: 'Контакты', href: '#contacts' },
+];
+
+const normalize = (path: string) => path.replace(/\/+$/, '') || '/';
+const current = normalize(Astro.url.pathname);
+const isActive = (href: string) => !href.startsWith('#') && normalize(href) === current;
+---
+
+<header class="header">
+  <div class="container header__inner">
+    {
+      showLogo && (
+        <a class="header__logo" href={withBase('/')}>
+          <span class="header__bracket" aria-hidden="true">
+            [
+          </span>
+          <span class="header__wordmark">ЛОКУС</span>
+          <span class="header__bracket" aria-hidden="true">
+            ]
+          </span>
+        </a>
+      )
+    }
+
+    <nav class="header__nav" aria-label="Основная навигация">
+      <ul class="header__list">
+        {
+          items.map((item) => (
+            <li>
+              <a
+                class:list={['header__link', { 'is-active': isActive(item.href) }]}
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: relative;
+    z-index: 10;
+    padding-top: var(--space-2);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: 59px; /* 75px от верха фрейма минус padding-top */
+  }
+
+  /* Лого: «ЛОКУС» обычным начертанием в скобках, набранных Light.
+     Кегли и трекинг сняты с ноды 9:1552 и округлены. */
+  .header__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+    color: var(--text-primary);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .header__wordmark {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 40px;
+  }
+
+  .header__bracket {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 50px;
+  }
+
+  /* margin-left, а не только justify-content: на главной логотипа нет,
+     и space-between прижал бы единственного ребёнка к левому краю */
+  .header__nav {
+    flex: none;
+    margin-left: auto;
+  }
+
+  .header__list {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+  }
+
+  /* Пункт-вкладка: скруглены только верхние углы, активный залит терракотой
+     на 50%. Радиус 12px — вне шкалы радиусов, так в макете. */
+  .header__link {
+    display: flex;
+    align-items: center;
+    height: 53px;
+    padding-inline: 18px;
+    border-radius: 12px 12px 0 0;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--text-primary);
+    white-space: nowrap;
+    transition: background-color var(--transition-fast);
+  }
+
+  .header__link:hover {
+    background-color: color-mix(in srgb, var(--accent-terracotta) 25%, transparent);
+  }
+
+  .header__link.is-active {
+    background-color: color-mix(in srgb, var(--accent-terracotta) 50%, transparent);
+  }
+</style>
