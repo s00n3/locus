@@ -1,0 +1,227 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Служебная страница для сверки дизайн-слоя (раздел 9.0).
+// Не входит в структуру сайта — из навигации не линкуется.
+
+const colors = [
+  ['--bg-deep', 'Фон · deep'],
+  ['--bg-base', 'Фон · base'],
+  ['--surface-card', 'Поверхность · card'],
+  ['--surface-panel', 'Поверхность · panel'],
+  ['--surface-glass', 'Поверхность · glass'],
+  ['--brand-cyan', 'Бренд · cyan'],
+  ['--brand-cyan-25', 'Бренд · cyan 25%'],
+  ['--accent-terracotta', 'Акцент · терракота'],
+  ['--accent-terracotta-light', 'Акцент · терракота light'],
+  ['--text-primary', 'Текст · primary'],
+  ['--text-soft', 'Текст · soft'],
+  ['--text-muted', 'Текст · muted'],
+  ['--text-accent', 'Текст · accent'],
+  ['--text-on-light', 'Текст · on-light'],
+  ['--border-glass', 'Граница · glass'],
+  ['--border-warm', 'Граница · warm'],
+  ['--border-teal', 'Граница · teal'],
+  ['--divider', 'Разделитель'],
+];
+
+const types = [
+  ['type-mega-l', 'Mega L · Sans 400 / 100 / 0.95 / −5%'],
+  ['type-mega-s', 'Mega S · Sans 400 / 80 / 110% / −5%'],
+  ['type-h1', 'H1 · Sans 500 / 60 / 107% / −4%'],
+  ['type-h2', 'H2 · Sans 500 / 40 / 120% / −2%'],
+  ['type-h3', 'H3 · Sans 500 / 32 / 120% / −2%'],
+  ['type-h4', 'H4 · Sans 500 / 24 / 130% / −5%'],
+  ['type-h5', 'H5 · Mono 400 / 24 / 140% / −5%'],
+  ['type-h6', 'H6 · Sans 500 / 18 / 130% / −2%'],
+  ['type-quote-l', 'Quote L · Sans 400 / 44 / 120% / −2%'],
+  ['type-quote-s', 'Quote S · Sans 400 / 32 / 120% / −2%'],
+  ['type-button-l', 'Button L · Mono 400 / 24 / 110% / −5%'],
+  ['type-button-s', 'Button S · Sans 500 / 18 / 105% / +5%'],
+  ['type-menu', 'Menu · Mono 400 / 16 / 105% / +5%'],
+  ['type-caption', 'Caption · Sans 400 / 16 / 120% / −2%'],
+  ['type-tag', 'Tag · Mono 400 / 14 / 140% / −2%'],
+  ['type-body', 'Body · Sans 400 / 20 / 150% / −2%'],
+];
+
+const spaces = [1, 2, 3, 4, 5, 6, 8, 12, 16];
+---
+
+<BaseLayout title="Дизайн-слой · ЛОКУС" description="Служебная сверка токенов и типо-шкалы.">
+  <div class="container section sg">
+    <h1 class="type-h1">Дизайн-слой</h1>
+    <p class="type-caption sg__note">
+      Служебная страница: токены, типо-шкала, отступы и радиусы из
+      LOCUS_design_handoff.md. Компоненты сюда добавляются по мере верстки блоков.
+    </p>
+
+    <section class="sg__section">
+      <h2 class="type-h3">Цвет · 18 токенов</h2>
+      <ul class="sg__swatches">
+        {
+          colors.map(([token, label]) => (
+            <li class="sg__swatch">
+              <span class="sg__chip" style={`background: var(${token})`} />
+              <span class="type-tag">{label}</span>
+              <code class="type-tag sg__code">{token}</code>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="sg__section">
+      <h2 class="type-h3">Типографика · 16 стилей</h2>
+      <ul class="sg__types">
+        {
+          types.map(([cls, label]) => (
+            <li class="sg__type">
+              <span class="type-tag sg__code">{label}</span>
+              <span class={cls}>Съешь ещё этих мягких булок · Aa Bb 0123</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="sg__section">
+      <h2 class="type-h3">Отступы · модуль 8px</h2>
+      <ul class="sg__spaces">
+        {
+          spaces.map((n) => (
+            <li class="sg__space">
+              <span class="sg__bar" style={`width: var(--space-${n})`} />
+              <code class="type-tag sg__code">--space-{n}</code>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="sg__section">
+      <h2 class="type-h3">Радиусы</h2>
+      <ul class="sg__radii">
+        <li class="sg__radius" style="border-radius: var(--radius-card)">16 · карточка</li>
+        <li class="sg__radius" style="border-radius: var(--radius-panel)">20 · панель</li>
+        <li class="sg__radius" style="border-radius: var(--radius-block)">24 · блок</li>
+        <li class="sg__radius" style="border-radius: var(--radius-pill)">999 · пилюля</li>
+      </ul>
+    </section>
+
+    <section class="sg__section">
+      <h2 class="type-h3">Сетка · 12 колонок (4 на 375)</h2>
+      <div class="grid sg__grid">
+        {Array.from({ length: 12 }, (_, i) => <span class="sg__col">{i + 1}</span>)}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .sg__note {
+    max-width: 60ch;
+    margin-top: var(--space-2);
+    color: var(--text-muted);
+  }
+
+  .sg__section {
+    margin-top: var(--space-12);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .sg__swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .sg__swatch {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--surface-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-card);
+  }
+
+  .sg__chip {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-glass);
+  }
+
+  .sg__code {
+    color: var(--text-muted);
+  }
+
+  .sg__types,
+  .sg__spaces {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .sg__type {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .sg__space {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .sg__bar {
+    height: 16px;
+    background: var(--brand-cyan);
+    border-radius: 2px;
+  }
+
+  .sg__radii {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .sg__radius {
+    display: grid;
+    place-items: center;
+    min-width: 160px;
+    padding: var(--space-4);
+    background: var(--surface-card);
+    border: 1px solid var(--border-teal);
+    font-family: var(--font-mono);
+    font-size: 14px;
+  }
+
+  .sg__grid {
+    background: var(--surface-glass);
+    border-radius: var(--radius-block);
+    padding: var(--space-2);
+  }
+
+  .sg__col {
+    display: grid;
+    place-items: center;
+    padding-block: var(--space-3);
+    background: var(--brand-cyan-25);
+    border-radius: var(--radius-card);
+    font-family: var(--font-mono);
+    font-size: 14px;
+  }
+
+  @media (max-width: 767px) {
+    .sg__col:nth-child(n + 5) {
+      display: none;
+    }
+  }
+</style>

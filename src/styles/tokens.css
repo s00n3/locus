@@ -1,0 +1,89 @@
+/* ---------------------------------------------------------------------------
+   Дизайн-токены ЛОКУС.
+   Цвета — коллекция «LOCUS · Color» из Figma (DC-Final), значения по
+   LOCUS_design_handoff.md, раздел 1. Тема только тёмная.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* --- Цвет: фоны --- */
+  --bg-deep: #071f29;
+  --bg-base: #081a2e;
+
+  /* --- Цвет: поверхности --- */
+  --surface-card: #123f4a;
+  --surface-panel: #1c5e74;
+  --surface-glass: rgba(255, 255, 255, 0.08);
+
+  /* --- Цвет: бренд и акценты --- */
+  --brand-cyan: #4ddbeb;
+  --brand-cyan-25: rgba(77, 219, 235, 0.25);
+  --accent-terracotta: #c36a49;
+  --accent-terracotta-light: #f08a61;
+
+  /* --- Цвет: текст --- */
+  --text-primary: #ffffff;
+  --text-soft: #e5f3f5;
+  --text-muted: #b8d1d6;
+  --text-accent: #c36a49;
+  --text-on-light: #000000;
+
+  /* --- Цвет: границы и разделители --- */
+  --border-glass: rgba(255, 255, 255, 0.18);
+  --border-warm: #c4b9b9;
+  --border-teal: rgba(30, 106, 124, 0.6);
+  --divider: rgba(255, 255, 255, 0.07);
+
+  /* --- Отступы: модуль 8px --- */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-12: 96px;
+  --space-16: 128px;
+
+  /* --- Радиусы --- */
+  --radius-card: 16px;
+  --radius-panel: 20px;
+  --radius-block: 24px;
+  --radius-pill: 999px;
+
+  /* --- Контейнер и сетка --- */
+  --container-max: 1840px;
+  --container-pad: 40px;
+  --grid-columns: 12;
+  --grid-gutter: 24px;
+
+  /* --- Гарнитуры --- */
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* --- Прочее --- */
+  --focus-ring: 2px solid var(--brand-cyan);
+  --focus-offset: 2px;
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
+
+/* Брейкпоинты (значения — для справки, в media-запросах пишутся числом,
+   т.к. CSS-переменные в @media не работают):
+     --bp-mobile:  375px
+     --bp-tablet:  768px
+     --bp-desktop: 1440px
+     --bp-wide:    1920px                                                     */
+
+@media (max-width: 1439px) {
+  :root {
+    --container-pad: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --container-pad: 16px;
+    --grid-columns: 4;
+    --grid-gutter: 16px;
+  }
+}

@@ -1,0 +1,75 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'ЛОКУС — цифровая проектная школа Цифровой кафедры Сеченовского университета.',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ЛОКУС" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="ru_RU" />
+    {/* TODO(раздел 8): og-изображение, favicon-набор, реальные title/description */}
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#071F29" />
+
+    {/* Ключевые начертания — кириллица, чтобы не ловить FOUT на первом экране */}
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-sans-cyrillic-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-sans-cyrillic-500-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-mono-cyrillic-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+
+  <body>
+    <a class="visually-hidden" href="#main">К основному содержимому</a>
+
+    {/* Блок 1 (раздел 9.1) — хедер */}
+    <slot name="header" />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    {/* Блок 2 (раздел 9.1) — футер */}
+    <slot name="footer" />
+  </body>
+</html>
