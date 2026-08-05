@@ -86,4 +86,24 @@ const benefits = defineCollection({
   }),
 });
 
-export const collections = { tracks, cases, audiences, benefits };
+/** Блок 8 главной — менторы (ТЗ, раздел 4.1) */
+const mentors = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/mentors' }),
+  schema: z.object({
+    /** Порядок в карусели */
+    order: z.number().default(0),
+    /** Фамилия — набирается жирным */
+    surname: z.string(),
+    /** Имя — набирается обычным начертанием под фамилией */
+    name: z.string(),
+    /** Название проекта; подпись «Ментор проекта» добавляет вёрстка */
+    project: z.string(),
+    description: z.string(),
+    /** Рукописная метка в углу карточки: Biotech, Medtech. Можно не заполнять */
+    label: z.string().default(''),
+    photo: z.string().optional(),
+    photoAlt: z.string().default(''),
+  }),
+});
+
+export const collections = { tracks, cases, audiences, benefits, mentors };

@@ -1,0 +1,318 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import noteArrow from '../assets/icons/mentors-note-arrow.svg?url';
+
+const mentors = (await getCollection('mentors')).sort((a, b) => a.data.order - b.data.order);
+
+const uploads = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+
+// Декоративные пиксели — ноды «Пиксели 7» и «Пиксели 8» (9:278, 9:293)
+const T = 'var(--surface-panel)';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+const pixels: [x: number, y: number, size: number, color: string][] = [
+  [59, 67.29, 17.143, T], [144.71, 67.29, 17.143, TH], [76.14, 84.43, 17.143, OH],
+  [93.29, 67.29, 17.143, TH], [93.29, 50.14, 17.143, TH], [93.29, 84.43, 17.143, T],
+  [110.43, 33, 17.143, OH], [59, 118.71, 17.143, OH], [127.57, 50.14, 17.143, T],
+  [110.43, 67.29, 17.143, OH], [93.29, 118.71, 17.143, T], [110.43, 50.14, 17.143, TH],
+  [93.29, 101.57, 17.143, TH],
+  [1314.82, 125.06, 18.413, T], [1314.82, 33, 18.413, TH], [1333.24, 106.65, 18.413, OH],
+  [1314.82, 88.24, 18.413, TH], [1296.41, 88.24, 18.413, TH], [1333.24, 88.24, 18.413, T],
+  [1278, 69.83, 18.413, OH], [1370.06, 125.06, 18.413, OH], [1296.41, 51.41, 18.413, T],
+  [1314.82, 69.83, 18.413, OH], [1370.06, 88.24, 18.413, T], [1296.41, 69.83, 18.413, TH],
+  [1351.65, 88.24, 18.413, TH],
+];
+---
+
+<section class="mentors" aria-labelledby="mentors-title">
+  <div class="mentors__pixels" aria-hidden="true">
+    {
+      pixels.map(([x, y, size, color]) => (
+        <span style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}`} />
+      ))
+    }
+  </div>
+
+  <div class="mentors__head">
+    <h2 class="mentors__title" id="mentors-title">/// Менторы</h2>
+
+    <p class="mentors__note">Организовывают работу и помогают с любой проблемой</p>
+    <img class="mentors__note-arrow" src={noteArrow} alt="" width="23" height="53" aria-hidden="true" />
+  </div>
+
+  <div class="mentors__carousel">
+    <button class="mentors__nav" type="button" data-dir="-1" aria-label="Предыдущие менторы">
+      &lsaquo;
+    </button>
+
+    <ul class="mentors__track">
+      {
+        mentors.map((item) => {
+          const photo = item.data.photo ? uploads[item.data.photo]?.default : undefined;
+          return (
+            <li class="mentor">
+              <div class="mentor__head">
+                {photo && (
+                  <Image
+                    class="mentor__photo"
+                    src={photo}
+                    alt={item.data.photoAlt}
+                    widths={[97, 194]}
+                    sizes="97px"
+                    loading="lazy"
+                  />
+                )}
+                <div class="mentor__info">
+                  <p class="mentor__name">
+                    <span class="mentor__surname">{item.data.surname}</span>
+                    <span class="mentor__given">{item.data.name}</span>
+                  </p>
+                  <p class="mentor__project">
+                    Ментор проекта<br />«{item.data.project}»
+                  </p>
+                </div>
+              </div>
+
+              <p class="mentor__text">{item.data.description}</p>
+
+              {item.data.label && <p class="mentor__label">{item.data.label}</p>}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <button class="mentors__nav" type="button" data-dir="1" aria-label="Следующие менторы">
+      &rsaquo;
+    </button>
+  </div>
+</section>
+
+<script>
+  // Листание прокруткой: без скрипта лента всё равно листается пальцем
+  // и колесом, кнопки лишь добавляют управление мышью.
+  document.querySelectorAll<HTMLElement>('.mentors__carousel').forEach((carousel) => {
+    const track = carousel.querySelector<HTMLElement>('.mentors__track');
+    if (!track) return;
+
+    const buttons = [...carousel.querySelectorAll<HTMLButtonElement>('.mentors__nav')];
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const card = track.querySelector<HTMLElement>('.mentor');
+        if (!card) return;
+        const step = card.offsetWidth + parseFloat(getComputedStyle(track).columnGap || '0');
+        track.scrollBy({ left: step * Number(button.dataset.dir), behavior: 'smooth' });
+      });
+    });
+
+    // Гасим кнопки, когда листать некуда: сейчас менторов ровно на один
+    // экран, и живая кнопка без реакции сбивала бы с толку
+    const sync = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      buttons.forEach((button) => {
+        const forward = Number(button.dataset.dir) > 0;
+        button.disabled = max < 1 || (forward ? track.scrollLeft >= max - 1 : track.scrollLeft <= 1);
+      });
+    };
+
+    sync();
+    track.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+  });
+</script>
+
+<style>
+  .mentors {
+    position: relative;
+    overflow: hidden;
+    padding-block: 59px 64px;
+  }
+
+  /* --- Заголовок и рукописная подноска --- */
+
+  .mentors__head {
+    position: relative;
+    width: var(--layout-width);
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .mentors__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-align: center;
+  }
+
+  /* В макете подноска набрана IBM Plex Sans с интерлиньяжем 24 при кегле 32 —
+     строки налезают друг на друга. Взят рукописный шрифт, как в герое. */
+  .mentors__note {
+    position: absolute;
+    left: 922px;
+    top: -59px;
+    width: 405px;
+    font-family: var(--font-hand);
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: normal;
+    color: var(--accent-terracotta-light);
+  }
+
+  .mentors__note-arrow {
+    position: absolute;
+    left: 876px;
+    top: -41px;
+    width: 22.4px;
+    height: 52.2px;
+    transform: rotate(-148.06deg);
+  }
+
+  /* --- Карусель --- */
+
+  .mentors__carousel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: var(--layout-width);
+    max-width: 100%;
+    margin: 19.4px auto 0;
+  }
+
+  /* 30 + зазор 10 = 40: лента начинается ровно там, где в макете карточки */
+  .mentors__nav {
+    flex: none;
+    width: 30px;
+    font-size: 46px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: opacity var(--transition-fast);
+  }
+
+  .mentors__nav:hover:not(:disabled) {
+    opacity: 0.6;
+  }
+
+  .mentors__nav:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  .mentors__track {
+    display: flex;
+    gap: 25.2px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .mentors__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* --- Карточка --- */
+
+  .mentor {
+    position: relative;
+    flex: none;
+    width: 320.086px;
+    height: 231.429px;
+    padding: 14.29px 17.46px;
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.2);
+    scroll-snap-align: start;
+    overflow: hidden;
+  }
+
+  .mentor__head {
+    display: flex;
+    gap: 14px;
+  }
+
+  .mentor__photo {
+    flex: none;
+    width: 97px;
+    height: 95px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .mentor__info {
+    flex: 1;
+    min-width: 0;
+    padding-top: 9.5px;
+    text-align: center;
+  }
+
+  /* Светло-серый вне палитры handoff — в макете весь текст карточки им */
+  .mentor__name {
+    font-size: 23px;
+    line-height: 1.22;
+    letter-spacing: normal;
+    color: #d9d9d9;
+  }
+
+  .mentor__surname {
+    display: block;
+    font-weight: 700;
+  }
+
+  .mentor__given {
+    display: block;
+    font-weight: 400;
+  }
+
+  .mentor__project {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.25;
+    letter-spacing: normal;
+    color: #d9d9d9;
+  }
+
+  .mentor__text {
+    margin-top: 23px;
+    font-size: 14px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    text-align: center;
+    color: #d9d9d9;
+  }
+
+  .mentor__label {
+    position: absolute;
+    left: 20px;
+    bottom: 6px;
+    font-family: var(--font-hand);
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: normal;
+    transform: rotate(-9.82deg);
+  }
+
+  /* --- Пиксели --- */
+
+  .mentors__pixels {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: var(--layout-width);
+    height: 100%;
+    margin-left: calc(var(--layout-width) / -2);
+    pointer-events: none;
+  }
+
+  .mentors__pixels :global(span) {
+    position: absolute;
+  }
+</style>

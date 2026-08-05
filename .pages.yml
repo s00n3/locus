@@ -179,6 +179,51 @@ content:
             - { value: purple, label: Фиолетовый }
         default: cyan
 
+  - name: mentors
+    label: Менторы
+    description: Карточки в карусели на главной.
+    type: collection
+    path: src/content/mentors
+    filename: '{fields.surname}-{fields.name}.yaml'
+    format: yaml
+    view:
+      fields: [surname, name, project, order]
+      sort: [order, surname]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: surname
+        label: Фамилия
+        type: string
+        required: true
+      - name: name
+        label: Имя
+        type: string
+        required: true
+      - name: project
+        label: Проект
+        type: string
+        required: true
+        description: Только название. Подпись «Ментор проекта» добавится сама.
+      - name: description
+        label: Описание
+        type: text
+        required: true
+      - name: label
+        label: Метка в углу
+        type: string
+        description: Рукописная подпись — Biotech, Medtech. Можно оставить пустым.
+      - name: photo
+        label: Фотография
+        type: image
+      - name: photoAlt
+        label: Описание фотографии
+        type: string
+        description: Для незрячих и на случай, если фото не загрузится.
+
 settings:
   content:
     merge: true
