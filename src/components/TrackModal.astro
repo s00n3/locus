@@ -123,7 +123,7 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
 
           <ol class="track-modal__stages">
             {stages.map((stage, index) => (
-              <li class:list={['track-modal__stage', { 'is-final': stage.highlight }]}>
+              <li class="track-modal__stage">
                 <span class="track-modal__rail" aria-hidden="true">
                   <span class="track-modal__num">{String(index + 1).padStart(2, '0')}</span>
                 </span>
@@ -145,8 +145,15 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
 
     <footer class="track-modal__footer">
       {outcome && <p class="track-modal__outcome">{outcome}</p>}
-      {/* Откроет форму заявки — попап появится на блоке 21 */}
-      <button class="track-modal__cta" type="button" data-modal="application">
+      {/* Ведёт на попап заявки: он закроет это окно и откроет форму.
+          Сама форма появится на блоке 21, обработчик ищет кнопки
+          по data-modal="application" — здесь и в остальных CTA сайта. */}
+      <button
+        class="track-modal__cta"
+        type="button"
+        data-modal="application"
+        aria-haspopup="dialog"
+      >
         Подать заявку
         <svg viewBox="0 0 20 10" width="20" height="10" aria-hidden="true">
           <path
@@ -166,10 +173,13 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
 <style>
   /* Нативный dialog: фокус запирается сам, Esc закрывает, остальное
      содержимое страницы скрывается от скринридеров без ARIA-костылей */
+  /* margin: auto возвращаем вручную — в общем ресете `* { margin: 0 }`,
+     а именно им браузер центрирует dialog в верхнем слое */
   .track-modal {
     width: min(1128px, calc(100vw - 48px));
     max-width: none;
     max-height: calc(100vh - 48px);
+    margin: auto;
     padding: 0;
     border: none;
     background: none;
@@ -549,7 +559,10 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
     letter-spacing: normal;
   }
 
-  .track-modal__stage.is-final .track-modal__num {
+  /* Терракотовое выделение — состояние наведения, одинаковое для всех
+     этапов. В макете оно показано на последнем просто потому, что курсор
+     стоял на нём. */
+  .track-modal__stage:hover .track-modal__num {
     border-color: rgba(195, 106, 73, 0.9);
   }
 
@@ -563,9 +576,12 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.07);
+    transition:
+      border-color var(--transition-fast),
+      background-color var(--transition-fast);
   }
 
-  .track-modal__stage.is-final .track-modal__stage-card {
+  .track-modal__stage:hover .track-modal__stage-card {
     border-width: 1.333px;
     border-color: rgba(195, 106, 73, 0.9);
     background: rgba(255, 255, 255, 0.12);
@@ -586,9 +602,10 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
     line-height: 12px;
     letter-spacing: normal;
     color: var(--brand-cyan);
+    transition: color var(--transition-fast);
   }
 
-  .track-modal__stage.is-final .track-modal__command {
+  .track-modal__stage:hover .track-modal__command {
     color: var(--accent-terracotta);
   }
 
@@ -625,9 +642,10 @@ const cover = modalImage ? uploads[modalImage]?.default : undefined;
     font-size: 7.333px;
     line-height: 9.333px;
     letter-spacing: 0.07em;
+    transition: background-color var(--transition-fast);
   }
 
-  .track-modal__stage.is-final .track-modal__tag {
+  .track-modal__stage:hover .track-modal__tag {
     background: var(--accent-terracotta);
   }
 

@@ -94,11 +94,6 @@ content:
             label: Метка справа
             type: string
             description: 'Коротко и заглавными: INPUT, FILTER, OUTPUT.'
-          - name: highlight
-            label: Выделить акцентом
-            type: boolean
-            description: Обычно выделен последний этап.
-            default: false
       - name: outcome
         label: Строка в нижней панели
         type: string

@@ -45,7 +45,7 @@ const tracks = defineCollection({
     skills: z.array(z.string()).default([]),
     /** Подводка под заголовком «Как проходит участие» */
     pipelineLead: z.string().default(''),
-    /** Этапы участия; последний обычно выделен акцентом */
+    /** Этапы участия */
     stages: z
       .array(
         z.object({
@@ -54,8 +54,6 @@ const tracks = defineCollection({
           description: z.string(),
           /** Метка справа: INPUT, FILTER, OUTPUT */
           tag: z.string(),
-          /** Выделить акцентом — в макете так помечен финальный этап */
-          highlight: z.boolean().default(false),
         }),
       )
       .default([]),
