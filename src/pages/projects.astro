@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectsHero from '../components/ProjectsHero.astro';
+import Cases from '../components/Cases.astro';
 ---
 
 <BaseLayout
@@ -9,9 +10,13 @@ import ProjectsHero from '../components/ProjectsHero.astro';
 >
   <ProjectsHero />
 
+  {/* Нода 9:1598 — та же секция, что на главной: тот же заголовок,
+      те же три кейса, пиксели на том же месте. Отдельного компонента
+      не заводим, иначе правку пришлось бы вносить дважды. */}
+  <Cases />
+
   {/*
     Блоки страницы «Проекты» (ТЗ, раздел 4.2 / порядок 9.1):
-      12. Кейсы (переиспользовать с главной)
       13. Собери свой трек — мультивыбор (раздел 5.1) ← ключевой блок
       14. Треки / навыки
       15. Индивидуальный план (CTA → форма)
