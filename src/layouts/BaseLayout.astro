@@ -11,6 +11,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ApplicationModal from '../components/ApplicationModal.astro';
 import IndividualPlanModal from '../components/IndividualPlanModal.astro';
+import CookieNotice from '../components/CookieNotice.astro';
 
 interface Props {
   title: string;
@@ -79,6 +80,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
         окно в макете, чтобы не забыть подключить его на новой странице. */}
     <ApplicationModal />
     <IndividualPlanModal />
+    <CookieNotice />
 
     <script>
       // Появление секций при прокрутке. Наблюдатель, а не CSS-таймлайн
