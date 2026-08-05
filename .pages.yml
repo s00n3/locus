@@ -316,6 +316,63 @@ content:
         type: string
         description: Можно оставить пустым — тогда логотип не будет ссылкой.
 
+  - name: directions
+    label: Направления (чипы)
+    description: Ряд чипов в блоке «Собери свой трек» на странице «Проекты».
+    type: collection
+    path: src/content/directions
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: title
+        label: Название направления
+        type: string
+        required: true
+        description: >-
+          Оно же становится тегом на карточке проекта, только заглавными.
+          Проекты ссылаются на направление ровно этим текстом.
+
+  - name: projects
+    label: Проекты
+    description: Карточки под чипами в блоке «Собери свой трек».
+    type: collection
+    path: src/content/projects
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, direction, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — раньше.
+        default: 1
+      - name: title
+        label: Название проекта
+        type: string
+        required: true
+      - name: summary
+        label: Описание
+        type: text
+        required: true
+        description: Одно-два предложения — больше в карточку не помещается.
+      - name: direction
+        label: Направление
+        type: string
+        required: true
+        description: >-
+          Должно совпадать с названием направления слово в слово, иначе
+          карточка не попадёт под фильтр.
+
   - name: faq
     label: Вопросы и ответы
     description: Аккордеон на главной.

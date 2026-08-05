@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectsHero from '../components/ProjectsHero.astro';
 import Cases from '../components/Cases.astro';
+import TrackBuilder from '../components/TrackBuilder.astro';
 ---
 
 <BaseLayout
@@ -15,9 +16,13 @@ import Cases from '../components/Cases.astro';
       не заводим, иначе правку пришлось бы вносить дважды. */}
   <Cases />
 
+  {/* Нода Блок3, слой дизайн-системы. Первый шаг конструктора: дальше
+      по макету идут «Какие задачи хочешь решать» (шаг 2) и «Уровень
+      опыта» (шаг 3), их ответы уходят в форму индивидуального плана. */}
+  <TrackBuilder />
+
   {/*
     Блоки страницы «Проекты» (ТЗ, раздел 4.2 / порядок 9.1):
-      13. Собери свой трек — мультивыбор (раздел 5.1) ← ключевой блок
       14. Треки / навыки
       15. Индивидуальный план (CTA → форма)
       16. Проекты (сетка + фильтр)

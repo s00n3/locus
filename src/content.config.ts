@@ -156,6 +156,35 @@ const partners = defineCollection({
   }),
 });
 
+/**
+ * Блок 13 «Проектов» — направления для мультивыбора (ТЗ, раздел 5.1).
+ * Отдельная коллекция, а не список внутри проектов: порядок чипов задаёт
+ * дизайн, и направление может существовать раньше своих проектов.
+ */
+const directions = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/directions' }),
+  schema: z.object({
+    /** Порядок чипа в ряду: меньше — левее */
+    order: z.number().default(0),
+    /** Подпись на чипе. Она же уходит в тег карточки, но заглавными */
+    title: z.string(),
+  }),
+});
+
+/** Блок 13 «Проектов» — карточки проектов под чипами (ТЗ, раздел 5.1) */
+const projects = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/projects' }),
+  schema: z.object({
+    /** Порядок в сетке: меньше — раньше */
+    order: z.number().default(0),
+    title: z.string(),
+    /** Одно-два предложения — больше в карточку не помещается */
+    summary: z.string(),
+    /** Должно совпадать с названием направления из коллекции directions */
+    direction: z.string(),
+  }),
+});
+
 /** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
 const faq = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
@@ -169,4 +198,14 @@ const faq = defineCollection({
   }),
 });
 
-export const collections = { tracks, cases, audiences, benefits, mentors, partners, faq };
+export const collections = {
+  tracks,
+  cases,
+  audiences,
+  benefits,
+  mentors,
+  partners,
+  faq,
+  directions,
+  projects,
+};
