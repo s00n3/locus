@@ -4,6 +4,7 @@ import ProjectsHero from '../components/ProjectsHero.astro';
 import Cases from '../components/Cases.astro';
 import TrackBuilder from '../components/TrackBuilder.astro';
 import ProjectAreas from '../components/ProjectAreas.astro';
+import ExperienceLevels from '../components/ExperienceLevels.astro';
 ---
 
 <BaseLayout
@@ -25,6 +26,11 @@ import ProjectAreas from '../components/ProjectAreas.astro';
   {/* Второй шаг конструктора, нода Блок4 (9:1644). Выбор один — его
       ответ уходит в «вопрос 2» формы индивидуального плана. */}
   <ProjectAreas />
+
+  {/* Третий шаг конструктора, нода Блок5 (9:1708). Здесь же CTA
+      «Подобрать индивидуальный план обучения» — вторая точка входа
+      в форму помимо кнопки под треками на главной. */}
+  <ExperienceLevels />
 
   {/*
     Блоки страницы «Проекты» (ТЗ, раздел 4.2 / порядок 9.1):

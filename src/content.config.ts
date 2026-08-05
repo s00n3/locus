@@ -205,6 +205,26 @@ const areas = defineCollection({
   }),
 });
 
+/**
+ * Блок 15 «Проектов» — третий шаг конструктора, «Уровень опыта».
+ * Иллюстрации — электронные орбитали s/p/d/f: чем выше уровень, тем
+ * сложнее форма. Отсюда и буква в кружке.
+ */
+const levels = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/levels' }),
+  schema: z.object({
+    /** Порядок в ряду: меньше — левее */
+    order: z.number().default(0),
+    title: z.string(),
+    /** Уточнение под названием. У «Эксперта» в макете его нет */
+    note: z.string().default(''),
+    /** Буква орбитали в кружке: s, p, d, f */
+    letter: z.string().default(''),
+    image: z.string().optional(),
+    imageAlt: z.string().default(''),
+  }),
+});
+
 /** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
 const faq = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
@@ -229,4 +249,5 @@ export const collections = {
   directions,
   projects,
   areas,
+  levels,
 };

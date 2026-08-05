@@ -413,6 +413,42 @@ content:
         type: string
         description: Для незрячих и на случай, если картинка не загрузится.
 
+  - name: levels
+    label: Уровни опыта (шаг 3)
+    description: Четыре карточки третьего шага конструктора на «Проектах».
+    type: collection
+    path: src/content/levels
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, letter, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: title
+        label: Название уровня
+        type: string
+        required: true
+      - name: note
+        label: Уточнение
+        type: string
+        description: Строка под названием. Можно оставить пустой.
+      - name: letter
+        label: Буква в кружке
+        type: string
+        description: 'Обозначение орбитали: s, p, d, f.'
+      - name: image
+        label: Иллюстрация
+        type: image
+        description: Квадратная, с прозрачным фоном.
+      - name: imageAlt
+        label: Описание иллюстрации
+        type: string
+
   - name: faq
     label: Вопросы и ответы
     description: Аккордеон на главной.
