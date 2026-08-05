@@ -1,0 +1,380 @@
+---
+import { Image } from 'astro:assets';
+import mitochondria from '../assets/images/mitochondria.png';
+import sechenovLogo from '../assets/icons/sechenov.svg?url';
+import arrowCurve from '../assets/icons/projects-arrow-curve.svg?raw';
+import arrowHead from '../assets/icons/projects-arrow-head.svg?raw';
+import lineShort from '../assets/icons/hero-line-short.svg?url';
+import lineLong from '../assets/icons/hero-line-long.svg?url';
+
+// Герой страницы «Проекты» — нода Figma «Блок1» (9:1474), фрейм 1440×884.
+//
+// Композиция повторяет герой главной, поэтому классы элементов те же:
+// правила входа лежат в motion.css и достаются обоим блокам даром.
+// Отличия: вместо хромосомы митохондрия и она не повёрнута, в панели
+// появилась кнопка «Подать заявку», сама панель выше (541 против 513),
+// а подпись со стрелкой ушла вправо и прижата по правому краю.
+
+const T = '#1c5e74';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+type Pixel = [x: number, y: number, color: string];
+
+// Четыре кластера по 13 квадратов 23.774px — ноды «Пиксели 1–4» внутри
+// Group 258. Координаты абсолютные, от левого верхнего угла блока.
+const pixels: Pixel[] = [
+  // Пиксели 1
+  [246.5, 189.21, T], [246.5, 308.08, TH], [270.27, 212.98, OH],
+  [246.5, 236.75, TH], [222.72, 236.75, TH], [270.27, 236.75, T],
+  [198.95, 260.53, OH], [317.82, 189.21, OH], [222.72, 284.3, T],
+  [246.5, 260.53, OH], [317.82, 236.75, T], [222.72, 260.53, TH],
+  [294.04, 236.75, TH],
+  // Пиксели 2
+  [198.95, 284.3, T], [198.95, 403.17, TH], [222.73, 308.08, OH],
+  [198.95, 331.85, TH], [175.18, 331.85, TH], [222.73, 331.85, T],
+  [151.41, 355.62, OH], [270.27, 284.3, OH], [175.18, 379.4, T],
+  [198.95, 355.62, OH], [270.27, 331.85, T], [175.18, 355.62, TH],
+  [246.5, 331.85, TH],
+  // Пиксели 3
+  [198.95, 383.36, T], [198.95, 502.23, TH], [222.73, 407.13, OH],
+  [198.95, 430.91, TH], [175.18, 430.91, TH], [222.73, 430.91, T],
+  [151.41, 454.68, OH], [270.27, 383.36, OH], [175.18, 478.45, T],
+  [198.95, 454.68, OH], [270.27, 430.91, T], [175.18, 454.68, TH],
+  [246.5, 430.91, TH],
+  // Пиксели 4 — в макете повёрнуты на −89.25°, но квадрат от этого не меняется
+  [425.42, 390.29, T], [544.28, 391.84, TH], [449.5, 366.83, OH],
+  [472.96, 390.91, TH], [472.65, 414.68, TH], [473.28, 367.13, T],
+  [496.12, 438.76, OH], [426.35, 318.97, OH], [520.2, 415.3, T],
+  [496.74, 391.22, OH], [473.9, 319.59, T], [496.43, 414.99, TH],
+  [473.59, 343.36, TH],
+];
+---
+
+<section class="hero" aria-labelledby="projects-hero-title">
+  {/* Огромный «</>» за панелью — фоновая графика макета */}
+  <span class="hero__code" aria-hidden="true">&lt;/&gt;</span>
+
+  {/* Стеклянная панель: размытый слой даёт свечение, поверх — чёткая рамка */}
+  <div class="hero__panel-glow" aria-hidden="true"></div>
+  <div class="hero__panel" aria-hidden="true"></div>
+
+  {/* Обёртка держит позицию, анимация живёт на самом кадре */}
+  <div class="hero__figure" aria-hidden="true">
+    <Image
+      class="hero__figure-img"
+      src={mitochondria}
+      alt=""
+      widths={[620, 1240]}
+      sizes="620px"
+      quality={82}
+      loading="eager"
+    />
+  </div>
+
+  <div class="hero__pixels" aria-hidden="true">
+    {
+      pixels.map(([x, y, color], index) => (
+        <span
+          style={`left:${x}px;top:${y}px;background:${color};animation-delay:${400 + index * 14}ms`}
+        />
+      ))
+    }
+  </div>
+
+  <p class="hero__eyebrow">проектная школа × digital health</p>
+
+  <h1 class="hero__logo" id="projects-hero-title">
+    <span class="hero__bracket" aria-hidden="true">[</span>
+    <span class="hero__wordmark">ПРОЕКТЫ</span>
+    <span class="hero__bracket" aria-hidden="true">]</span>
+  </h1>
+
+  <img class="hero__line-short" src={lineShort} alt="" width="183" height="2" aria-hidden="true" />
+  <p class="hero__tagline">цифровая проектная школа</p>
+
+  {/* Открывает форму заявки — обработчик ищет кнопки по всему документу */}
+  <button class="hero__cta" type="button" data-modal="application" aria-haspopup="dialog">
+    Подать заявку
+  </button>
+
+  {/* Рукописная подпись со стрелкой к митохондрии. Стрелка встроена,
+      а не подключена картинкой: только так её можно прорисовать
+      при появлении. В макете это две отдельные фигуры — дуга и остриё. */}
+  <p class="hero__note">Место, где запускаются проекты</p>
+  <span class="hero__pointer" aria-hidden="true" set:html={arrowCurve} />
+  <span class="hero__pointer-head" aria-hidden="true" set:html={arrowHead} />
+
+  <img class="hero__university" src={sechenovLogo} alt="Сеченовский университет" width="211" height="57" />
+  <span class="hero__amp" aria-hidden="true">&&</span>
+  <span class="hero__credits-logo" aria-hidden="true">
+    <span class="hero__bracket hero__bracket--sm">[</span>
+    <span class="hero__wordmark hero__wordmark--sm">ЛОКУС</span>
+    <span class="hero__bracket hero__bracket--sm">]</span>
+  </span>
+  <img class="hero__line-long" src={lineLong} alt="" width="754" height="2" aria-hidden="true" />
+
+  <p class="hero__lead">
+    цифровая проектная школа Сеченовского университета, где междисциплинарные команды
+    участников решают реальные задачи здравоохранения под руководством экспертов
+  </p>
+</section>
+
+<style>
+  /* Сцена 1440×884 — ровно фрейм «Блок1». Всё внутри позиционируется
+     абсолютными координатами из Figma, поэтому 1:1 переносится и проверяется.
+     Отрицательный margin поднимает сцену под шапку: митохондрия в макете
+     выходит выше панели и левее кадра. */
+  .hero {
+    position: relative;
+    width: var(--layout-width);
+    max-width: 100%;
+    height: 884px;
+    margin-inline: auto;
+    margin-top: -75px;
+    overflow: hidden;
+  }
+
+  .hero > * {
+    position: absolute;
+  }
+
+  /* --- Фон --- */
+
+  /* Отрицательный top — не произвол: глиф центрируется по панели.
+     Ink-бокс «</>» высотой 604 при кегле 666, у текстового бокса сверху
+     183px подъёма. Панель здесь 75…616, центр 345.5 — отсюда −139.57. */
+  .hero__code {
+    left: 123.81px;
+    top: -139.57px;
+    font-weight: 300;
+    font-size: 666.667px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #5f5f5f;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .hero__panel-glow,
+  .hero__panel {
+    left: 40px;
+    top: 75px;
+    height: 541px;
+    border-radius: 60px;
+  }
+
+  .hero__panel-glow {
+    width: 1358.035px;
+    background: rgba(28, 94, 116, 0.05);
+    border: 1px solid #f6cfba;
+    filter: blur(4.762px);
+  }
+
+  /* Матовое стекло: панель размывает всё, что за ней — прежде всего «</>» */
+  .hero__panel {
+    width: 1360px;
+    background: rgba(217, 217, 217, 0.2);
+    border: 1px solid var(--border-warm);
+    -webkit-backdrop-filter: blur(25px);
+    backdrop-filter: blur(25px);
+  }
+
+  /* Кадр вписан по cover. Пропорции исходника и бокса совпадают (3:2),
+     поэтому обрезки нет. Исходник синеватый, в макете обесцвечен. */
+  .hero__figure {
+    left: -16px;
+    top: 106px;
+    width: 619.598px;
+    height: 413.065px;
+    pointer-events: none;
+  }
+
+  .hero__figure-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) brightness(0.97);
+    pointer-events: none;
+  }
+
+  .hero__pixels :global(span) {
+    position: absolute;
+    width: 23.774px;
+    height: 23.774px;
+  }
+
+  /* --- Логотип и подписи --- */
+
+  /* Привязка по правому краю: строка выравнивается с правой скобкой
+     логотипа (1387.71). Начертание Medium вместо Bold — 700 в шкале нет,
+     а подделанная браузером жирность ещё и шире настоящей. */
+  .hero__eyebrow {
+    right: 52.29px;
+    top: 140px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--accent-terracotta);
+    white-space: nowrap;
+  }
+
+  /* Зазор подобран так, чтобы логотип занял ту же ширину, что в макете
+     (621.71 → 1387.71). В Figma зазоры разные — 8 слева и 80 справа,
+     это ручная расстановка, симметрия читается лучше. */
+  .hero__logo {
+    left: 621.71px;
+    top: 170px;
+    display: flex;
+    align-items: baseline;
+    gap: 45.1px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hero__wordmark {
+    font-weight: 400;
+    font-size: 123.81px;
+    letter-spacing: normal;
+  }
+
+  .hero__bracket {
+    font-weight: 300;
+    font-size: 152.381px;
+  }
+
+  .hero__line-short {
+    left: 751.71px;
+    top: 341.43px;
+    width: 182.857px;
+    height: 2px;
+  }
+
+  .hero__tagline {
+    left: 959.33px;
+    top: 323.33px;
+    font-weight: 300;
+    font-size: 30.476px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    white-space: nowrap;
+  }
+
+  .hero__cta {
+    left: 1137px;
+    top: 372px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 232px;
+    height: 60px;
+    padding: 12px 24px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .hero__cta:hover {
+    background: var(--accent-terracotta-light);
+  }
+
+  /* --- Подпись со стрелкой --- */
+
+  .hero__note {
+    left: 270px;
+    top: 514px;
+    width: 312px;
+    font-family: var(--font-hand);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: right;
+  }
+
+  /* Имена свои, а не общие с главной: там стрелка обведена штрихом
+     и прорисовывается через stroke-dashoffset, здесь она залита контуром.
+     Под общим классом правила главной наложились бы поверх. */
+  .hero__pointer {
+    left: 314px;
+    top: 460px;
+    width: 89.446px;
+    height: 60.5px;
+  }
+
+  .hero__pointer-head {
+    left: 304px;
+    top: 453px;
+    width: 20.963px;
+    height: 20.248px;
+  }
+
+  .hero__pointer :global(svg),
+  .hero__pointer-head :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* --- Нижний ряд --- */
+
+  /* Три части стоят по своим координатам из макета, флексом их не собрать —
+     в Figma они выставлены вручную и заходят друг на друга. Весь ряд на 16px
+     ниже, чем на главной: панель здесь выше на 27.67. */
+  .hero__university {
+    left: 52.04px;
+    top: 679.04px;
+    width: 210.8px;
+    height: 56.84px;
+  }
+
+  .hero__amp {
+    left: 310.2px;
+    top: 699.9px;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--text-soft);
+    transform: translate(-50%, -50%) rotate(-10.46deg);
+  }
+
+  .hero__credits-logo {
+    left: 352px;
+    top: 679px;
+    display: flex;
+    align-items: baseline;
+    gap: 25px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hero__wordmark--sm {
+    font-size: 45.714px;
+  }
+
+  .hero__bracket--sm {
+    font-size: 57.143px;
+  }
+
+  .hero__line-long {
+    left: 603px;
+    top: 704px;
+    width: 754px;
+    height: 2px;
+  }
+
+  .hero__lead {
+    left: 51px;
+    top: 767px;
+    width: 1284px;
+    font-weight: 300;
+    font-size: 28px;
+    line-height: 1.35;
+    letter-spacing: normal;
+  }
+</style>

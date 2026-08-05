@@ -144,3 +144,61 @@
 .has-motion .hero__note {
   animation: hero-write 900ms ease-out 1700ms both;
 }
+
+/* --- Вход героя «Проектов» ---
+   Композиция та же, поэтому общие элементы — панель, «</>», пиксели,
+   подписи, нижний ряд, заметка — берут правила выше. Здесь только то,
+   чего на главной нет. */
+
+@keyframes hero-figure-in {
+  from {
+    opacity: 0;
+    transform: translateX(-26px) scale(1.05);
+  }
+}
+
+/* Митохондрия не повёрнута, поэтому дрейф вертикальный —
+   с едва заметным «дыханием», чтобы кадр не выглядел приклеенным */
+@keyframes hero-figure-float {
+  50% {
+    transform: translateY(-10px) scale(1.012);
+  }
+}
+
+/* Дуга залита, а не обведена: Figma отдала её контуром, штрихом такую
+   не прорисовать. Открываем справа налево — от заметки к острию,
+   получается тот же жест письма. */
+@keyframes hero-arrow-wipe {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes hero-arrow-head-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.has-motion .hero__figure-img {
+  animation:
+    hero-figure-in 1300ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both,
+    hero-figure-float 12s ease-in-out 1500ms infinite;
+}
+
+.has-motion .hero__cta {
+  animation: hero-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) 800ms both;
+}
+
+.has-motion .hero__pointer {
+  animation: hero-arrow-wipe 900ms ease-out 1100ms both;
+}
+
+/* Остриё появляется после дуги — как будто её только что довели */
+.has-motion .hero__pointer-head {
+  animation: hero-arrow-head-in 400ms cubic-bezier(0.34, 1.4, 0.64, 1) 1900ms both;
+}

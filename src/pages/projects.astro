@@ -1,8 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectsHero from '../components/ProjectsHero.astro';
 ---
 
-<BaseLayout title="Проекты — ЛОКУС">
+<BaseLayout
+  title="Проекты — ЛОКУС"
+  description="Проекты цифровой проектной школы ЛОКУС: направления, треки и команды."
+>
+  <ProjectsHero />
+
   {/*
     Блоки страницы «Проекты» (ТЗ, раздел 4.2 / порядок 9.1):
       12. Кейсы (переиспользовать с главной)
