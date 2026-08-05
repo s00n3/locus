@@ -1,0 +1,596 @@
+---
+import { getCollection } from 'astro:content';
+
+// Попап «Форма подачи заявки» — нода Figma 9:1011 (ТЗ, раздел 4.4).
+// Открывается кнопками [data-modal="application"]: CTA главной и кнопка
+// внутри попапа трека. Обработчик ищет их по всему документу, поэтому
+// новые точки входа подключатся сами.
+
+const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
+
+// Список источников в макете не задан — это не редактируемый список
+// (меняется вместе с вёрсткой, а не отдельно), поэтому живёт здесь,
+// а не в CMS.
+const sources = [
+  'Университет',
+  'Преподаватель или научный руководитель',
+  'Социальные сети',
+  'Друзья и коллеги',
+  'Мероприятие или конференция',
+  'Другое',
+];
+
+// Декоративные пиксели, координаты от левого верхнего угла панели.
+// Ноды «Пиксели 7» (9:1014), «Пиксели 11» (9:1028), «Пиксели 12» (9:1033).
+const T = '#1c5e74';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+const pixels: [x: number, y: number, size: number, color: string][] = [
+  // Пиксели 7 — правый верхний угол, кластер 17px
+  [1198.72, 100.43, 17.143, T], [1113, 100.43, 17.143, TH],
+  [1181.58, 83.29, 17.143, OH], [1164.43, 100.43, 17.143, TH],
+  [1164.43, 117.57, 17.143, TH], [1164.43, 83.29, 17.143, T],
+  [1147.29, 134.71, 17.143, OH], [1198.72, 49, 17.143, OH],
+  [1130.14, 117.57, 17.143, T], [1147.29, 100.43, 17.143, OH],
+  [1164.43, 49, 17.143, T], [1147.29, 117.57, 17.143, TH],
+  [1164.43, 66.14, 17.143, TH],
+  // Пиксели 11 — правый край, на уровне «ВУЗа»
+  [1259.81, 501, 22.857, T], [1236, 569.57, 22.857, TH],
+  [1281.71, 523.86, 22.857, OH], [1258.86, 546.71, 22.857, T],
+  // Пиксели 12 — левый край, почти целиком уходят за границу панели
+  [-35.1, 122.52, 22.857, T], [-11.29, 53.95, 22.857, TH],
+  [-57, 99.67, 22.857, OH], [-34.14, 76.81, 22.857, T],
+];
+---
+
+<dialog class="application-modal" id="application-modal" aria-labelledby="application-modal-title">
+  <form class="application-modal__panel" method="dialog" novalidate>
+    <div class="application-modal__pixels" aria-hidden="true">
+      {
+        pixels.map(([x, y, size, color]) => (
+          <span style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}`} />
+        ))
+      }
+    </div>
+
+    <button class="application-modal__close" type="button" data-close aria-label="Закрыть">
+      <span aria-hidden="true">×</span>
+    </button>
+
+    <p class="application-modal__eyebrow">Последний шаг</p>
+    <h2 class="application-modal__title" id="application-modal-title">Форма подачи заявки</h2>
+
+    <div class="application-modal__card">
+      <div class="application-modal__grid">
+        <p class="application-modal__field">
+          <label class="application-modal__label" for="application-name">ФИО</label>
+          <input
+            class="application-modal__input"
+            id="application-name"
+            name="fullName"
+            type="text"
+            autocomplete="name"
+            placeholder="Иванов Иван Иванович"
+            required
+          />
+        </p>
+
+        <p class="application-modal__field">
+          <label class="application-modal__label" for="application-track">Трек</label>
+          <span class="application-modal__control">
+            <select class="application-modal__select" id="application-track" name="track" required>
+              <option value="" selected>Выберите вариант</option>
+              {tracks.map((track) => <option value={track.id}>{track.data.title}</option>)}
+            </select>
+            <svg class="application-modal__chevron" viewBox="0 0 20 10" width="20" height="10" aria-hidden="true">
+              <path
+                d="M1 2 L10 8.5 L19 2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+        </p>
+
+        <p class="application-modal__field">
+          <label class="application-modal__label" for="application-phone">Телефон</label>
+          <input
+            class="application-modal__input"
+            id="application-phone"
+            name="phone"
+            type="tel"
+            autocomplete="tel"
+            placeholder="8-900-000-00-00"
+            required
+          />
+        </p>
+
+        <p class="application-modal__field">
+          <label class="application-modal__label" for="application-email">Почта</label>
+          <input
+            class="application-modal__input"
+            id="application-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="8-900-000-00-00, example@mail.ru"
+            required
+          />
+        </p>
+
+        <p class="application-modal__field application-modal__field--wide">
+          <label class="application-modal__label" for="application-university">ВУЗ</label>
+          <input
+            class="application-modal__input"
+            id="application-university"
+            name="university"
+            type="text"
+            autocomplete="organization"
+            placeholder="ПМГМУ им. И.М. Сеченова"
+          />
+        </p>
+
+        <p class="application-modal__field application-modal__field--wide">
+          <label class="application-modal__label" for="application-specialty">Код специальности</label>
+          <input
+            class="application-modal__input"
+            id="application-specialty"
+            name="specialtyCode"
+            type="text"
+            placeholder="3.31.05.01 Лечебное дело"
+          />
+        </p>
+
+        <p class="application-modal__field">
+          <label class="application-modal__label" for="application-source">Откуда узнали о Локусе?</label>
+          <span class="application-modal__control">
+            <select class="application-modal__select" id="application-source" name="source">
+              <option value="" selected>Выберите вариант</option>
+              {sources.map((source) => <option value={source}>{source}</option>)}
+            </select>
+            <svg class="application-modal__chevron" viewBox="0 0 20 10" width="20" height="10" aria-hidden="true">
+              <path
+                d="M1 2 L10 8.5 L19 2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+        </p>
+
+        {/* Галочка не проставлена заранее намеренно: согласие на обработку
+            ПД по 152-ФЗ должно быть активным действием, а не снятием
+            галочки. В макете она нарисована уже отмеченной. */}
+        <p class="application-modal__consent">
+          <input
+            class="application-modal__checkbox"
+            id="application-consent"
+            name="consent"
+            type="checkbox"
+            required
+          />
+          <svg class="application-modal__check" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <path
+              d="M4 11.6 L9.4 17 L19.6 6.3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <label class="application-modal__consent-text" for="application-consent">
+            Согласен на обработку персональных данных
+          </label>
+        </p>
+      </div>
+
+      <button class="application-modal__submit" type="submit">Подать заявку</button>
+
+      {/* Появляется только после попытки отправки — в макете этой строки
+          нет, но молча терять заявку хуже, чем признаться */}
+      <p class="application-modal__status" data-status role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import { lockScroll, unlockScroll } from '../lib/scroll-lock';
+
+  // Открытие и закрытие формы заявки. Кнопки-триггеры разбросаны по всей
+  // странице (CTA, попап трека), поэтому ищем их по документу, а не внутри
+  // секции. Нативный dialog сам запирает фокус и закрывается по Esc.
+  const dialog = document.getElementById('application-modal') as HTMLDialogElement | null;
+
+  if (dialog) {
+    const form = dialog.querySelector('form') as HTMLFormElement;
+    const status = dialog.querySelector('[data-status]') as HTMLElement;
+    let opener: HTMLElement | null = null;
+
+    // Возвращаем фокус на кнопку, только если она ещё видима: заявку часто
+    // открывают из попапа трека, а он к этому моменту уже закрыт.
+    const restore = () => {
+      if (opener?.isConnected && opener.offsetParent !== null) opener.focus();
+      opener = null;
+    };
+
+    // Прибираемся и по событию close, и в явных обработчиках: событие
+    // покрывает Esc, но если оно не придёт, страница останется без прокрутки.
+    const cleanup = () => {
+      unlockScroll(dialog);
+      restore();
+    };
+
+    const close = () => {
+      if (dialog.open) dialog.close();
+      cleanup();
+    };
+
+    document.querySelectorAll<HTMLElement>('[data-modal="application"]').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        // Кнопка может стоять внутри другого попапа — закрываем его, иначе
+        // два окна лягут друг на друга в верхнем слое
+        const parent = trigger.closest('dialog') as HTMLDialogElement | null;
+        if (parent && parent !== dialog) parent.close();
+
+        opener = trigger;
+        status.textContent = '';
+        dialog.showModal();
+        lockScroll(dialog);
+      });
+    });
+
+    dialog.addEventListener('close', cleanup);
+    dialog.querySelector('[data-close]')?.addEventListener('click', close);
+
+    // Клик мимо панели закрывает окно: у самого dialog нет отступов,
+    // поэтому попадание за пределы панели надёжно определяется рамкой
+    dialog.addEventListener('click', (event) => {
+      const panel = dialog.querySelector('.application-modal__panel');
+      if (!panel || !(event.target instanceof Node)) return;
+      if (panel.contains(event.target)) return;
+      close();
+    });
+
+    // Отправлять заявку пока некуда: персональные данные по 152-ФЗ хранятся
+    // только в России, а сайт живёт на GitHub Pages. Бэкенд появится вместе
+    // с сервером университета. До тех пор проверяем поля и честно говорим,
+    // что данные не ушли, — молча терять заявку нельзя.
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        status.textContent = 'Проверьте выделенные поля.';
+        status.dataset.state = 'error';
+        return;
+      }
+
+      status.textContent = 'Отправка заявок пока не подключена — форма ждёт сервер университета.';
+      status.dataset.state = 'notice';
+    });
+  }
+</script>
+
+<style>
+  /* margin: auto возвращаем вручную — в общем ресете `* { margin: 0 }`,
+     а именно им браузер центрирует dialog в верхнем слое */
+  .application-modal {
+    width: min(1326px, calc(100vw - 48px));
+    max-width: none;
+    max-height: calc(100vh - 48px);
+    margin: auto;
+    padding: 0;
+    border: none;
+    background: none;
+    overflow: visible;
+    color: var(--text-primary);
+
+    /* Появление и скрытие. allow-discrete нужен, чтобы окно успело
+       доиграть переход прежде, чем браузер уберёт его из верхнего слоя.
+       Где @starting-style не поддержан, окно просто появляется сразу. */
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    transition:
+      opacity 220ms ease,
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      overlay 260ms allow-discrete,
+      display 260ms allow-discrete;
+  }
+
+  .application-modal[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .application-modal[open] {
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+    }
+  }
+
+  .application-modal::backdrop {
+    background: rgba(3, 14, 19, 0.72);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition:
+      opacity 220ms ease,
+      overlay 220ms allow-discrete,
+      display 220ms allow-discrete;
+  }
+
+  .application-modal[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .application-modal[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  .application-modal__panel {
+    position: relative;
+    max-height: calc(100vh - 48px);
+    padding: 40px 40px 38px;
+    border-radius: var(--radius-block);
+    background: linear-gradient(
+      -42.61deg,
+      #1c5e74 5.81%,
+      #0b232c 48.66%,
+      #091315 112.73%
+    );
+    box-shadow: 0 4px 48px rgba(0, 0, 0, 0.47);
+    /* Кластер «Пиксели 12» нарисован левее панели и должен обрезаться
+       по её краю — в макете у этой ноды стоит clip content */
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
+
+  /* --- Декор --- */
+
+  .application-modal__pixels span {
+    position: absolute;
+  }
+
+  /* --- Шапка --- */
+
+  .application-modal__close {
+    position: absolute;
+    right: 33px;
+    top: 38px;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(91, 194, 213, 0.5);
+    border-radius: 50%;
+    background: rgba(18, 59, 69, 0.9);
+    font-size: 25px;
+    line-height: 1;
+    color: #f5fbfc;
+    transition: background-color var(--transition-fast);
+  }
+
+  .application-modal__close:hover {
+    background: rgba(28, 94, 116, 0.9);
+  }
+
+  .application-modal__eyebrow {
+    font-size: 20px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: var(--text-accent);
+  }
+
+  .application-modal__title {
+    margin-top: 25px;
+    font-weight: 400;
+    font-size: 64px;
+    line-height: normal;
+    letter-spacing: normal;
+  }
+
+  /* --- Карточка с полями --- */
+
+  /* Отступы несимметричны намеренно: в макете поля прижаты к левому краю
+     карточки (29px) и не достают до правого (70px) */
+  .application-modal__card {
+    margin-top: 13px;
+    padding: 54px 70px 48px 29px;
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.1);
+  }
+
+  .application-modal__grid {
+    display: grid;
+    grid-template-columns: 546px 546px;
+    gap: 30px 55px;
+  }
+
+  .application-modal__field--wide {
+    grid-column: 1 / -1;
+  }
+
+  /* Подпись сдвинута на 19px вправо — ровно под текст внутри поля,
+     поэтому рамка поля выступает левее подписи */
+  .application-modal__label {
+    display: block;
+    padding-left: 19px;
+    margin-bottom: 2px;
+    font-size: 24px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: var(--text-accent);
+  }
+
+  .application-modal__input,
+  .application-modal__control {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    padding-inline: 19px;
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.2);
+    font-family: inherit;
+    font-size: 15px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: var(--text-primary);
+  }
+
+  .application-modal__input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .application-modal__input:focus-visible,
+  .application-modal__control:has(:focus-visible) {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* --- Выпадающие списки --- */
+
+  /* Стрелка в макете стоит вплотную к тексту «Выберите вариант», но текст
+     меняется вместе с выбором — поэтому прижимаем её к правому краю поля,
+     как в любом привычном селекте */
+  .application-modal__control {
+    position: relative;
+    padding-right: 44px;
+  }
+
+  .application-modal__select {
+    appearance: none;
+    width: 100%;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .application-modal__select:focus-visible {
+    outline: none;
+  }
+
+  /* Список раскрывается системным виджетом — на тёмном фоне он остаётся
+     светлым, поэтому задаём цвета пунктам явно */
+  .application-modal__select option {
+    background: #0b232c;
+    color: var(--text-primary);
+  }
+
+  .application-modal__chevron {
+    position: absolute;
+    right: 19px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-primary);
+  }
+
+  /* --- Согласие --- */
+
+  /* Стоит в правой колонке последнего ряда, вровень с полем слева,
+     но подписи над собой не имеет */
+  .application-modal__consent {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    align-self: end;
+    height: 60px;
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.2);
+  }
+
+  /* Сам чекбокс невидим, но остаётся на месте: клик и фокус достаются ему,
+     а рисуем рамку и галочку рядом лежащим SVG */
+  .application-modal__checkbox {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    opacity: 0;
+  }
+
+  .application-modal__check {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+    border: 1px solid var(--text-primary);
+    border-radius: 2px;
+    color: transparent;
+    transition: color var(--transition-fast);
+  }
+
+  .application-modal__checkbox:checked + .application-modal__check {
+    color: var(--text-primary);
+  }
+
+  .application-modal__checkbox:focus-visible + .application-modal__check {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .application-modal__consent-text {
+    font-size: 15px;
+    line-height: normal;
+    letter-spacing: normal;
+    cursor: pointer;
+  }
+
+  /* --- Кнопка --- */
+
+  .application-modal__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1061px;
+    max-width: 100%;
+    height: 78px;
+    margin: 69px auto 0;
+    padding-inline: 22.857px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .application-modal__submit:hover {
+    background: var(--accent-terracotta-light);
+  }
+
+  .application-modal__status:empty {
+    display: none;
+  }
+
+  .application-modal__status {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.4;
+    letter-spacing: normal;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .application-modal__status[data-state='error'] {
+    color: var(--accent-terracotta-light);
+  }
+</style>

@@ -9,6 +9,7 @@ import monoCyr400 from '../fonts/ibm-plex-mono-cyrillic-400-normal.woff2?url';
 import { withBase } from '../lib/url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import ApplicationModal from '../components/ApplicationModal.astro';
 
 interface Props {
   title: string;
@@ -71,6 +72,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
     </main>
 
     <Footer />
+
+    {/* Форму открывают кнопки [data-modal="application"] — они есть в CTA
+        главной и в попапе трека, а позже появятся на «Проектах». Держим
+        окно в макете, чтобы не забыть подключить его на новой странице. */}
+    <ApplicationModal />
 
     <script>
       // Появление секций при прокрутке. Наблюдатель, а не CSS-таймлайн

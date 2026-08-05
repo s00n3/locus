@@ -56,6 +56,8 @@ const pixels: [x: number, y: number, color: string][] = [
 </section>
 
 <script>
+  import { lockScroll, unlockScroll } from '../lib/scroll-lock';
+
   // Открытие и закрытие попапов треков. Нативный dialog берёт на себя
   // фокус, Esc и подложку — остаётся связать карточку с окном и вернуть
   // фокус на карточку после закрытия.
@@ -69,14 +71,16 @@ const pixels: [x: number, y: number, color: string][] = [
     // покрывает закрытие по Esc, но полагаться только на него нельзя:
     // если оно не придёт, страница останется без прокрутки.
     const cleanup = () => {
-      document.body.style.overflow = '';
-      trigger.focus();
+      unlockScroll(dialog);
+      // Из этого окна можно уйти в форму заявки — тогда оно закрывается,
+      // а фокус уже внутри формы, и возвращать его на карточку нельзя
+      if (!document.querySelector('dialog[open]')) trigger.focus();
     };
 
     trigger.addEventListener('click', () => {
       dialog.showModal();
       // Пока окно открыто, страница под ним не должна прокручиваться
-      document.body.style.overflow = 'hidden';
+      lockScroll(dialog);
     });
 
     dialog.addEventListener('close', cleanup);
