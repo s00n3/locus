@@ -4,7 +4,11 @@ import TrackCard from './TrackCard.astro';
 
 const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
 
-// Декоративные пиксели справа внизу — координаты с ноды «Пиксели 10» (9:47)
+// Декоративные пиксели справа внизу — координаты с ноды «Пиксели 10» (9:47).
+// В макете кластер начинается на 1212 и наезжает на кнопку, которая кончается
+// на 1251. Сдвигаем вправо, чтобы между ними остался зазор — так в правленой
+// компоновке.
+const PIXELS_OFFSET_X = 52;
 const T = 'var(--surface-panel)';
 const TH = 'rgba(28,94,116,0.5)';
 const OH = 'rgba(195,106,73,0.5)';
@@ -41,7 +45,7 @@ const pixels: [x: number, y: number, color: string][] = [
   <div class="tracks__pixels" aria-hidden="true">
     {
       pixels.map(([x, y, color]) => (
-        <span style={`left:${x}px;top:${y}px;background:${color}`} />
+        <span style={`left:${x + PIXELS_OFFSET_X}px;top:${y}px;background:${color}`} />
       ))
     }
   </div>

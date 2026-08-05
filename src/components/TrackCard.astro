@@ -53,12 +53,12 @@ const Tag = href ? 'a' : 'div';
 
     {/* Вектором, а не символом «→»: U+2192 нет в подключённых сабсетах
         IBM Plex, и глиф подставлялся системным шрифтом — на каждой ОС свой */}
-    <svg class="track__arrow" viewBox="0 0 58 18" width="58" height="18" aria-hidden="true">
+    <svg class="track__arrow" viewBox="0 0 42 24" width="42" height="24" aria-hidden="true">
       <path
-        d="M1 9 H55 M45 1 L56 9 L45 17"
+        d="M2 12 H38 M29 3 L39 12 L29 21"
         fill="none"
         stroke="currentColor"
-        stroke-width="3"
+        stroke-width="3.5"
         stroke-linecap="round"
         stroke-linejoin="round"
       />
@@ -84,14 +84,17 @@ const Tag = href ? 'a' : 'div';
     object-fit: cover;
   }
 
-  /* Полупрозрачная подложка поверх фотографии: снимок продолжает
-     просвечивать, как в макете */
+  /* Матовое стекло поверх фотографии: снимок просвечивает, но размыт.
+     Радиус 15px и прозрачность 0.3 подобраны сведением с эталонным
+     рендером карточки — перебором по обоим параметрам сразу. */
   .track__body {
     position: absolute;
     inset: auto 0 0 0;
     height: 280px;
     padding: 15px 28px 0;
-    background: rgba(28, 94, 116, 0.2);
+    background: rgba(28, 94, 116, 0.3);
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
   }
 
   .track__title {
@@ -123,7 +126,7 @@ const Tag = href ? 'a' : 'div';
   .track__arrow {
     position: absolute;
     right: 20px;
-    bottom: 45px;
+    bottom: 42px;
     color: var(--accent-terracotta);
     transition: transform var(--transition-base);
   }
