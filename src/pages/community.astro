@@ -1,8 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CommunityHero from '../components/CommunityHero.astro';
 ---
 
-<BaseLayout title="Сообщество — ЛОКУС">
+<BaseLayout
+  title="Сообщество — ЛОКУС"
+  description="Люди ЛОКУСа: эксперты, менторы и команда цифровой проектной школы."
+>
+  <CommunityHero />
+
   {/*
     Блоки страницы «Сообщество» (ТЗ, раздел 4.3 / порядок 9.1):
       18. Эксперты проекта

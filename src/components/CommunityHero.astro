@@ -1,0 +1,360 @@
+---
+import { Image } from 'astro:assets';
+import membrane from '../assets/images/membrane.png';
+import sechenovLogo from '../assets/icons/sechenov.svg?url';
+import arrowCurve from '../assets/icons/projects-arrow-curve.svg?raw';
+import arrowHead from '../assets/icons/projects-arrow-head.svg?raw';
+import lineShort from '../assets/icons/hero-line-short.svg?url';
+import lineLong from '../assets/icons/hero-line-long.svg?url';
+
+// Герой страницы «Сообщество» — первый блок фрейма 9:638.
+//
+// Композиция та же, что у героя «Проектов», поэтому классы элементов те же:
+// правила входа из motion.css достаются блоку даром. Отличия: слово
+// «СООБЩЕСТВО» вместо «ПРОЕКТЫ», ионный канал в мембране вместо митохондрии
+// и своя рукописная подпись.
+//
+// Метаданные страницы целиком Figma не отдаёт — рвётся по размеру ответа,
+// поэтому координаты сняты с рендера фрейма в натуральную величину
+// (см. правила проекта, раздел про работу с Figma).
+
+const T = '#1c5e74';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+type Pixel = [x: number, y: number, color: string, size?: number];
+
+// Кластеры пикселей поверх мембраны. Координаты сняты с рендера: россыпь
+// идёт по диагонали от левого края панели к центру канала.
+const pixels: Pixel[] = [
+  [98, 236, TH], [121, 236, T], [144, 259, OH], [98, 282, T],
+  [167, 282, TH], [121, 305, TH], [144, 328, T], [98, 351, OH],
+  [167, 351, TH], [190, 374, T], [144, 397, TH], [190, 420, OH],
+  [213, 259, T], [236, 305, TH], [259, 351, T], [213, 397, OH],
+  [236, 420, TH], [282, 236, TH], [305, 282, T], [259, 420, T],
+  [328, 328, OH], [351, 236, T], [374, 305, TH], [397, 259, OH],
+  [420, 282, TH],
+];
+---
+
+<section class="hero" aria-labelledby="community-hero-title">
+  {/* Огромный «</>» за панелью — фоновая графика макета */}
+  <span class="hero__code" aria-hidden="true">&lt;/&gt;</span>
+
+  {/* Стеклянная панель: размытый слой даёт свечение, поверх — чёткая рамка */}
+  <div class="hero__panel-glow" aria-hidden="true"></div>
+  <div class="hero__panel" aria-hidden="true"></div>
+
+  {/* Обёртка держит позицию, анимация живёт на самом кадре */}
+  <div class="hero__figure" aria-hidden="true">
+    <Image
+      class="hero__figure-img"
+      src={membrane}
+      alt=""
+      widths={[528, 1056]}
+      sizes="528px"
+      quality={82}
+      loading="eager"
+    />
+  </div>
+
+  <div class="hero__pixels" aria-hidden="true">
+    {
+      pixels.map(([x, y, color, size = 22.857], index) => (
+        <span
+          style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};animation-delay:${400 + index * 14}ms`}
+        />
+      ))
+    }
+  </div>
+
+  <p class="hero__eyebrow">проектная школа × digital health</p>
+
+  <h1 class="hero__logo" id="community-hero-title">
+    <span class="hero__bracket" aria-hidden="true">[</span>
+    <span class="hero__wordmark">СООБЩЕСТВО</span>
+    <span class="hero__bracket" aria-hidden="true">]</span>
+  </h1>
+
+  <img class="hero__line-short" src={lineShort} alt="" width="183" height="2" aria-hidden="true" />
+  <p class="hero__tagline">цифровая проектная школа</p>
+
+  {/* Открывает форму заявки — обработчик ищет кнопки по всему документу */}
+  <button class="hero__cta" type="button" data-modal="application" aria-haspopup="dialog">
+    Подать заявку
+  </button>
+
+  {/* Рукописная подпись со стрелкой к мембране. Стрелка встроена,
+      а не подключена картинкой: только так её можно прорисовать
+      при появлении. В макете это две фигуры — дуга и остриё. */}
+  <p class="hero__note">Люди, которые открывают возможности</p>
+  <span class="hero__pointer" aria-hidden="true" set:html={arrowCurve} />
+  <span class="hero__pointer-head" aria-hidden="true" set:html={arrowHead} />
+
+  <img class="hero__university" src={sechenovLogo} alt="Сеченовский университет" width="211" height="57" />
+  <span class="hero__amp" aria-hidden="true">&&</span>
+  <span class="hero__credits-logo" aria-hidden="true">
+    <span class="hero__bracket hero__bracket--sm">[</span>
+    <span class="hero__wordmark hero__wordmark--sm">ЛОКУС</span>
+    <span class="hero__bracket hero__bracket--sm">]</span>
+  </span>
+  <img class="hero__line-long" src={lineLong} alt="" width="754" height="2" aria-hidden="true" />
+
+  <p class="hero__lead">
+    цифровая проектная школа Сеченовского университета, где междисциплинарные команды
+    участников решают реальные задачи здравоохранения под руководством экспертов
+  </p>
+</section>
+
+<style>
+  /* Сцена 1440×884 — как на «Проектах». Отрицательный margin поднимает её
+     под шапку: мембрана в макете выходит выше панели. */
+  .hero {
+    position: relative;
+    width: var(--layout-width);
+    max-width: 100%;
+    height: 884px;
+    margin-inline: auto;
+    margin-top: -75px;
+    overflow: hidden;
+  }
+
+  .hero > * {
+    position: absolute;
+  }
+
+  /* --- Фон --- */
+
+  /* Глиф центрируется по панели: ink-бокс «</>» высотой 604 при кегле 666,
+     у текстового бокса сверху 183px подъёма. Панель 75…615, центр 345 */
+  .hero__code {
+    left: 123.81px;
+    top: -140px;
+    font-weight: 300;
+    font-size: 666.667px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #5f5f5f;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .hero__panel-glow,
+  .hero__panel {
+    left: 40px;
+    top: 75px;
+    height: 540px;
+    border-radius: 60px;
+  }
+
+  .hero__panel-glow {
+    width: 1358.035px;
+    background: rgba(28, 94, 116, 0.05);
+    border: 1px solid #f6cfba;
+    filter: blur(4.762px);
+  }
+
+  .hero__panel {
+    width: 1360px;
+    background: rgba(217, 217, 217, 0.2);
+    border: 1px solid var(--border-warm);
+    -webkit-backdrop-filter: blur(25px);
+    backdrop-filter: blur(25px);
+  }
+
+  /* Пропорции кадра сохраняем: бокс 528×352 — те же 3:2, что у исходника,
+     поэтому картинка не сжимается. В макете она чуть приплюснута, но это
+     та же ловушка, что была с хромосомой на главной. */
+  .hero__figure {
+    left: 32px;
+    top: 96px;
+    width: 528px;
+    height: 352px;
+    pointer-events: none;
+  }
+
+  .hero__figure-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Исходник цветной, в макете обесцвечен */
+    filter: grayscale(1) brightness(1.05);
+    pointer-events: none;
+  }
+
+  .hero__pixels :global(span) {
+    position: absolute;
+  }
+
+  /* --- Логотип и подписи --- */
+
+  /* Правый край строки совпадает с правой скобкой логотипа (1372).
+     Начертание Medium вместо Bold: 700 в шкале нет, а подделанная
+     браузером жирность ещё и шире настоящей. */
+  .hero__eyebrow {
+    right: 68px;
+    top: 140px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--accent-terracotta);
+    white-space: nowrap;
+  }
+
+  /* Зазор подобран так, чтобы логотип занял ширину из макета (582 → 1372) */
+  .hero__logo {
+    left: 582px;
+    top: 170px;
+    display: flex;
+    align-items: baseline;
+    gap: 32px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Кегль меньше, чем у «ПРОЕКТЫ» (123.81): в слове десять букв против
+     семи, и при том же размере логотип не влезал бы в панель. Подобран
+     так, чтобы строка заняла ту же ширину, что в макете. */
+  .hero__wordmark {
+    font-weight: 400;
+    font-size: 93px;
+    letter-spacing: normal;
+  }
+
+  .hero__bracket {
+    font-weight: 300;
+    font-size: 152.381px;
+  }
+
+  .hero__line-short {
+    left: 751.71px;
+    top: 341.43px;
+    width: 182.857px;
+    height: 2px;
+  }
+
+  .hero__tagline {
+    left: 959.33px;
+    top: 323.33px;
+    font-weight: 300;
+    font-size: 30.476px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    white-space: nowrap;
+  }
+
+  .hero__cta {
+    left: 1137px;
+    top: 372px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 232px;
+    height: 60px;
+    padding: 12px 24px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .hero__cta:hover {
+    background: var(--accent-terracotta-light);
+  }
+
+  /* --- Подпись со стрелкой --- */
+
+  .hero__note {
+    left: 437px;
+    top: 370px;
+    width: 320px;
+    font-family: var(--font-hand);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: normal;
+  }
+
+  /* Имена свои, а не общие с главной: там стрелка обведена штрихом
+     и прорисовывается через stroke-dashoffset, здесь она залита контуром */
+  .hero__pointer {
+    left: 320px;
+    top: 352px;
+    width: 89.446px;
+    height: 60.5px;
+  }
+
+  .hero__pointer-head {
+    left: 310px;
+    top: 345px;
+    width: 20.963px;
+    height: 20.248px;
+  }
+
+  .hero__pointer :global(svg),
+  .hero__pointer-head :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* --- Нижний ряд --- */
+
+  /* Как на «Проектах»: части стоят по своим координатам из макета,
+     флексом их не собрать — в Figma они выставлены вручную */
+  .hero__university {
+    left: 52.04px;
+    top: 679.04px;
+    width: 210.8px;
+    height: 56.84px;
+  }
+
+  .hero__amp {
+    left: 310.2px;
+    top: 699.9px;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--text-soft);
+    transform: translate(-50%, -50%) rotate(-10.46deg);
+  }
+
+  .hero__credits-logo {
+    left: 352px;
+    top: 679px;
+    display: flex;
+    align-items: baseline;
+    gap: 25px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hero__wordmark--sm {
+    font-size: 45.714px;
+  }
+
+  .hero__bracket--sm {
+    font-size: 57.143px;
+  }
+
+  .hero__line-long {
+    left: 603px;
+    top: 704px;
+    width: 754px;
+    height: 2px;
+  }
+
+  .hero__lead {
+    left: 51px;
+    top: 767px;
+    width: 1284px;
+    font-weight: 300;
+    font-size: 28px;
+    line-height: 1.35;
+    letter-spacing: normal;
+  }
+</style>
