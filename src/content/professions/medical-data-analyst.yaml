@@ -4,6 +4,13 @@ title: Аналитик медицинских данных
 directions:
   - Анализ медицинских данных
   - Исследовательские проекты
-competencies: []
+# Оси паутины. Значения 0–100, черновые — ждут заказчика.
+# Набор осей и порядок должны совпадать у всех профессий.
+competencies:
+  - { name: Python, value: 60 }
+  - { name: Данные, value: 95 }
+  - { name: Медтех, value: 40 }
+  - { name: Продукт, value: 55 }
+  - { name: Коммуникации, value: 70 }
 image: /src/assets/uploads/profession-analyst.jpg
 imageAlt: Аналитик за экранами с медицинскими графиками

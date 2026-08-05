@@ -6,6 +6,7 @@ import TrackBuilder from '../components/TrackBuilder.astro';
 import ProjectAreas from '../components/ProjectAreas.astro';
 import ExperienceLevels from '../components/ExperienceLevels.astro';
 import RecommendedResult from '../components/RecommendedResult.astro';
+import CompetencyWeb from '../components/CompetencyWeb.astro';
 import TrackModals from '../components/TrackModals.astro';
 ---
 
@@ -38,6 +39,11 @@ import TrackModals from '../components/TrackModals.astro';
       направлений: трек по большинству, проекты и профессии фильтром.
       Пока ничего не выбрано — блок скрыт. */}
   <RecommendedResult />
+
+  {/* Паутина компетенций, нода «Widget 3» (9:1799). В ТЗ описана как
+      статичная иллюстрация, но по требованию заказчика генерируется
+      из цифр в админке и перестраивается с анимацией. */}
+  <CompetencyWeb />
 
   {/* Окна треков: их открывает кнопка «Подробнее о треке» в результате
       подбора. На главной те же окна подключает блок треков. */}

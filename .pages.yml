@@ -518,10 +518,24 @@ content:
           хотя бы одно из них. Сейчас связки расставлены по смыслу и ждут
           подтверждения.
       - name: competencies
-        label: Компетенции
-        type: string
+        label: Компетенции (оси паутины)
+        type: object
         list: true
-        description: Понадобятся для паутины компетенций. Пока не используются.
+        description: >-
+          Паутина рисуется по этим цифрам. Названия осей и их порядок должны
+          быть одинаковыми у всех профессий — иначе переход между ними
+          сломается. Обычно пять осей.
+        fields:
+          - name: name
+            label: Название оси
+            type: string
+            required: true
+          - name: value
+            label: Значение
+            type: number
+            required: true
+            description: От 0 до 100.
+            default: 50
       - name: image
         label: Фотография
         type: image

@@ -1,0 +1,454 @@
+---
+import { getCollection } from 'astro:content';
+
+// Паутина компетенций — нода Figma «Widget 3» (9:1799).
+//
+// В ТЗ блок описан как статичная иллюстрация, но по требованию заказчика
+// он генерируется из цифр: каждая профессия задаёт значения по осям
+// в админке, а фигура строится геометрией. Поэтому паутина здесь —
+// настоящий SVG, а не обведённый вектор из макета.
+//
+// Переключение профессий не подменяет кадры: у многоугольника меняется
+// атрибут d, у точек — transform, и браузер сам доигрывает переход.
+// Отсюда требование к данным: у всех профессий одинаковый набор осей
+// в одинаковом порядке, иначе морфить нечего.
+
+const professions = (await getCollection('professions')).sort((a, b) => a.data.order - b.data.order);
+const withAxes = professions.filter((p) => p.data.competencies.length > 0);
+
+// Оси берём у первой профессии — она задаёт порядок. Остальные подгоняем
+// по названию, недостающие считаем нулём: пусть фигура просядет по оси,
+// но не рассыплется.
+const axes = withAxes[0]?.data.competencies.map((c) => c.name) ?? [];
+
+for (const profession of withAxes) {
+  const own = profession.data.competencies.map((c) => c.name);
+  const mismatch = own.length !== axes.length || own.some((name, i) => name !== axes[i]);
+  if (mismatch) {
+    console.warn(
+      `[Паутина компетенций] у «${profession.data.title}» оси отличаются от эталонных ` +
+        `(${axes.join(', ')}) — фигура построится, но переход между профессиями будет рваным`,
+    );
+  }
+}
+
+/* --- Геометрия ---
+   Правильный многоугольник по числу осей, первая ось смотрит вверх.
+   Координаты в системе viewBox, её же используют подписи в процентах. */
+
+const W = 1357;
+const H = 659;
+const CX = W / 2;
+
+// Центр сдвинут ниже середины, а радиус меньше макетного (там ~312):
+// подписи стоят снаружи контура, и верхней нужно место над вершиной.
+// В макете она уходит вбок от вершины, но у сгенерированной сетки
+// подписи ложатся предсказуемо — по своим осям, — поэтому запас берём
+// размером фигуры. При R=270 и центре 366 верхняя подпись впритык
+// укладывается в панель, нижние — тоже.
+const CY = 366;
+const R = 270;
+const LABEL_GAP = 26;
+const RINGS = 4;
+
+const angleOf = (index: number) => (-90 + (360 / axes.length) * index) * (Math.PI / 180);
+
+const pointAt = (index: number, radius: number) => ({
+  x: CX + Math.cos(angleOf(index)) * radius,
+  y: CY + Math.sin(angleOf(index)) * radius,
+});
+
+const round = (n: number) => Math.round(n * 100) / 100;
+
+/** Замкнутый контур по всем осям на заданном радиусе */
+const ring = (radius: number) =>
+  axes
+    .map((_, i) => {
+      const { x, y } = pointAt(i, radius);
+      return `${i === 0 ? 'M' : 'L'}${round(x)} ${round(y)}`;
+    })
+    .join(' ') + ' Z';
+
+/** Контур профессии: радиус каждой вершины — её значение */
+const shapeOf = (values: number[]) =>
+  values
+    .map((value, i) => {
+      const { x, y } = pointAt(i, (Math.max(0, Math.min(100, value)) / 100) * R);
+      return `${i === 0 ? 'M' : 'L'}${round(x)} ${round(y)}`;
+    })
+    .join(' ') + ' Z';
+
+const valuesOf = (profession: (typeof withAxes)[number]) =>
+  axes.map((name) => profession.data.competencies.find((c) => c.name === name)?.value ?? 0);
+
+const shapes = Object.fromEntries(withAxes.map((p) => [p.id, shapeOf(valuesOf(p))]));
+const points = Object.fromEntries(
+  withAxes.map((p) => [
+    p.id,
+    valuesOf(p).map((value, i) => {
+      const { x, y } = pointAt(i, (Math.max(0, Math.min(100, value)) / 100) * R);
+      return [round(x), round(y)] as [number, number];
+    }),
+  ]),
+);
+
+// Подписи осей стоят снаружи внешнего контура. Сторону выбираем по углу:
+// иначе длинная подпись слева наезжала бы на фигуру.
+const labels = axes.map((name, i) => {
+  const { x, y } = pointAt(i, R + LABEL_GAP);
+  const cos = Math.cos(angleOf(i));
+  const sin = Math.sin(angleOf(i));
+  const shift =
+    cos > 0.2
+      ? 'translate(0, -50%)'
+      : cos < -0.2
+        ? 'translate(-100%, -50%)'
+        : sin > 0
+          ? 'translate(-50%, 0)'
+          : 'translate(-50%, -100%)';
+
+  return { name, left: (x / W) * 100, top: (y / H) * 100, shift };
+});
+
+const descriptions = Object.fromEntries(
+  withAxes.map((p) => [
+    p.id,
+    `${p.data.title}: ` +
+      valuesOf(p)
+        .map((value, i) => `${axes[i]} — ${value} из 100`)
+        .join(', '),
+  ]),
+);
+
+const first = withAxes[0];
+---
+
+{
+  withAxes.length > 0 && (
+    <section
+      class="web"
+      data-reveal
+      aria-labelledby="web-title"
+      data-shapes={JSON.stringify(shapes)}
+      data-points={JSON.stringify(points)}
+      data-descriptions={JSON.stringify(descriptions)}
+    >
+      <div class="web__inner">
+        <header class="web__head">
+          <h2 class="web__title" id="web-title">Паутина компетенций</h2>
+          <p class="web__lead">Выбери профессию — подсветим связанные навыки</p>
+          <p class="web__hint">
+            <span class="web__dot" aria-hidden="true" />
+            Наведи на профессию или навык
+          </p>
+        </header>
+
+        {/* Выбор один: паутина показывает одну профессию за раз */}
+        <ul class="web__chips" role="radiogroup" aria-labelledby="web-title">
+          {withAxes.map((profession) => (
+            <li>
+              <button
+                class="web__chip"
+                type="button"
+                role="radio"
+                aria-checked={profession.id === first.id ? 'true' : 'false'}
+                data-profession={profession.id}
+              >
+                {profession.data.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div class="web__panel">
+          <svg class="web__chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="web-figure-desc">
+            {/* Текстовое описание вместо картинки: цифры уже есть, грех
+                не отдать их скринридеру */}
+            <desc id="web-figure-desc" data-desc>{descriptions[first.id]}</desc>
+
+            <g class="web__grid" aria-hidden="true">
+              {Array.from({ length: RINGS }, (_, step) => (
+                <path d={ring((R / RINGS) * (step + 1))} />
+              ))}
+
+              {axes.map((_, i) => {
+                const { x, y } = pointAt(i, R);
+                return <line x1={CX} y1={CY} x2={round(x)} y2={round(y)} />;
+              })}
+            </g>
+
+            {/* Фигура профессии. Меняется только d — переход доигрывает браузер */}
+            <path class="web__area" d={shapes[first.id]} data-area />
+
+            {axes.map((name, i) => (
+              <g
+                class="web__node"
+                data-node={i}
+                style={`transform: translate(${points[first.id][i][0]}px, ${points[first.id][i][1]}px)`}
+              >
+                <circle r="9" />
+                <title>{name}</title>
+              </g>
+            ))}
+          </svg>
+
+          {
+            labels.map((label, i) => (
+              <p
+                class="web__label"
+                data-label={i}
+                style={`left:${round(label.left)}%;top:${round(label.top)}%;transform:${label.shift}`}
+              >
+                {label.name}
+              </p>
+            ))
+          }
+
+          <p class="web__legend">
+            <span class="web__dot web__dot--legend" aria-hidden="true" />
+            навыки выбранной профессии
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // Переключение профессии. Ни перерисовки, ни покадровой анимации:
+  // подменяем d у контура и transform у точек, дальше работает CSS.
+  const section = document.querySelector<HTMLElement>('.web');
+
+  if (section) {
+    const area = section.querySelector<SVGPathElement>('[data-area]');
+    const nodes = [...section.querySelectorAll<SVGGElement>('[data-node]')];
+    const desc = section.querySelector<SVGDescElement>('[data-desc]');
+    const chips = [...section.querySelectorAll<HTMLButtonElement>('[data-profession]')];
+
+    // Фигуры считаются на сборке и лежат в data-атрибуте: считать их
+    // в браузере значило бы держать геометрию в двух местах
+    const shapes = JSON.parse(section.dataset.shapes ?? '{}') as Record<string, string>;
+    const points = JSON.parse(section.dataset.points ?? '{}') as Record<string, [number, number][]>;
+    const descriptions = JSON.parse(section.dataset.descriptions ?? '{}') as Record<string, string>;
+
+    const show = (id: string) => {
+      if (!shapes[id] || !area) return;
+
+      area.setAttribute('d', shapes[id]);
+      points[id]?.forEach(([x, y], i) => {
+        nodes[i]?.style.setProperty('transform', `translate(${x}px, ${y}px)`);
+      });
+      if (desc) desc.textContent = descriptions[id] ?? '';
+    };
+
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        for (const other of chips) other.setAttribute('aria-checked', 'false');
+        chip.setAttribute('aria-checked', 'true');
+        show(chip.dataset.profession ?? '');
+      });
+    }
+
+    // Наведение на подпись оси подсвечивает её вершину — то самое
+    // «наведи на профессию или навык» из макета
+    section.querySelectorAll<HTMLElement>('[data-label]').forEach((label) => {
+      const node = nodes[Number(label.dataset.label)];
+      const set = (on: boolean) => {
+        label.classList.toggle('is-active', on);
+        node?.classList.toggle('is-active', on);
+      };
+      label.addEventListener('pointerenter', () => set(true));
+      label.addEventListener('pointerleave', () => set(false));
+    });
+  }
+</script>
+
+<style>
+  .web {
+    padding-block: 40px 64px;
+  }
+
+  .web__inner {
+    width: var(--layout-width);
+    max-width: 100%;
+    padding-inline: var(--container-pad);
+    margin-inline: auto;
+  }
+
+  /* --- Шапка --- */
+
+  .web__head {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-width: 987px;
+    padding-top: 28px;
+  }
+
+  .web__title {
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #f3fbfc;
+  }
+
+  .web__lead {
+    font-size: 18.5px;
+    line-height: 25.6px;
+    letter-spacing: normal;
+    color: #b7d3d9;
+  }
+
+  .web__hint {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 15.7px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #d8eaed;
+  }
+
+  .web__dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-terracotta-light);
+  }
+
+  /* --- Чипы профессий --- */
+
+  .web__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 15px;
+  }
+
+  .web__chip {
+    padding: 10px 13px;
+    border: 1px solid rgba(44, 164, 188, 0.55);
+    border-radius: var(--radius-pill);
+    background: rgba(10, 52, 64, 0.9);
+    font-size: 18px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #f7fbfc;
+    white-space: nowrap;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+
+  .web__chip:hover {
+    border-color: rgba(44, 164, 188, 0.9);
+  }
+
+  .web__chip[aria-checked='true'] {
+    border-color: rgba(244, 163, 127, 0.85);
+    background: #d06d49;
+  }
+
+  /* --- Панель с паутиной --- */
+
+  .web__panel {
+    position: relative;
+    height: 697px;
+    margin-top: 15px;
+    border: 1px solid rgba(37, 145, 168, 0.34);
+    border-radius: 19.6px;
+    background: rgba(6, 42, 53, 0.5);
+    overflow: hidden;
+  }
+
+  .web__chart {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Сетка: концентрические контуры и спицы. Цвет снят с эталона — тот же
+     оттенок, что у рамки панели, только слабее */
+  .web__grid path {
+    fill: none;
+    stroke: rgba(37, 145, 168, 0.32);
+    stroke-width: 1.5;
+  }
+
+  .web__grid line {
+    stroke: rgba(37, 145, 168, 0.26);
+    stroke-width: 1.5;
+  }
+
+  /* Фигура профессии. Переход по d — то, ради чего фигура рисуется путём
+     с одинаковым числом сегментов: браузер интерполирует вершины сам. */
+  .web__area {
+    fill: rgba(37, 145, 168, 0.32);
+    stroke: #f6cfba;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+
+  .web__node circle {
+    fill: #f6cfba;
+    stroke: rgba(18, 60, 70, 0.9);
+    stroke-width: 2;
+  }
+
+  .web__node.is-active circle {
+    fill: var(--accent-terracotta-light);
+    r: 12;
+  }
+
+  /* Движение только при разрешённой анимации: без него фигура просто
+     встаёт в новое положение, ничего не пропадая */
+  :global(html.has-motion) .web__area {
+    transition: d 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  :global(html.has-motion) .web__node {
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* --- Подписи осей --- */
+
+  /* Стиль «тултипа» из макета: подписи стоят снаружи контура */
+  .web__label {
+    position: absolute;
+    padding: 12px 15px;
+    border: 1.5px solid rgba(240, 138, 97, 0.9);
+    border-radius: 14.5px;
+    background: rgba(18, 60, 70, 0.98);
+    font-weight: 300;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: normal;
+    color: var(--text-primary);
+    white-space: nowrap;
+    transition: border-color var(--transition-fast);
+  }
+
+  .web__label.is-active {
+    border-color: var(--accent-terracotta-light);
+  }
+
+  .web__legend {
+    position: absolute;
+    left: 28px;
+    top: 43px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #cfe4e8;
+  }
+
+  .web__dot--legend {
+    background: #f6cfba;
+  }
+</style>

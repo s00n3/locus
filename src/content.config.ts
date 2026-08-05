@@ -272,8 +272,20 @@ const professions = defineCollection({
      * ни в ТЗ, ни в пояснении её нет, выставлена по смыслу названий.
      */
     directions: z.array(z.string()).default([]),
-    /** Компетенции для паутины. Пока пусто: заполняет заказчик */
-    competencies: z.array(z.string()).default([]),
+    /**
+     * Оси паутины компетенций и их значения, 0–100. Паутина рисуется из
+     * этих цифр, а не картинкой, поэтому набор осей должен совпадать
+     * у всех профессий — иначе перестроение между ними теряет смысл.
+     * Расхождение не роняет сборку, но пишет предупреждение в лог.
+     */
+    competencies: z
+      .array(
+        z.object({
+          name: z.string(),
+          value: z.number().min(0).max(100),
+        }),
+      )
+      .default([]),
     image: z.string().optional(),
     imageAlt: z.string().default(''),
   }),

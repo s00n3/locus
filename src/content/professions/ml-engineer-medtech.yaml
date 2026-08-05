@@ -4,6 +4,13 @@ title: ML-разработчик в medtech
 directions:
   - Искусственный интеллект в медицине
   - MedTech
-competencies: []
+# Оси паутины. Значения 0–100, черновые — ждут заказчика.
+# Набор осей и порядок должны совпадать у всех профессий.
+competencies:
+  - { name: Python, value: 90 }
+  - { name: Данные, value: 80 }
+  - { name: Медтех, value: 65 }
+  - { name: Продукт, value: 45 }
+  - { name: Коммуникации, value: 55 }
 image: /src/assets/uploads/profession-ml.jpg
 imageAlt: Разработчик за экранами с медицинскими данными
