@@ -65,6 +65,7 @@
   /* --- Гарнитуры --- */
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --font-hand: 'Caveat', cursive;
 
   /* --- Прочее --- */
   --focus-ring: 2px solid var(--brand-cyan);

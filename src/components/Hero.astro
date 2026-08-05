@@ -52,17 +52,15 @@ const pixels: Pixel[] = [
   <div class="hero__panel-glow" aria-hidden="true"></div>
   <div class="hero__panel" aria-hidden="true"></div>
 
-  {/* Кадр в макете растянут непропорционально (1672×941 → 420×651), поэтому
-      пережимаем сразу в нужную геометрию с fit=fill и в 2× под ретину —
-      иначе браузер берёт узкий вариант из srcset и тянет его по вертикали */}
+  {/* Отдаём кадр в исходной пропорции: кадрирование делает CSS (object-fit:
+      cover), поэтому пережимать заранее нельзя — иначе хромосома сплющится */}
   <Image
     class="hero__chromosome"
     src={chromosome}
     alt=""
-    width={841}
-    height={1303}
-    fit="fill"
-    quality={80}
+    width={1672}
+    height={941}
+    quality={78}
     loading="eager"
     aria-hidden="true"
   />
@@ -133,7 +131,7 @@ const pixels: Pixel[] = [
     top: 81.33px;
     font-weight: 300;
     font-size: 666.667px;
-    line-height: 1;
+    line-height: normal;
     letter-spacing: normal;
     color: #5f5f5f;
     white-space: nowrap;
@@ -155,21 +153,28 @@ const pixels: Pixel[] = [
     filter: blur(4.762px);
   }
 
+  /* Матовое стекло: панель размывает всё, что за ней — прежде всего «</>».
+     Радиус 25px замерен по эталону: резкая полоса под панелью 68px по
+     полувысоте, за стеклом та же полоса расплывается до 128px. */
   .hero__panel {
     width: 1360px;
     background: rgba(217, 217, 217, 0.2);
     border: 1px solid var(--border-warm);
+    -webkit-backdrop-filter: blur(25px);
+    backdrop-filter: blur(25px);
   }
 
-  /* Кадр растянут (object-fit: fill) — так в макете, отсюда вытянутый силуэт.
-     Исходник синеватый, в макете обесцвечен. */
+  /* Кадр вписан по cover, а не растянут: Figma-экспорт подсказывал fill,
+     но в макете хромосома сохраняет пропорции и заполняет бокс целиком,
+     выходя углами за панель. Исходник синеватый, в макете обесцвечен. */
   .hero__chromosome {
     left: 387.2px;
     top: 321.67px;
     width: 420.205px;
     height: 651.305px;
     transform: translate(-50%, -50%) rotate(-47.64deg);
-    object-fit: fill;
+    object-fit: cover;
+    object-position: center bottom;
     /* 0.97 подобран по эталону: обесцвеченный исходник даёт яркость 186,
        в макете тело хромосомы — 180 */
     filter: grayscale(1) brightness(0.97);
@@ -239,10 +244,11 @@ const pixels: Pixel[] = [
 
   .hero__note {
     left: 86px;
-    top: 465px;
+    top: 455px;
     width: 233px;
+    font-family: var(--font-hand);
     font-weight: 400;
-    font-size: 38.095px;
+    font-size: 40px;
     line-height: 1.05;
     letter-spacing: normal;
   }
