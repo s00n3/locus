@@ -129,6 +129,56 @@ content:
         list: true
         description: По одному пункту в строке. Дефис в начале подставится сам.
 
+  - name: benefits
+    label: Что получает участник
+    description: Восемь карточек результатов на главной.
+    type: collection
+    path: src/content/benefits
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, key, code, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Слева направо, сверху вниз.
+        default: 1
+      - name: glyph
+        label: Символ
+        type: string
+        required: true
+        description: 'Знак в цветном квадрате: </>, { }, @, #.'
+      - name: key
+        label: Подпись-код
+        type: string
+        required: true
+        description: 'Псевдо-вызов рядом с иконкой: project.real, mentor.api.'
+      - name: code
+        label: Номер
+        type: string
+        required: true
+        description: В шестнадцатеричном виде — 0x01, 0x02.
+      - name: title
+        label: Заголовок
+        type: string
+        required: true
+      - name: description
+        label: Описание
+        type: text
+        required: true
+      - name: accent
+        label: Цвет акцента
+        type: select
+        options:
+          values:
+            - { value: cyan, label: Бирюзовый }
+            - { value: terracotta, label: Терракотовый }
+            - { value: green, label: Зелёный }
+            - { value: purple, label: Фиолетовый }
+        default: cyan
+
 settings:
   content:
     merge: true

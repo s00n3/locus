@@ -1,0 +1,7 @@
+order: 8
+glyph: "->"
+key: project.next
+code: '0x08'
+title: Дальнейшее развитие проекта
+description: Основа для пилота, конкурса, стартапа или нового профессионального шага.
+accent: green

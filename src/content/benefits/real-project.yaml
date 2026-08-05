@@ -1,0 +1,7 @@
+order: 1
+glyph: </>
+key: project.real
+code: '0x01'
+title: Реальный проект
+description: Задача из цифрового здравоохранения с понятным заказчиком и контекстом.
+accent: cyan

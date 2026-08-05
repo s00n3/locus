@@ -1,0 +1,7 @@
+order: 5
+glyph: ">"
+key: practice.run
+code: '0x05'
+title: Практический опыт
+description: Не учебный кейс, а исследование, сборка, тестирование и выводы.
+accent: terracotta

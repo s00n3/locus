@@ -1,0 +1,242 @@
+---
+import { getCollection } from 'astro:content';
+
+const benefits = (await getCollection('benefits')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section class="benefits" aria-labelledby="benefits-title">
+  <div class="container benefits__inner">
+    <header class="benefits__header">
+      <p class="benefits__eyebrow">&#123; return participant.value[] &#125;</p>
+      <h2 class="benefits__title" id="benefits-title">Что получает участник</h2>
+      <p class="benefits__lead">
+        Не абстрактные знания, а восемь результатов, которые остаются с тобой после
+        программы.
+      </p>
+    </header>
+
+    {/* Строка-«вывод сборки» — часть кодовой метафоры блока */}
+    <p class="benefits__output">
+      <span class="benefits__output-icon" aria-hidden="true">✓</span>
+      <span class="benefits__output-text">build complete: 8 assets added to your profile</span>
+      <span class="benefits__output-status">READY TO GROW</span>
+    </p>
+
+    <ul class="benefits__grid">
+      {
+        benefits.map((item) => (
+          <li class="benefit" data-accent={item.data.accent}>
+            <div class="benefit__meta">
+              <span class="benefit__glyph" aria-hidden="true">
+                {item.data.glyph}
+              </span>
+              <span class="benefit__key">{item.data.key}</span>
+              <span class="benefit__code">{item.data.code}</span>
+            </div>
+            <div class="benefit__copy">
+              <h3 class="benefit__title">{item.data.title}</h3>
+              <p class="benefit__text">{item.data.description}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .benefits {
+    padding-block: 64px;
+  }
+
+  .benefits__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* --- Шапка секции --- */
+
+  .benefits__header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .benefits__eyebrow {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.06em;
+    color: var(--accent-terracotta);
+  }
+
+  .benefits__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 58px;
+    letter-spacing: normal;
+  }
+
+  .benefits__lead {
+    max-width: 980px;
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: normal;
+    color: var(--text-muted);
+  }
+
+  /* --- Строка сборки --- */
+
+  .benefits__output {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    background: rgba(7, 31, 41, 0.76);
+  }
+
+  .benefits__output-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--space-1);
+    background: var(--accent-terracotta);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .benefits__output-text {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: normal;
+  }
+
+  /* Зелёный вне палитры handoff — встречается только в этом блоке */
+  .benefits__output-status {
+    flex: none;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: normal;
+    color: #40eb94;
+  }
+
+  /* --- Сетка карточек --- */
+
+  /* align-items: start, а не stretch: в макете карточки в ряду разной
+     высоты, каждая по своему тексту */
+  .benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px;
+  }
+
+  /* Акцент задаётся компонентами, чтобы одним значением красить рамку,
+     подложку глифа и текст с разной прозрачностью */
+  .benefit {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 22px;
+    border: 1px solid rgb(var(--accent) / 0.48);
+    border-radius: var(--radius-panel);
+    background: var(--surface-glass);
+  }
+
+  .benefit[data-accent='cyan'] {
+    --accent: 77 219 235;
+  }
+  .benefit[data-accent='terracotta'] {
+    --accent: 195 106 73;
+  }
+  .benefit[data-accent='green'] {
+    --accent: 64 235 148;
+  }
+  .benefit[data-accent='purple'] {
+    --accent: 158 122 240;
+  }
+
+  .benefit__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .benefit__glyph {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgb(var(--accent) / 0.72);
+    border-radius: 12px;
+    background: rgb(var(--accent) / 0.18);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 18px;
+    color: rgb(var(--accent));
+  }
+
+  .benefit__key {
+    flex: none;
+    padding: 8px 11px;
+    border-radius: var(--radius-pill);
+    background: rgba(7, 31, 41, 0.78);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: normal;
+    color: rgb(var(--accent));
+  }
+
+  .benefit__code {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: normal;
+    text-align: right;
+    color: var(--text-muted);
+  }
+
+  /* От meta до текста 16, между заголовком и описанием 6 */
+  .benefit__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .benefit__title {
+    font-weight: 500;
+    font-size: 23px;
+    line-height: 29px;
+    letter-spacing: normal;
+  }
+
+  .benefit__text {
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 21px;
+    letter-spacing: normal;
+    color: var(--text-muted);
+  }
+</style>

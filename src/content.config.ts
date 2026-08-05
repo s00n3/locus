@@ -67,4 +67,23 @@ const audiences = defineCollection({
   }),
 });
 
-export const collections = { tracks, cases, audiences };
+/** Блок 7 главной — что получает участник (ТЗ, раздел 4.1) */
+const benefits = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/benefits' }),
+  schema: z.object({
+    /** Порядок в сетке: слева направо, сверху вниз */
+    order: z.number().default(0),
+    /** Символ в цветном квадрате: </>, { }, @, # и т.п. */
+    glyph: z.string(),
+    /** Псевдо-вызов рядом с иконкой: project.real, mentor.api */
+    key: z.string(),
+    /** Номер в шестнадцатеричном виде: 0x01 */
+    code: z.string(),
+    title: z.string(),
+    description: z.string(),
+    /** Цветовой акцент карточки */
+    accent: z.enum(['cyan', 'terracotta', 'green', 'purple']).default('cyan'),
+  }),
+});
+
+export const collections = { tracks, cases, audiences, benefits };

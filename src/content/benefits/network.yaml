@@ -1,0 +1,7 @@
+order: 7
+glyph: '#'
+key: network.link
+code: '0x07'
+title: Нетворкинг
+description: Связи с участниками, экспертами и командами из разных дисциплин.
+accent: purple

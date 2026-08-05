@@ -1,0 +1,7 @@
+order: 2
+glyph: '{ }'
+key: portfolio.push
+code: '0x02'
+title: Проектное портфолио
+description: Артефакты, прототип и история решений, которые можно показать работодателю.
+accent: terracotta
