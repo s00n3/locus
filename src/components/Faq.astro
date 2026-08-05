@@ -55,59 +55,71 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
 </section>
 
 <script>
-  // Оба направления приходится вести вручную. При раскрытии браузер
-  // показывает содержимое сразу в конечном состоянии, при сворачивании —
-  // сразу прячет. И там и там переходу не с чего начинать, поэтому
-  // выставляем нулевую высоту явно и только потом отпускаем.
+  // Высоту анимируем сами, через Web Animations API.
+  //
+  // Первым делом пробовал CSS-переход долей строки сетки (0fr -> 1fr) —
+  // он заикался: браузер каждый кадр заново раскладывает сетку и заново
+  // измеряет содержимое, а при раскрытии к этому добавлялись три подряд
+  // пересчёта вёрстки (показ details, принудительный рефлоу, снятие класса).
+  // Здесь измерение одно, дальше идёт ровная интерполяция пикселей.
+  const DURATION = 250;
+  const EASING = 'cubic-bezier(0.4, 0, 0.2, 1)';
+
   document.querySelectorAll<HTMLDetailsElement>('.faq__item').forEach((details) => {
     const summary = details.querySelector('summary');
     const body = details.querySelector<HTMLElement>('.faq__body');
     if (!summary || !body) return;
 
-    let busy = false;
-
-    /** Ждёт конец перехода, но не зависает, если его не случилось */
-    const afterTransition = (run: () => void) => {
-      let done = false;
-      const once = () => {
-        if (done) return;
-        done = true;
-        run();
-      };
-      body.addEventListener('transitionend', once, { once: true });
-      setTimeout(once, 500);
-    };
-
-    /** Длительность перехода в миллисекундах; 0 — анимации нет */
-    const duration = () => parseFloat(getComputedStyle(body).transitionDuration) * 1000 || 0;
+    let running: Animation | null = null;
 
     summary.addEventListener('click', (event) => {
-      // Анимации отключены (например, системной настройкой) — не мешаем
-      // браузеру переключать пункт самому, иначе он ждал бы страховочный
-      // таймер и реагировал с задержкой
-      if (duration() === 0) return;
+      // Движение отключено системной настройкой — пусть браузер
+      // переключает пункт сам, мгновенно
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       event.preventDefault();
-      if (busy) return;
-      busy = true;
 
-      if (details.open) {
-        details.classList.add('is-collapsed');
-        afterTransition(() => {
-          details.open = false;
-          details.classList.remove('is-collapsed');
-          busy = false;
-        });
+      const closing = details.open;
+      // Высоту снимаем до отмены: клик на полпути продолжится с текущего
+      // места, а не прыгнет к краю
+      const midway = running ? body.getBoundingClientRect().height : null;
+      running?.cancel();
+
+      let from: number;
+      let to: number;
+
+      if (closing) {
+        from = midway ?? body.getBoundingClientRect().height;
+        to = 0;
       } else {
-        // фиксируем нулевую высоту до показа, иначе анимироваться не с чего
-        details.classList.add('is-collapsed');
         details.open = true;
-        void body.offsetHeight;
-        details.classList.remove('is-collapsed');
-        afterTransition(() => {
-          busy = false;
-        });
+        from = midway ?? 0;
+        to = body.getBoundingClientRect().height;
       }
+
+      const anim = body.animate([{ height: `${from}px` }, { height: `${to}px` }], {
+        duration: DURATION,
+        easing: EASING,
+      });
+      running = anim;
+
+      // Состояние доводим не только по onfinish: если кадры не идут
+      // (вкладка в фоне, анимация не стартовала), пункт остался бы
+      // висеть открытым. Таймер это закрывает, а сверка с running
+      // страхует от срабатывания после нового клика.
+      let settled = false;
+      const settle = () => {
+        if (settled || running !== anim) return;
+        settled = true;
+        running = null;
+        // Снимаем анимацию явно: по таймеру она могла не завершиться
+        // и осталась бы висеть на элементе, накапливаясь с каждым кликом
+        anim.cancel();
+        if (closing) details.open = false;
+      };
+
+      anim.onfinish = settle;
+      setTimeout(settle, DURATION + 200);
     });
   });
 </script>
@@ -164,30 +176,9 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     background: rgba(217, 217, 217, 0.2);
   }
 
-  /* Плавное раскрытие: анимируем долю строки сетки с 0fr до 1fr.
-     Обёртка, а не ::details-content — псевдоэлемент в проверке
-     не отдавал содержимому высоту, и пункт застревал полураскрытым. */
+  /* Высоту обёртки ведёт скрипт; overflow прячет текст на сжатой высоте.
+     Без скрипта пункт просто раскрывается мгновенно. */
   .faq__body {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows var(--transition-base);
-  }
-
-  .faq__item[open] .faq__body {
-    grid-template-rows: 1fr;
-  }
-
-  /* Скрипт навешивает этот класс, чтобы принудительно держать нулевую
-     высоту поверх [open] — с него начинается раскрытие и им же
-     заканчивается сворачивание */
-  .faq__item[open].is-collapsed .faq__body {
-    grid-template-rows: 0fr;
-  }
-
-  /* Обязательные спутники приёма: overflow прячет текст на сжатой строке,
-     min-height позволяет ей сжаться до нуля */
-  .faq__answer {
-    min-height: 0;
     overflow: hidden;
   }
 
