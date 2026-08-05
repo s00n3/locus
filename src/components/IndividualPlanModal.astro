@@ -202,6 +202,7 @@ const pixels: [x: number, y: number, color: string][] = [
 
 <script>
   import { setupModal } from '../lib/modal';
+  import { readConstructorAnswers } from '../lib/constructor-answers';
 
   const dialog = document.getElementById('individual-plan-modal') as HTMLDialogElement | null;
 
@@ -210,6 +211,11 @@ const pixels: [x: number, y: number, color: string][] = [
     const status = dialog.querySelector('[data-status]') as HTMLElement;
     const lead = dialog.querySelector('[data-lead]') as HTMLElement;
     const DEFAULT_NOTE = status.textContent ?? '';
+    const DEFAULT_LEAD = lead.textContent ?? '';
+
+    const answerFields = [...dialog.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      '[data-plan-answer]',
+    )];
 
     setupModal(dialog, {
       triggers: '[data-modal="individual-plan"]',
@@ -218,12 +224,23 @@ const pixels: [x: number, y: number, color: string][] = [
         status.textContent = DEFAULT_NOTE;
         delete status.dataset.state;
 
-        // Конструктор «Собери свой трек» появится на блоке 16 и заполнит поля
-        // ответов. Пока их нет, подводка не обещает того, чего в форме не видно.
-        const filled = [...dialog.querySelectorAll<HTMLInputElement>('[data-plan-answer]')].some(
-          (field) => field.value.trim() !== '',
-        );
-        if (filled) lead.textContent = lead.dataset.leadFilled ?? lead.textContent;
+        // Читаем выбор конструктора при каждом открытии, а не храним его:
+        // между открытиями пользователь мог поменять отметки. На страницах
+        // без конструктора ответов нет, и поля остаются пустыми.
+        const answers = readConstructorAnswers();
+        const byQuestion: Record<string, string> = {
+          '1': answers.directions.join(', '),
+          '2': answers.area,
+          '3': answers.level,
+        };
+
+        for (const field of answerFields) {
+          field.value = byQuestion[field.dataset.planAnswer ?? ''] ?? '';
+        }
+
+        // Подводка обещает готовые ответы только когда они есть в форме
+        const filled = answerFields.some((field) => field.value.trim() !== '');
+        lead.textContent = filled ? (lead.dataset.leadFilled ?? DEFAULT_LEAD) : DEFAULT_LEAD;
       },
     });
 
