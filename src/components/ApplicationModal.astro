@@ -202,61 +202,20 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
 </dialog>
 
 <script>
-  import { lockScroll, unlockScroll } from '../lib/scroll-lock';
+  import { setupModal } from '../lib/modal';
 
-  // Открытие и закрытие формы заявки. Кнопки-триггеры разбросаны по всей
-  // странице (CTA, попап трека), поэтому ищем их по документу, а не внутри
-  // секции. Нативный dialog сам запирает фокус и закрывается по Esc.
   const dialog = document.getElementById('application-modal') as HTMLDialogElement | null;
 
   if (dialog) {
     const form = dialog.querySelector('form') as HTMLFormElement;
     const status = dialog.querySelector('[data-status]') as HTMLElement;
-    let opener: HTMLElement | null = null;
 
-    // Возвращаем фокус на кнопку, только если она ещё видима: заявку часто
-    // открывают из попапа трека, а он к этому моменту уже закрыт.
-    const restore = () => {
-      if (opener?.isConnected && opener.offsetParent !== null) opener.focus();
-      opener = null;
-    };
-
-    // Прибираемся и по событию close, и в явных обработчиках: событие
-    // покрывает Esc, но если оно не придёт, страница останется без прокрутки.
-    const cleanup = () => {
-      unlockScroll(dialog);
-      restore();
-    };
-
-    const close = () => {
-      if (dialog.open) dialog.close();
-      cleanup();
-    };
-
-    document.querySelectorAll<HTMLElement>('[data-modal="application"]').forEach((trigger) => {
-      trigger.addEventListener('click', () => {
-        // Кнопка может стоять внутри другого попапа — закрываем его, иначе
-        // два окна лягут друг на друга в верхнем слое
-        const parent = trigger.closest('dialog') as HTMLDialogElement | null;
-        if (parent && parent !== dialog) parent.close();
-
-        opener = trigger;
+    setupModal(dialog, {
+      triggers: '[data-modal="application"]',
+      panel: '.application-modal__panel',
+      onOpen: () => {
         status.textContent = '';
-        dialog.showModal();
-        lockScroll(dialog);
-      });
-    });
-
-    dialog.addEventListener('close', cleanup);
-    dialog.querySelector('[data-close]')?.addEventListener('click', close);
-
-    // Клик мимо панели закрывает окно: у самого dialog нет отступов,
-    // поэтому попадание за пределы панели надёжно определяется рамкой
-    dialog.addEventListener('click', (event) => {
-      const panel = dialog.querySelector('.application-modal__panel');
-      if (!panel || !(event.target instanceof Node)) return;
-      if (panel.contains(event.target)) return;
-      close();
+      },
     });
 
     // Отправлять заявку пока некуда: персональные данные по 152-ФЗ хранятся

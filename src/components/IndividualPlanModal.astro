@@ -1,0 +1,602 @@
+---
+import { getCollection } from 'astro:content';
+
+// Попап «Заявка с индивидуальным планом» — нода Figma 9:1076 (ТЗ, раздел 4.4).
+// Открывается кнопками [data-modal="individual-plan"]: пока это кнопка
+// «Подобрать индивидуальный план обучения» под треками на главной, позже
+// добавится такая же на странице «Проекты» (ТЗ, п. 4.2.5).
+
+const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
+
+// Три поля с ответами приходят из конструктора «Собери свой трек», а он живёт
+// на странице «Проекты» и ещё не свёрстан (блок 16). Пока поля пустые и
+// доступны только для чтения; когда конструктор появится, он заполнит их
+// по атрибутам data-plan-answer, и подводка сменится на текст из макета.
+const LEAD_FILLED = 'Ответы из конструктора уже добавлены — останется указать контакты и проверить выбранный трек.';
+const LEAD_EMPTY = 'Укажите контакты и выберите трек — ответы из конструктора подставятся сюда автоматически.';
+const ANSWER_PLACEHOLDER = 'Подставится из конструктора «Собери свой трек»';
+
+// Декоративный «плюс» из пикселей — нода 9:1121, квадраты по 18px
+const T = 'rgba(18, 87, 110, 0.85)';
+const O = 'rgba(195, 106, 73, 0.7)';
+
+const pixels: [x: number, y: number, color: string][] = [
+  [48, 0, T], [48, 18, T], [30, 36, T],
+  [48, 36, T], [66, 36, O], [48, 54, O],
+];
+---
+
+<dialog class="plan-modal" id="individual-plan-modal" aria-labelledby="plan-modal-title">
+  <form class="plan-modal__panel" method="dialog" novalidate>
+    <div class="plan-modal__pixels" aria-hidden="true">
+      {pixels.map(([x, y, color]) => <span style={`left:${x}px;top:${y}px;background:${color}`} />)}
+    </div>
+
+    <button class="plan-modal__close" type="button" data-close aria-label="Закрыть">
+      <span aria-hidden="true">×</span>
+    </button>
+
+    <header class="plan-modal__header">
+      <p class="plan-modal__eyebrow">ПОСЛЕДНИЙ ШАГ</p>
+      <h2 class="plan-modal__title" id="plan-modal-title">Заявка с индивидуальным планом</h2>
+      <p class="plan-modal__lead" data-lead data-lead-filled={LEAD_FILLED}>{LEAD_EMPTY}</p>
+    </header>
+
+    <div class="plan-modal__card">
+      <p class="plan-modal__field">
+        <label class="plan-modal__label" for="plan-name">ФИО</label>
+        <input
+          class="plan-modal__input"
+          id="plan-name"
+          name="fullName"
+          type="text"
+          autocomplete="name"
+          placeholder="Иванова Анна Сергеевна"
+          required
+        />
+      </p>
+
+      <div class="plan-modal__row">
+        <p class="plan-modal__field">
+          <label class="plan-modal__label" for="plan-email">Почта</label>
+          <input
+            class="plan-modal__input"
+            id="plan-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="name@example.ru"
+            required
+          />
+        </p>
+
+        <p class="plan-modal__field">
+          <label class="plan-modal__label" for="plan-phone">Телефон</label>
+          <input
+            class="plan-modal__input"
+            id="plan-phone"
+            name="phone"
+            type="tel"
+            autocomplete="tel"
+            placeholder="+7 999 000-00-00"
+            required
+          />
+        </p>
+      </div>
+
+      {/* Ответы из конструктора: только для чтения — их выбирают там, а не здесь */}
+      <p class="plan-modal__field">
+        <label class="plan-modal__label" for="plan-answer-1">Выбранные ответы — вопрос 1</label>
+        <textarea
+          class="plan-modal__input plan-modal__input--tall plan-modal__input--answer"
+          id="plan-answer-1"
+          name="answer1"
+          rows="2"
+          readonly
+          data-plan-answer="1"
+          placeholder={ANSWER_PLACEHOLDER}></textarea>
+      </p>
+
+      <p class="plan-modal__field">
+        <label class="plan-modal__label" for="plan-answer-2">Выбранный ответ — вопрос 2</label>
+        <input
+          class="plan-modal__input plan-modal__input--answer"
+          id="plan-answer-2"
+          name="answer2"
+          type="text"
+          readonly
+          data-plan-answer="2"
+          placeholder={ANSWER_PLACEHOLDER}
+        />
+      </p>
+
+      <div class="plan-modal__row">
+        <p class="plan-modal__field">
+          <label class="plan-modal__label" for="plan-answer-3">Выбранный ответ — вопрос 3</label>
+          <input
+            class="plan-modal__input plan-modal__input--answer"
+            id="plan-answer-3"
+            name="answer3"
+            type="text"
+            readonly
+            data-plan-answer="3"
+            placeholder={ANSWER_PLACEHOLDER}
+          />
+        </p>
+
+        <p class="plan-modal__field">
+          <label class="plan-modal__label" for="plan-track">Выбор трека</label>
+          <span class="plan-modal__control">
+            <select class="plan-modal__select" id="plan-track" name="track" required>
+              <option value="">Выберите вариант</option>
+              {tracks.map((track) => <option value={track.id}>{track.data.title}</option>)}
+            </select>
+            <svg class="plan-modal__chevron" viewBox="0 0 14 8" width="14" height="8" aria-hidden="true">
+              <path
+                d="M1 1.5 L7 6.5 L13 1.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+        </p>
+      </div>
+
+      <p class="plan-modal__field">
+        <label class="plan-modal__label" for="plan-source">Откуда узнали о проекте</label>
+        <textarea
+          class="plan-modal__input plan-modal__input--tall"
+          id="plan-source"
+          name="source"
+          rows="2"
+          placeholder="Университет, социальные сети, друзья…"></textarea>
+      </p>
+
+      {/* Галочки в макете нет — добавлена по требованию заказчика: без согласия
+          на обработку ПД собирать ФИО, почту и телефон нельзя. Не отмечена
+          заранее намеренно: по 152-ФЗ согласие должно быть активным действием. */}
+      <p class="plan-modal__consent">
+        <input class="plan-modal__checkbox" id="plan-consent" name="consent" type="checkbox" required />
+        <svg class="plan-modal__check" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+          <path
+            d="M4 11.6 L9.4 17 L19.6 6.3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <label class="plan-modal__consent-text" for="plan-consent">
+          Согласен на обработку персональных данных
+        </label>
+      </p>
+
+      <div class="plan-modal__footer">
+        {/* Строка из макета. Она же показывает ошибки проверки полей —
+            заводить рядом второе такое же сообщение незачем */}
+        <p class="plan-modal__note" data-status role="status" aria-live="polite">
+          Отправка данных в этой версии не подключена
+        </p>
+
+        <button class="plan-modal__submit" type="submit">
+          Отправить заявку
+          <svg viewBox="0 0 20 10" width="20" height="10" aria-hidden="true">
+            <path
+              d="M1 5 H17 M13 1 L18 5 L13 9"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import { setupModal } from '../lib/modal';
+
+  const dialog = document.getElementById('individual-plan-modal') as HTMLDialogElement | null;
+
+  if (dialog) {
+    const form = dialog.querySelector('form') as HTMLFormElement;
+    const status = dialog.querySelector('[data-status]') as HTMLElement;
+    const lead = dialog.querySelector('[data-lead]') as HTMLElement;
+    const DEFAULT_NOTE = status.textContent ?? '';
+
+    setupModal(dialog, {
+      triggers: '[data-modal="individual-plan"]',
+      panel: '.plan-modal__panel',
+      onOpen: () => {
+        status.textContent = DEFAULT_NOTE;
+        delete status.dataset.state;
+
+        // Конструктор «Собери свой трек» появится на блоке 16 и заполнит поля
+        // ответов. Пока их нет, подводка не обещает того, чего в форме не видно.
+        const filled = [...dialog.querySelectorAll<HTMLInputElement>('[data-plan-answer]')].some(
+          (field) => field.value.trim() !== '',
+        );
+        if (filled) lead.textContent = lead.dataset.leadFilled ?? lead.textContent;
+      },
+    });
+
+    // Отправлять некуда: персональные данные по 152-ФЗ хранятся только
+    // в России, а сайт живёт на GitHub Pages. Бэкенд появится вместе
+    // с сервером университета. До тех пор проверяем поля и честно говорим,
+    // что данные не ушли, — молча терять заявку нельзя.
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        status.textContent = 'Проверьте выделенные поля.';
+        status.dataset.state = 'error';
+        return;
+      }
+
+      status.textContent = 'Заявка заполнена, но отправка пока не подключена.';
+      status.dataset.state = 'notice';
+    });
+  }
+</script>
+
+<style>
+  /* margin: auto возвращаем вручную — в общем ресете `* { margin: 0 }`,
+     а именно им браузер центрирует dialog в верхнем слое */
+  .plan-modal {
+    width: min(1326px, calc(100vw - 48px));
+    max-width: none;
+    max-height: calc(100vh - 48px);
+    margin: auto;
+    padding: 0;
+    border: none;
+    background: none;
+    overflow: visible;
+    color: var(--text-primary);
+
+    /* Появление и скрытие. allow-discrete нужен, чтобы окно успело доиграть
+       переход прежде, чем браузер уберёт его из верхнего слоя. Где
+       @starting-style не поддержан, окно просто появляется сразу. */
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    transition:
+      opacity 220ms ease,
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      overlay 260ms allow-discrete,
+      display 260ms allow-discrete;
+  }
+
+  .plan-modal[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .plan-modal[open] {
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+    }
+  }
+
+  .plan-modal::backdrop {
+    background: rgba(3, 14, 19, 0.72);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition:
+      opacity 220ms ease,
+      overlay 220ms allow-discrete,
+      display 220ms allow-discrete;
+  }
+
+  .plan-modal[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .plan-modal[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  .plan-modal__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-height: calc(100vh - 48px);
+    padding: var(--space-5);
+    border-radius: var(--radius-block);
+    background: linear-gradient(-43.14deg, #1c5e74 5.81%, #0b232c 48.66%, #091315 112.73%);
+    box-shadow: 0 4px 48px rgba(0, 0, 0, 0.47);
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
+
+  .plan-modal__panel > * {
+    flex: none;
+  }
+
+  /* --- Декор и закрытие --- */
+
+  .plan-modal__pixels span {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+  }
+
+  .plan-modal__pixels {
+    position: absolute;
+    left: 1160px;
+    top: 112px;
+    width: 112px;
+    height: 112px;
+  }
+
+  .plan-modal__close {
+    position: absolute;
+    right: 33px;
+    top: 34px;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(91, 194, 213, 0.5);
+    border-radius: 50%;
+    background: rgba(18, 59, 69, 0.9);
+    font-size: 25px;
+    line-height: 1;
+    color: #f5fbfc;
+    transition: background-color var(--transition-fast);
+  }
+
+  .plan-modal__close:hover {
+    background: rgba(28, 94, 116, 0.9);
+  }
+
+  /* --- Шапка --- */
+
+  .plan-modal__header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .plan-modal__eyebrow {
+    font-size: 20px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: var(--text-accent);
+  }
+
+  .plan-modal__title {
+    font-weight: 400;
+    font-size: 52px;
+    line-height: 60px;
+    letter-spacing: normal;
+  }
+
+  .plan-modal__lead {
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: normal;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* --- Карточка с полями --- */
+
+  .plan-modal__card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: var(--space-4);
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.1);
+  }
+
+  .plan-modal__row {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .plan-modal__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .plan-modal__label {
+    font-size: 18px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: var(--text-accent);
+  }
+
+  .plan-modal__input,
+  .plan-modal__control {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    padding-inline: 18px;
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.2);
+    font-family: inherit;
+    font-size: 15px;
+    line-height: normal;
+    letter-spacing: normal;
+    color: var(--text-primary);
+  }
+
+  .plan-modal__input--tall {
+    height: 96px;
+    padding-block: 16px;
+    line-height: 22px;
+    resize: none;
+  }
+
+  /* Ответы конструктора набраны плотнее и ярче остальных значений:
+     это не ввод, а показ уже сделанного выбора */
+  .plan-modal__input--answer {
+    font-weight: 600;
+    line-height: 22px;
+    color: rgba(255, 255, 255, 0.88);
+    cursor: default;
+  }
+
+  .plan-modal__input::placeholder {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.38);
+  }
+
+  .plan-modal__input:focus-visible,
+  .plan-modal__control:has(:focus-visible) {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* --- Выбор трека --- */
+
+  .plan-modal__control {
+    justify-content: space-between;
+    gap: var(--space-1);
+  }
+
+  .plan-modal__select {
+    appearance: none;
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    cursor: pointer;
+  }
+
+  .plan-modal__select:focus-visible {
+    outline: none;
+  }
+
+  /* Список раскрывается системным виджетом — на тёмном фоне он остаётся
+     светлым, поэтому задаём цвета пунктам явно */
+  .plan-modal__select option {
+    background: #0b232c;
+    color: var(--text-primary);
+  }
+
+  .plan-modal__chevron {
+    flex: none;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* --- Согласие --- */
+
+  .plan-modal__consent {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 60px;
+    padding-inline: 18px;
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+    background: rgba(217, 217, 217, 0.2);
+  }
+
+  /* Растянут на всё поле, иначе нарисованный квадратик кликом не поймать:
+     у абсолютного элемента статическая позиция приходится не под него */
+  .plan-modal__checkbox {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .plan-modal__check {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+    border: 1px solid var(--text-primary);
+    border-radius: 2px;
+    color: transparent;
+    transition: color var(--transition-fast);
+  }
+
+  .plan-modal__checkbox:checked + .plan-modal__check {
+    color: var(--text-primary);
+  }
+
+  .plan-modal__checkbox:focus-visible + .plan-modal__check {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .plan-modal__consent-text {
+    font-size: 15px;
+    line-height: normal;
+    letter-spacing: normal;
+    cursor: pointer;
+  }
+
+  /* --- Нижняя строка --- */
+
+  .plan-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    height: 60px;
+  }
+
+  .plan-modal__note {
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: normal;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .plan-modal__note[data-state='error'] {
+    color: var(--accent-terracotta-light);
+  }
+
+  .plan-modal__note[data-state='notice'] {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .plan-modal__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: none;
+    width: 270px;
+    height: 60px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .plan-modal__submit:hover {
+    background: var(--accent-terracotta-light);
+  }
+</style>
