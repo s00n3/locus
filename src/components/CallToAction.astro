@@ -1,0 +1,78 @@
+---
+// Финальный призыв главной. Текст здесь — часть вёрстки, а не список,
+// поэтому в CMS не выносится: он меняется вместе с макетом, не отдельно.
+---
+
+<section class="cta" aria-labelledby="cta-title">
+  <div class="cta__stage">
+    <p class="cta__slogan" id="cta-title">&lt; Запускайте проекты, которые меняют медицину &gt;</p>
+
+    {/* Служебная пометка из макета — почти прозрачная, часть кодовой метафоры */}
+    <p class="cta__tab" aria-hidden="true">\ tab</p>
+
+    {/* Откроет форму заявки — попап появится на блоке 21 */}
+    <button class="cta__button" type="button" data-modal="application">Подать заявку</button>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-block: 0;
+  }
+
+  .cta__stage {
+    position: relative;
+    width: var(--layout-width);
+    max-width: 100%;
+    height: 240px;
+    margin-inline: auto;
+  }
+
+  /* Кегль 46, а не округлённые 48: при 48 вторая строка перестаёт
+     помещаться в 710 и слоган ломается на три строки вместо двух */
+  .cta__slogan {
+    position: absolute;
+    left: 45px;
+    top: 65px;
+    width: 710px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 46px;
+    line-height: 1.3;
+    letter-spacing: normal;
+  }
+
+  .cta__tab {
+    position: absolute;
+    left: 643px;
+    top: 85px;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 23px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: rgba(217, 217, 217, 0.2);
+  }
+
+  .cta__button {
+    position: absolute;
+    left: 894px;
+    top: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 506px;
+    height: 90px;
+    padding-inline: 22.857px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .cta__button:hover {
+    background: var(--accent-terracotta-light);
+  }
+</style>

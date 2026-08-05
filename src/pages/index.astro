@@ -8,6 +8,7 @@ import Benefits from '../components/Benefits.astro';
 import Mentors from '../components/Mentors.astro';
 import Partners from '../components/Partners.astro';
 import Faq from '../components/Faq.astro';
+import CallToAction from '../components/CallToAction.astro';
 ---
 
 <BaseLayout title="ЛОКУС — цифровая проектная школа" headerLogo={false}>
@@ -19,13 +20,11 @@ import Faq from '../components/Faq.astro';
   <Mentors />
   <Partners />
   <Faq />
+  <CallToAction />
 
   {/*
-    Блоки главной (ТЗ, раздел 4.1 / порядок верстки 9.1):
-      8.  Менторы
-      9.  Партнёры проекта
-      10. FAQ (аккордеон)
-      11. CTA «Подать заявку»
-    Верстается строго по одному блоку за раз, каждый — отдельным коммитом.
+    Десктопная главная собрана целиком (ТЗ, раздел 4.1: блоки 3–11).
+    Осталось по разделу 9.1: страницы «Проекты» и «Сообщество», попапы,
+    затем адаптив по разделу 9.2.
   */}
 </BaseLayout>
