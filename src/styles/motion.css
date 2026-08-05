@@ -219,3 +219,14 @@
 .has-motion .hero__leader path:last-child {
   animation-delay: 1450ms;
 }
+
+/* Стрелка-приглашение у выпускников: та же прорисовка, но по появлению
+   блока, а не по загрузке страницы — блок далеко внизу */
+.has-motion [data-reveal].is-visible .grads__arrow path {
+  stroke-dasharray: 1;
+  animation: hero-draw 600ms ease-out 250ms both;
+}
+
+.has-motion [data-reveal].is-visible .grads__arrow path:last-child {
+  animation-delay: 800ms;
+}

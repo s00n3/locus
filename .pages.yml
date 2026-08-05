@@ -596,6 +596,58 @@ content:
         list: true
         description: Нумерация добавится сама. Заполнять вместо названия и описания.
 
+  - name: graduates
+    label: Выпускники
+    description: >-
+      Блок «Наши выпускники» на странице «Люди». Сейчас там пять
+      демо-карточек из макета с фото-заглушкой — их нужно заменить.
+    type: collection
+    path: src/content/graduates
+    filename: '{fields.surname}-{fields.name}.yaml'
+    format: yaml
+    view:
+      fields: [surname, name, year, order]
+      sort: [order, surname]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: surname
+        label: Фамилия
+        type: string
+        required: true
+      - name: name
+        label: Имя
+        type: string
+        required: true
+      - name: year
+        label: Выпуск
+        type: string
+        description: 'Например: Выпуск 2025.'
+      - name: project
+        label: Проект
+        type: text
+        required: true
+        description: Над чем работал в школе.
+      - name: current
+        label: Сейчас
+        type: text
+        required: true
+        description: Где работает и кем.
+      - name: quote
+        label: Отзыв
+        type: text
+        description: Кавычки добавятся сами.
+      - name: photo
+        label: Фотография
+        type: image
+        description: Квадратная.
+      - name: photoAlt
+        label: Описание фотографии
+        type: string
+
   - name: faq
     label: Вопросы и ответы
     description: Аккордеон на главной.

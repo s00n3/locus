@@ -321,6 +321,32 @@ const experts = defineCollection({
   }),
 });
 
+/**
+ * Блок 19 «Сообщества» — «Наши выпускники» (ТЗ, раздел 4.3, «Вы можете
+ * быть здесь»). В макете пять одинаковых демо-карточек и фото-заглушка;
+ * реальные истории подставит заказчик.
+ */
+const graduates = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/graduates' }),
+  schema: z.object({
+    /** Порядок слева направо */
+    order: z.number().default(0),
+    /** Фамилия — набирается жирным над именем */
+    surname: z.string(),
+    name: z.string(),
+    /** Строка под именем: «Выпуск 2025» */
+    year: z.string().default(''),
+    /** Что делал в школе */
+    project: z.string(),
+    /** Где сейчас */
+    current: z.string(),
+    /** Отзыв в кавычках, курсивом */
+    quote: z.string().default(''),
+    photo: z.string().optional(),
+    photoAlt: z.string().default(''),
+  }),
+});
+
 /** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
 const faq = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
@@ -348,4 +374,5 @@ export const collections = {
   levels,
   professions,
   experts,
+  graduates,
 };
