@@ -3,18 +3,43 @@
 // В макете стоит последней в «Блок6», уже после паутины компетенций,
 // поэтому и в вёрстке идёт отдельной полосой за ней.
 //
-// В отличие от паутины и самого результата, кнопка не прячется без выбора:
-// это не результат подбора, а действие, и последняя точка конверсии
-// на странице. Открывает ту же форму, что CTA под уровнями опыта.
+// Появляется, только когда пройдены все три шага конструктора. Иначе
+// она вставала сразу под CTA «Подобрать индивидуальный план обучения»
+// и на пустой странице получалось две кнопки подряд.
 ---
 
-<section class="plan-cta" data-reveal>
+<section class="plan-cta" data-reveal hidden>
   <div class="plan-cta__inner">
     <button class="plan-cta__button" type="button" data-modal="individual-plan" aria-haspopup="dialog">
       Подать заявку с индивидуальным планом
     </button>
   </div>
 </section>
+
+<script>
+  import { readConstructorAnswers } from '../lib/constructor-answers';
+
+  // Кнопка появляется только после всех трёх шагов: направления, область
+  // и уровень опыта. До этого она стояла вплотную под CTA уровней опыта,
+  // и на нетронутой странице читались две кнопки подряд.
+  const section = document.querySelector<HTMLElement>('.plan-cta');
+
+  if (section) {
+    const sync = () => {
+      const { directions, area, level } = readConstructorAnswers();
+      section.hidden = directions.length === 0 || !area || !level;
+    };
+
+    // Шаги живут в других блоках, поэтому слушаем документ: связывать
+    // компоненты между собой ради этого не нужно
+    document.addEventListener('click', (event) => {
+      if (!(event.target instanceof Element)) return;
+      if (event.target.closest('[data-direction], [data-area], [data-level]')) sync();
+    });
+
+    sync();
+  }
+</script>
 
 <style>
   .plan-cta {
