@@ -106,4 +106,20 @@ const mentors = defineCollection({
   }),
 });
 
-export const collections = { tracks, cases, audiences, benefits, mentors };
+/** Блок 9 главной — партнёры проекта (ТЗ, раздел 4.1) */
+const partners = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/partners' }),
+  schema: z.object({
+    /** Порядок в ряду: меньше — левее */
+    order: z.number().default(0),
+    /** Название — уходит в alt логотипа */
+    name: z.string(),
+    logo: z.string(),
+    /** Высота логотипа в пикселях: в макете они разного размера */
+    height: z.number().default(168),
+    /** Ссылка на сайт партнёра. Можно не заполнять */
+    href: z.string().optional(),
+  }),
+});
+
+export const collections = { tracks, cases, audiences, benefits, mentors, partners };

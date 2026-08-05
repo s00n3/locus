@@ -224,6 +224,41 @@ content:
         type: string
         description: Для незрячих и на случай, если фото не загрузится.
 
+  - name: partners
+    label: Партнёры проекта
+    description: Логотипы в ряду на главной.
+    type: collection
+    path: src/content/partners
+    filename: '{fields.name}.yaml'
+    format: yaml
+    view:
+      fields: [name, order]
+      sort: [order, name]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: name
+        label: Название
+        type: string
+        required: true
+        description: Показывается незрячим вместо логотипа.
+      - name: logo
+        label: Логотип
+        type: image
+        required: true
+      - name: height
+        label: Высота логотипа
+        type: number
+        description: В пикселях. Ширина подберётся сама.
+        default: 168
+      - name: href
+        label: Ссылка на сайт
+        type: string
+        description: Можно оставить пустым — тогда логотип не будет ссылкой.
+
 settings:
   content:
     merge: true

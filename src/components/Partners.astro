@@ -1,0 +1,118 @@
+---
+import { getCollection } from 'astro:content';
+
+const partners = (await getCollection('partners')).sort((a, b) => a.data.order - b.data.order);
+
+// SVG отдаём как файл: у логотипов своя геометрия и свои цвета,
+// оптимизировать их нечего
+const logos = import.meta.glob<string>('/src/assets/uploads/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+// Декоративные пиксели слева сверху — нода «Пиксели 12» (9:369).
+// Два других кластера блока («Пиксели 7» и «Пиксели 11») в макете стоят
+// ниже его границы и обрезаны — их не переносим.
+const T = 'var(--surface-panel)';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+const pixels: [x: number, y: number, color: string][] = [
+  [21.9, 122.52, T],
+  [45.71, 53.95, TH],
+  [0, 99.67, OH],
+  [22.86, 76.81, T],
+];
+---
+
+<section class="partners" aria-labelledby="partners-title">
+  <div class="partners__pixels" aria-hidden="true">
+    {pixels.map(([x, y, color]) => <span style={`left:${x}px;top:${y}px;background:${color}`} />)}
+  </div>
+
+  <h2 class="partners__title" id="partners-title">&lt;H1&gt; Партнеры проекта &lt;/H1&gt;</h2>
+
+  <ul class="partners__list">
+    {
+      partners.map((item) => {
+        const src = logos[item.data.logo];
+        const logo = src && (
+          <img
+            class="partners__logo"
+            src={src}
+            alt={item.data.name}
+            height={item.data.height}
+            style={`height:${item.data.height}px`}
+            loading="lazy"
+          />
+        );
+        return (
+          <li>
+            {item.data.href ? (
+              <a href={item.data.href} rel="noopener noreferrer" target="_blank">
+                {logo}
+              </a>
+            ) : (
+              logo
+            )}
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
+
+<style>
+  .partners {
+    position: relative;
+    overflow: hidden;
+    padding-block: 64px 12.5px;
+  }
+
+  .partners__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-align: center;
+  }
+
+  /* Логотипы разной высоты выровнены по общей оси — в макете их центры
+     совпадают, хотя размеры отличаются (168 и 247) */
+  .partners__list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 68.3px;
+    margin-top: 11.9px;
+    min-height: 247px;
+  }
+
+  .partners__logo {
+    width: auto;
+    max-width: 100%;
+  }
+
+  a:hover .partners__logo {
+    opacity: 0.8;
+    transition: opacity var(--transition-fast);
+  }
+
+  /* Сцена 1440 — координаты пикселей ложатся 1:1 */
+  .partners__pixels {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: var(--layout-width);
+    height: 100%;
+    margin-left: calc(var(--layout-width) / -2);
+    pointer-events: none;
+  }
+
+  .partners__pixels :global(span) {
+    position: absolute;
+    width: 22.857px;
+    height: 22.857px;
+  }
+</style>
