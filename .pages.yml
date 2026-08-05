@@ -97,6 +97,18 @@ content:
       - name: outcome
         label: Строка в нижней панели
         type: string
+      - name: secondaryAction
+        label: Вторая кнопка в нижней панели
+        type: object
+        description: Необязательная. Оставьте название пустым, если кнопка не нужна.
+        fields:
+          - name: label
+            label: Название кнопки
+            type: string
+          - name: href
+            label: Ссылка
+            type: string
+            description: Можно оставить пустым — тогда кнопка пока ничего не делает.
 
   - name: cases
     label: Кейсы и проекты

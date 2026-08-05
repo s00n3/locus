@@ -59,6 +59,13 @@ const tracks = defineCollection({
       .default([]),
     /** Строка в нижней панели попапа */
     outcome: z.string().default(''),
+    /** Необязательная вторая кнопка в нижней панели */
+    secondaryAction: z
+      .object({
+        label: z.string(),
+        href: z.string().optional(),
+      })
+      .optional(),
   }),
 });
 
