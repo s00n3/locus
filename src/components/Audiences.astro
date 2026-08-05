@@ -69,8 +69,11 @@ const pixels: [x: number, y: number, color: string][] = [
 
   /* --- Карточка аудитории --- */
 
+  /* min-height, а не height: описания правятся в админке, и жёсткая высота
+     выпускала бы длинный текст за границу карточки. Карточки в ряду
+     тянутся до самой высокой. */
   .audience {
-    height: 246px;
+    min-height: 246px;
     padding: 19px 24px 24px;
     background: rgba(217, 217, 217, 0.2);
     border: 1px solid var(--border-warm);
@@ -97,19 +100,21 @@ const pixels: [x: number, y: number, color: string][] = [
   /* min-height в две строки: заголовки разной длины, а описания под ними
      в макете начинаются на одной высоте */
   .audience__title {
-    min-height: 80px;
+    min-height: 75px;
     margin-top: 25px;
     font-weight: 300;
-    font-size: 32px;
+    font-size: 30px;
     line-height: 1.25;
     letter-spacing: normal;
   }
 
+  /* Интерлиньяж плотный — так в макете: у карточки с тремя строками
+     он задан явно как 20px при кегле 22.86 */
   .audience__points {
     margin-top: var(--space-1);
     font-weight: 300;
-    font-size: 24px;
-    line-height: 1.3;
+    font-size: 23px;
+    line-height: 1;
     letter-spacing: normal;
   }
 
