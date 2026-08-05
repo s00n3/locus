@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import TrackCard from './TrackCard.astro';
+import TrackModal from './TrackModal.astro';
 
 const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
 
@@ -39,7 +40,7 @@ const pixels: [x: number, y: number, color: string][] = [
       {
         tracks.map((track) => (
           <li>
-            <TrackCard {...track.data} />
+            <TrackCard id={track.id} {...track.data} />
           </li>
         ))
       }
@@ -50,7 +51,52 @@ const pixels: [x: number, y: number, color: string][] = [
       Подобрать индивидуальный план обучения
     </button>
   </div>
+
+  {tracks.map((track) => <TrackModal id={track.id} {...track.data} />)}
 </section>
+
+<script>
+  // Открытие и закрытие попапов треков. Нативный dialog берёт на себя
+  // фокус, Esc и подложку — остаётся связать карточку с окном и вернуть
+  // фокус на карточку после закрытия.
+  document.querySelectorAll<HTMLButtonElement>('[data-track-open]').forEach((trigger) => {
+    const dialog = document.getElementById(
+      `track-modal-${trigger.dataset.trackOpen}`,
+    ) as HTMLDialogElement | null;
+    if (!dialog) return;
+
+    // Прибираемся и по событию close, и в явных обработчиках. Событие
+    // покрывает закрытие по Esc, но полагаться только на него нельзя:
+    // если оно не придёт, страница останется без прокрутки.
+    const cleanup = () => {
+      document.body.style.overflow = '';
+      trigger.focus();
+    };
+
+    trigger.addEventListener('click', () => {
+      dialog.showModal();
+      // Пока окно открыто, страница под ним не должна прокручиваться
+      document.body.style.overflow = 'hidden';
+    });
+
+    dialog.addEventListener('close', cleanup);
+
+    dialog.querySelector('[data-close]')?.addEventListener('click', () => {
+      dialog.close();
+      cleanup();
+    });
+
+    // Клик мимо панели закрывает окно: у самого dialog нет отступов,
+    // поэтому попадание за пределы панели надёжно определяется рамкой
+    dialog.addEventListener('click', (event) => {
+      const panel = dialog.querySelector('.track-modal__panel');
+      if (!panel || !(event.target instanceof Node)) return;
+      if (panel.contains(event.target)) return;
+      dialog.close();
+      cleanup();
+    });
+  });
+</script>
 
 <style>
   /* Отрицательный отступ: в макете секция начинается на 859, а герой

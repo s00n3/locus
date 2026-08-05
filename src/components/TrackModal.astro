@@ -1,0 +1,675 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Stage {
+  command: string;
+  title: string;
+  description: string;
+  tag: string;
+  highlight: boolean;
+}
+
+interface Props {
+  id: string;
+  label: string;
+  title: string;
+  modalImage?: string;
+  modalImageAlt?: string;
+  about: string;
+  audience: string[];
+  skills: string[];
+  pipelineLead: string;
+  stages: Stage[];
+  outcome: string;
+}
+
+const {
+  id,
+  label,
+  title,
+  modalImage,
+  modalImageAlt = '',
+  about,
+  audience,
+  skills,
+  pipelineLead,
+  stages,
+  outcome,
+} = Astro.props;
+
+const uploads = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+const cover = modalImage ? uploads[modalImage]?.default : undefined;
+---
+
+<dialog class="track-modal" id={`track-modal-${id}`} aria-labelledby={`track-modal-${id}-title`}>
+  <article class="track-modal__panel">
+    <header class="track-modal__header">
+      <div class="track-modal__titles">
+        {label && <p class="track-modal__label">{label}</p>}
+        <h2 class="track-modal__title" id={`track-modal-${id}-title`}>{title}</h2>
+      </div>
+
+      <button class="track-modal__close" type="button" data-close aria-label="Закрыть">
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+
+    {
+      cover && (
+        <div class="track-modal__cover">
+          <Image src={cover} alt={modalImageAlt} widths={[960, 1920]} sizes="960px" loading="lazy" />
+        </div>
+      )
+    }
+
+    {
+      about && (
+        <section class="track-modal__about">
+          <h3 class="track-modal__about-label">О треке</h3>
+          <p class="track-modal__about-text">{about}</p>
+        </section>
+      )
+    }
+
+    <div class="track-modal__columns">
+      {
+        audience.length > 0 && (
+          <section class="track-modal__panel-card track-modal__audience">
+            <h3 class="track-modal__card-title">Для кого подойдёт</h3>
+            <ul class="track-modal__audience-list">
+              {audience.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        skills.length > 0 && (
+          <section class="track-modal__panel-card track-modal__skills">
+            <h3 class="track-modal__card-title">Навыки, которые получит студент</h3>
+            <ul class="track-modal__chips">
+              {skills.map((skill) => (
+                <li>{skill}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </div>
+
+    {
+      stages.length > 0 && (
+        <section class="track-modal__pipeline">
+          <header class="track-modal__pipeline-head">
+            <p class="track-modal__pipeline-eyebrow">&#123; participant.pipeline &#125;</p>
+            <h3 class="track-modal__pipeline-title">Как проходит участие</h3>
+            {pipelineLead && <p class="track-modal__pipeline-lead">{pipelineLead}</p>}
+          </header>
+
+          {/* Строка-«окно терминала»: три кружка, путь и индикатор */}
+          <p class="track-modal__status">
+            <span class="track-modal__dots" aria-hidden="true" />
+            <span class="track-modal__status-text">
+              participant.pipeline &nbsp;/&nbsp; {stages.length} stages &nbsp;/&nbsp; status: ready
+            </span>
+            <span class="track-modal__live">LIVE</span>
+          </p>
+
+          <ol class="track-modal__stages">
+            {stages.map((stage, index) => (
+              <li class:list={['track-modal__stage', { 'is-final': stage.highlight }]}>
+                <span class="track-modal__rail" aria-hidden="true">
+                  <span class="track-modal__num">{String(index + 1).padStart(2, '0')}</span>
+                </span>
+
+                <div class="track-modal__stage-card">
+                  <span class="track-modal__command">{stage.command}</span>
+                  <span class="track-modal__stage-copy">
+                    <span class="track-modal__stage-title">{stage.title}</span>
+                    <span class="track-modal__stage-text">{stage.description}</span>
+                  </span>
+                  <span class="track-modal__tag">{stage.tag}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    <footer class="track-modal__footer">
+      {outcome && <p class="track-modal__outcome">{outcome}</p>}
+      {/* Откроет форму заявки — попап появится на блоке 21 */}
+      <button class="track-modal__cta" type="button" data-modal="application">
+        Подать заявку
+        <svg viewBox="0 0 20 10" width="20" height="10" aria-hidden="true">
+          <path
+            d="M1 5 H17 M13 1 L18 5 L13 9"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </footer>
+  </article>
+</dialog>
+
+<style>
+  /* Нативный dialog: фокус запирается сам, Esc закрывает, остальное
+     содержимое страницы скрывается от скринридеров без ARIA-костылей */
+  .track-modal {
+    width: min(1128px, calc(100vw - 48px));
+    max-width: none;
+    max-height: calc(100vh - 48px);
+    padding: 0;
+    border: none;
+    background: none;
+    overflow: visible;
+    color: var(--text-primary);
+  }
+
+  .track-modal::backdrop {
+    background: rgba(3, 14, 19, 0.72);
+    backdrop-filter: blur(4px);
+  }
+
+  .track-modal__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-height: calc(100vh - 48px);
+    padding: 40px 40px 36px;
+    border: 1px solid rgba(57, 127, 145, 0.56);
+    border-radius: 30px;
+    background: #08242d;
+    box-shadow: 0 20px 44px rgba(0, 5, 8, 0.48);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Высота панели ограничена экраном, поэтому флекс по умолчанию сжимает
+     содержимое — обложка схлопывалась в полоску. Запрещаем сжатие:
+     что не влезло, уходит в прокрутку панели. */
+  .track-modal__panel > * {
+    flex: none;
+  }
+
+  /* --- Шапка --- */
+
+  .track-modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .track-modal__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .track-modal__label {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.1em;
+    color: #d06d49;
+  }
+
+  .track-modal__title {
+    font-weight: 600;
+    font-size: 31px;
+    line-height: 39px;
+    letter-spacing: normal;
+    color: var(--text-soft);
+    text-wrap: balance;
+  }
+
+  .track-modal__close {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(91, 194, 213, 0.5);
+    border-radius: 50%;
+    background: rgba(18, 59, 69, 0.9);
+    font-size: 25px;
+    line-height: 1;
+    color: #f5fbfc;
+    transition: background-color var(--transition-fast);
+  }
+
+  .track-modal__close:hover {
+    background: rgba(28, 94, 116, 0.9);
+  }
+
+  /* --- Обложка --- */
+
+  .track-modal__cover {
+    border: 1px solid rgba(77, 187, 208, 0.42);
+    border-radius: 22px;
+    overflow: hidden;
+  }
+
+  .track-modal__cover :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  /* --- О треке --- */
+
+  .track-modal__about {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 20px;
+    border: 1px solid rgba(83, 183, 201, 0.28);
+    border-radius: var(--radius-card);
+    background: rgba(16, 52, 62, 0.78);
+  }
+
+  .track-modal__about-label {
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e1815c;
+  }
+
+  .track-modal__about-text {
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: normal;
+    color: #d6e8eb;
+  }
+
+  /* --- Аудитория и навыки --- */
+
+  .track-modal__columns {
+    display: flex;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+
+  .track-modal__panel-card {
+    padding: 18px;
+    border: 1px solid rgba(76, 180, 200, 0.25);
+    border-radius: var(--radius-card);
+    background: rgba(12, 48, 58, 0.84);
+  }
+
+  .track-modal__audience {
+    flex: none;
+    width: 360px;
+  }
+
+  .track-modal__skills {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .track-modal__card-title {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-soft);
+  }
+
+  .track-modal__audience-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  /* Точку рисуем сами: в макете это отдельный вектор 7×7 */
+  .track-modal__audience-list li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: normal;
+    color: #cde1e5;
+  }
+
+  .track-modal__audience-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4.5px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-terracotta);
+  }
+
+  .track-modal__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-top: 14px;
+  }
+
+  .track-modal__chips li {
+    padding: 8px 11px;
+    border: 1px solid rgba(89, 194, 212, 0.45);
+    border-radius: var(--radius-card);
+    background: rgba(18, 63, 74, 0.9);
+    font-weight: 500;
+    font-size: 10px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-soft);
+  }
+
+  /* --- Как проходит участие --- */
+
+  .track-modal__pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 21.333px;
+    padding: 42.667px 26.667px;
+  }
+
+  .track-modal__pipeline-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6.667px;
+  }
+
+  .track-modal__pipeline-eyebrow {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 10.667px;
+    line-height: 14.667px;
+    letter-spacing: 0.07em;
+    color: var(--accent-terracotta);
+  }
+
+  .track-modal__pipeline-title {
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 38.667px;
+    letter-spacing: normal;
+  }
+
+  .track-modal__pipeline-lead {
+    max-width: 693.333px;
+    font-weight: 300;
+    font-size: 13.333px;
+    line-height: 18.667px;
+    letter-spacing: normal;
+    color: var(--text-muted);
+  }
+
+  .track-modal__status {
+    display: flex;
+    align-items: center;
+    gap: 10.667px;
+    padding: 10.667px 13.333px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10.667px;
+    background: rgba(7, 31, 41, 0.86);
+  }
+
+  /* Три кружка «окна» — тоже рисуем, а не тянем картинкой */
+  .track-modal__dots {
+    display: flex;
+    flex: none;
+    gap: 5px;
+  }
+
+  .track-modal__dots::before,
+  .track-modal__dots::after {
+    content: '';
+    width: 6.667px;
+    height: 6.667px;
+    border-radius: 50%;
+    background: #f0b429;
+    box-shadow: -11.667px 0 0 #e05252;
+  }
+
+  .track-modal__dots::after {
+    background: #40eb94;
+    box-shadow: none;
+  }
+
+  .track-modal__status-text {
+    flex: 1;
+    min-width: 0;
+    margin-left: 11.667px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 10px;
+    line-height: 13.333px;
+    letter-spacing: normal;
+  }
+
+  .track-modal__live {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 8.667px;
+    line-height: 12px;
+    letter-spacing: normal;
+    color: #40eb94;
+  }
+
+  .track-modal__live::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* --- Этапы --- */
+
+  .track-modal__stages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .track-modal__stage {
+    display: flex;
+    align-items: center;
+    gap: 10.667px;
+  }
+
+  /* Направляющая: кружок с номером и вертикальные отрезки сверху и снизу.
+     Отрезки рисуем псевдоэлементами, у первого и последнего — по одному. */
+  .track-modal__rail {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 37.333px;
+    align-self: stretch;
+    min-height: 61.333px;
+  }
+
+  .track-modal__rail::before,
+  .track-modal__rail::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 1.333px;
+    height: 21.333px;
+    background: rgba(77, 219, 235, 0.38);
+    transform: translateX(-50%);
+  }
+
+  .track-modal__rail::before {
+    top: 0;
+  }
+
+  .track-modal__rail::after {
+    bottom: 0;
+  }
+
+  .track-modal__stage:first-child .track-modal__rail::before,
+  .track-modal__stage:last-child .track-modal__rail::after {
+    content: none;
+  }
+
+  .track-modal__num {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 26.667px;
+    height: 26.667px;
+    border: 1px solid rgba(77, 219, 235, 0.55);
+    border-radius: 50%;
+    background: rgba(7, 31, 41, 0.9);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 8.667px;
+    line-height: 12px;
+    letter-spacing: normal;
+  }
+
+  .track-modal__stage.is-final .track-modal__num {
+    border-color: rgba(195, 106, 73, 0.9);
+  }
+
+  .track-modal__stage-card {
+    display: flex;
+    align-items: center;
+    gap: 13.333px;
+    flex: 1;
+    min-width: 0;
+    padding: 12px 13.333px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .track-modal__stage.is-final .track-modal__stage-card {
+    border-width: 1.333px;
+    border-color: rgba(195, 106, 73, 0.9);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .track-modal__command {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 109.333px;
+    height: 24px;
+    border: 1px solid rgba(77, 219, 235, 0.25);
+    border-radius: 6.667px;
+    background: rgba(7, 31, 41, 0.88);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 9.333px;
+    line-height: 12px;
+    letter-spacing: normal;
+    color: var(--brand-cyan);
+  }
+
+  .track-modal__stage.is-final .track-modal__command {
+    color: var(--accent-terracotta);
+  }
+
+  .track-modal__stage-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2.667px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .track-modal__stage-title {
+    font-weight: 500;
+    font-size: 14.667px;
+    line-height: 18.667px;
+    letter-spacing: normal;
+  }
+
+  .track-modal__stage-text {
+    font-weight: 300;
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: normal;
+    color: var(--text-muted);
+  }
+
+  .track-modal__tag {
+    flex: none;
+    padding: 5.333px 8px;
+    border-radius: var(--radius-pill);
+    background: rgba(28, 94, 116, 0.42);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 7.333px;
+    line-height: 9.333px;
+    letter-spacing: 0.07em;
+  }
+
+  .track-modal__stage.is-final .track-modal__tag {
+    background: var(--accent-terracotta);
+  }
+
+  /* --- Нижняя панель --- */
+
+  .track-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 10px 12px 10px 18px;
+    border: 1px solid rgba(76, 180, 200, 0.28);
+    border-radius: var(--radius-card);
+    background: rgba(12, 48, 58, 0.9);
+  }
+
+  .track-modal__outcome {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #d7e9ec;
+  }
+
+  .track-modal__cta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex: none;
+    padding: 12px 18px;
+    border: 1px solid rgba(242, 161, 125, 0.72);
+    border-radius: 12px;
+    background: #d06d49;
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .track-modal__cta:hover {
+    background: var(--accent-terracotta-light);
+  }
+</style>

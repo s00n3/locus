@@ -30,8 +30,37 @@ const tracks = defineCollection({
     /** Путь от корня сайта, например /uploads/track-ai.jpg */
     image: z.string().optional(),
     imageAlt: z.string().default(''),
-    /** Куда ведёт карточка: виджет трека появится на блоке 23 */
-    href: z.string().optional(),
+
+    /* --- Попап трека: раскрывается по клику на карточку --- */
+
+    /** Надпись над заголовком в попапе: «ТРЕК 02» */
+    label: z.string().default(''),
+    modalImage: z.string().optional(),
+    modalImageAlt: z.string().default(''),
+    /** Абзац в блоке «О треке» */
+    about: z.string().default(''),
+    /** Пункты «Для кого подойдёт» */
+    audience: z.array(z.string()).default([]),
+    /** Чипы «Навыки, которые получит студент» */
+    skills: z.array(z.string()).default([]),
+    /** Подводка под заголовком «Как проходит участие» */
+    pipelineLead: z.string().default(''),
+    /** Этапы участия; последний обычно выделен акцентом */
+    stages: z
+      .array(
+        z.object({
+          command: z.string(),
+          title: z.string(),
+          description: z.string(),
+          /** Метка справа: INPUT, FILTER, OUTPUT */
+          tag: z.string(),
+          /** Выделить акцентом — в макете так помечен финальный этап */
+          highlight: z.boolean().default(false),
+        }),
+      )
+      .default([]),
+    /** Строка в нижней панели попапа */
+    outcome: z.string().default(''),
   }),
 });
 

@@ -48,10 +48,60 @@ content:
         label: Описание изображения
         type: string
         description: Для незрячих и на случай, если картинка не загрузится.
-      - name: href
-        label: Ссылка
+      - name: label
+        label: Надпись над заголовком
         type: string
-        description: Куда ведёт карточка. Пока можно оставить пустым.
+        description: Показывается в попапе — например «ТРЕК 02».
+      - name: modalImage
+        label: Изображение в попапе
+        type: image
+        description: Широкое, 16:9.
+      - name: modalImageAlt
+        label: Описание изображения в попапе
+        type: string
+      - name: about
+        label: О треке
+        type: text
+      - name: audience
+        label: Для кого подойдёт
+        type: string
+        list: true
+        description: По одному пункту в строке.
+      - name: skills
+        label: Навыки студента
+        type: string
+        list: true
+        description: Показываются чипами.
+      - name: pipelineLead
+        label: Подводка к этапам
+        type: text
+      - name: stages
+        label: Этапы участия
+        type: object
+        list: true
+        fields:
+          - name: command
+            label: Команда
+            type: string
+            description: 'Например /apply — показывается моноширинным.'
+          - name: title
+            label: Название этапа
+            type: string
+          - name: description
+            label: Описание
+            type: text
+          - name: tag
+            label: Метка справа
+            type: string
+            description: 'Коротко и заглавными: INPUT, FILTER, OUTPUT.'
+          - name: highlight
+            label: Выделить акцентом
+            type: boolean
+            description: Обычно выделен последний этап.
+            default: false
+      - name: outcome
+        label: Строка в нижней панели
+        type: string
 
   - name: cases
     label: Кейсы и проекты

@@ -3,14 +3,15 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
+  /** Идентификатор трека — связывает карточку с её попапом */
+  id: string;
   title: string;
   tags: string[];
   image?: string;
   imageAlt?: string;
-  href?: string;
 }
 
-const { title, tags, image, imageAlt = '', href } = Astro.props;
+const { id, title, tags, image, imageAlt = '' } = Astro.props;
 
 // Картинки приходят из CMS путями вида /src/assets/uploads/foo.webp.
 // Astro не умеет импортировать по переменной, поэтому собираем карту заранее —
@@ -20,11 +21,10 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 const resolved = image ? uploads[image]?.default : undefined;
-
-const Tag = href ? 'a' : 'div';
 ---
 
-<Tag class="track" href={href}>
+{/* Кнопка, а не ссылка: карточка раскрывает попап, а не ведёт на страницу */}
+<button class="track" type="button" data-track-open={id} aria-haspopup="dialog">
   {
     resolved && (
       <Image
@@ -64,13 +64,16 @@ const Tag = href ? 'a' : 'div';
       />
     </svg>
   </div>
-</Tag>
+</button>
 
 <style>
   .track {
     position: relative;
     display: block;
+    width: 100%;
     height: 504px;
+    text-align: left;
+    cursor: pointer;
     border-radius: var(--radius-card);
     overflow: hidden;
     color: var(--text-primary);
@@ -131,7 +134,12 @@ const Tag = href ? 'a' : 'div';
     transition: transform var(--transition-base);
   }
 
-  a.track:hover .track__arrow {
+  .track:hover .track__arrow {
     transform: translateX(8px);
+  }
+
+  .track:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
   }
 </style>
