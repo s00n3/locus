@@ -3,9 +3,9 @@
 // В макете стоит последней в «Блок6», уже после паутины компетенций,
 // поэтому и в вёрстке идёт отдельной полосой за ней.
 //
-// Появляется, только когда пройдены все три шага конструктора. Иначе
+// Появляется вместе с паутиной компетенций и исчезает вместе с ней. Иначе
 // она вставала сразу под CTA «Подобрать индивидуальный план обучения»
-// и на пустой странице получалось две кнопки подряд.
+// и на нетронутой странице читались две кнопки подряд.
 ---
 
 <section class="plan-cta" data-reveal hidden>
@@ -17,27 +17,28 @@
 </section>
 
 <script>
-  import { readConstructorAnswers } from '../lib/constructor-answers';
-
-  // Кнопка появляется только после всех трёх шагов: направления, область
-  // и уровень опыта. До этого она стояла вплотную под CTA уровней опыта,
-  // и на нетронутой странице читались две кнопки подряд.
+  // Кнопка повторяет видимость паутины компетенций. Именно повторяет,
+  // а не пересчитывает её условие заново: иначе правило показа жило бы
+  // в двух местах и разъезжалось при любой правке отбора профессий.
   const section = document.querySelector<HTMLElement>('.plan-cta');
+  const web = document.querySelector<HTMLElement>('.web');
 
   if (section) {
-    const sync = () => {
-      const { directions, area, level } = readConstructorAnswers();
-      section.hidden = directions.length === 0 || !area || !level;
-    };
+    if (!web) {
+      // Паутины на странице нет — гейту не за чем следить, кнопка нужна
+      section.hidden = false;
+    } else {
+      const sync = () => {
+        section.hidden = web.hidden;
+      };
 
-    // Шаги живут в других блоках, поэтому слушаем документ: связывать
-    // компоненты между собой ради этого не нужно
-    document.addEventListener('click', (event) => {
-      if (!(event.target instanceof Element)) return;
-      if (event.target.closest('[data-direction], [data-area], [data-level]')) sync();
-    });
+      new MutationObserver(sync).observe(web, {
+        attributes: true,
+        attributeFilter: ['hidden'],
+      });
 
-    sync();
+      sync();
+    }
   }
 </script>
 
