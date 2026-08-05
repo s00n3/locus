@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import CaseCard from './CaseCard.astro';
+
+const cases = (await getCollection('cases')).sort((a, b) => a.data.order - b.data.order);
+
+// Декоративные пиксели над средней карточкой — нода «Пиксели 9» (9:66)
+const T = 'var(--surface-panel)';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+const pixels: [x: number, y: number, color: string][] = [
+  [788.57, 161.29, T], [788.57, 47, TH], [765.71, 138.43, OH],
+  [788.57, 115.57, TH], [811.43, 115.57, TH], [765.71, 115.57, T],
+  [834.29, 92.71, OH], [720, 161.29, OH], [811.43, 69.86, T],
+  [788.57, 92.71, OH], [720, 115.57, T], [811.43, 92.71, TH],
+  [742.86, 115.57, TH],
+];
+---
+
+<section class="cases" aria-labelledby="cases-title">
+  <div class="cases__pixels" aria-hidden="true">
+    {pixels.map(([x, y, color]) => <span style={`left:${x}px;top:${y}px;background:${color}`} />)}
+  </div>
+
+  <div class="container">
+    {/* Фигурные скобки набраны моноширинным — так в макете */}
+    <h2 class="cases__title" id="cases-title">
+      <span class="cases__brace">&#123;</span>Кейсы и проекты<span class="cases__brace">&#125;</span>
+    </h2>
+
+    <ul class="cases__grid">
+      {
+        cases.map((item) => (
+          <li>
+            <CaseCard {...item.data} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cases {
+    position: relative;
+    overflow: hidden;
+    padding-block: 64px 65px;
+  }
+
+  .cases__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: normal;
+  }
+
+  .cases__brace {
+    font-family: var(--font-mono);
+  }
+
+  .cases__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 21.4px;
+  }
+
+  .cases__grid > li {
+    display: flex;
+  }
+
+  .cases__grid > li > :global(*) {
+    flex: 1;
+  }
+
+  /* Сцена 1440 — координаты пикселей ложатся 1:1 */
+  .cases__pixels {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: var(--layout-width);
+    height: 100%;
+    margin-left: calc(var(--layout-width) / -2);
+    pointer-events: none;
+  }
+
+  .cases__pixels :global(span) {
+    position: absolute;
+    width: 22.857px;
+    height: 22.857px;
+  }
+</style>

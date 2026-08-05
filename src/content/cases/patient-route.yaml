@@ -1,0 +1,8 @@
+order: 2
+tag: SERVICE
+title: Маршрут пациента
+image: /src/assets/uploads/case-service.webp
+imageAlt: Экраны мобильного приложения с медицинскими показателями
+problem: Упростить навигацию между этапами лечения.
+solution: Сервис собирает персональный путь и напоминания.
+result: Кликабельный MVP и метрики.

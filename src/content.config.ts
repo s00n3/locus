@@ -35,6 +35,24 @@ const tracks = defineCollection({
   }),
 });
 
+/** Блок 5 главной — кейсы и проекты (ТЗ, раздел 4.1) */
+const cases = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/cases' }),
+  schema: z.object({
+    /** Порядок в ряду: меньше — левее */
+    order: z.number().default(0),
+    /** Метка направления поверх фото: AI, SERVICE, DATA */
+    tag: z.string(),
+    title: z.string(),
+    /** Путь вида /src/assets/uploads/foo.webp */
+    image: z.string().optional(),
+    imageAlt: z.string().default(''),
+    problem: z.string(),
+    solution: z.string(),
+    result: z.string(),
+  }),
+});
+
 /** Блок 6 главной — кому подойдёт (ТЗ, раздел 4.1) */
 const audiences = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/audiences' }),
@@ -49,4 +67,4 @@ const audiences = defineCollection({
   }),
 });
 
-export const collections = { tracks, audiences };
+export const collections = { tracks, cases, audiences };

@@ -53,6 +53,51 @@ content:
         type: string
         description: Куда ведёт карточка. Пока можно оставить пустым.
 
+  - name: cases
+    label: Кейсы и проекты
+    description: Карточки кейсов на главной.
+    type: collection
+    path: src/content/cases
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, tag, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: tag
+        label: Направление
+        type: string
+        required: true
+        description: Короткая метка поверх фото — AI, SERVICE, DATA.
+      - name: title
+        label: Название кейса
+        type: string
+        required: true
+      - name: image
+        label: Изображение
+        type: image
+      - name: imageAlt
+        label: Описание изображения
+        type: string
+        description: Для незрячих и на случай, если картинка не загрузится.
+      - name: problem
+        label: Проблема
+        type: text
+        required: true
+      - name: solution
+        label: Решение
+        type: text
+        required: true
+      - name: result
+        label: Результат
+        type: text
+        required: true
+
   - name: audiences
     label: Кому подойдёт
     description: Карточки аудиторий на главной.
