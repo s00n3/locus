@@ -122,4 +122,17 @@ const partners = defineCollection({
   }),
 });
 
-export const collections = { tracks, cases, audiences, benefits, mentors, partners };
+/** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
+const faq = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
+  schema: z.object({
+    /** Порядок в списке */
+    order: z.number().default(0),
+    question: z.string(),
+    answer: z.string(),
+    /** Раскрыт ли пункт при загрузке страницы. В макете раскрыт первый */
+    open: z.boolean().default(false),
+  }),
+});
+
+export const collections = { tracks, cases, audiences, benefits, mentors, partners, faq };

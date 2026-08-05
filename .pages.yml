@@ -259,6 +259,36 @@ content:
         type: string
         description: Можно оставить пустым — тогда логотип не будет ссылкой.
 
+  - name: faq
+    label: Вопросы и ответы
+    description: Аккордеон на главной.
+    type: collection
+    path: src/content/faq
+    filename: '{fields.question}.yaml'
+    format: yaml
+    view:
+      fields: [question, order]
+      sort: [order, question]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — выше.
+        default: 1
+      - name: question
+        label: Вопрос
+        type: string
+        required: true
+      - name: answer
+        label: Ответ
+        type: text
+        required: true
+      - name: open
+        label: Раскрыт при загрузке
+        type: boolean
+        description: Обычно раскрыт только первый вопрос.
+        default: false
+
 settings:
   content:
     merge: true
