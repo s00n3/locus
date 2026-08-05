@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import TrackModal from './TrackModal.astro';
+
+// Попапы треков и их открытие. Вынесены из блока «Образовательные треки»:
+// открывать их умеет не только карточка на главной, но и кнопка «Подробнее
+// о треке» в результате подбора на «Проектах».
+//
+// Подключать на каждой странице, где есть кнопки [data-track-open].
+
+const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
+---
+
+{tracks.map((track) => <TrackModal id={track.id} {...track.data} />)}
+
+<script>
+  import { lockScroll, unlockScroll } from '../lib/scroll-lock';
+
+  // Нативный dialog берёт на себя фокус, Esc и подложку — остаётся связать
+  // кнопку с окном и вернуть фокус после закрытия.
+  document.querySelectorAll<HTMLElement>('[data-track-open]').forEach((trigger) => {
+    const dialog = document.getElementById(
+      `track-modal-${trigger.dataset.trackOpen}`,
+    ) as HTMLDialogElement | null;
+    if (!dialog) return;
+
+    // Прибираемся и по событию close, и в явных обработчиках. Событие
+    // покрывает закрытие по Esc, но полагаться только на него нельзя:
+    // если оно не придёт, страница останется без прокрутки.
+    const cleanup = () => {
+      unlockScroll(dialog);
+      // Из этого окна можно уйти в форму заявки — тогда оно закрывается,
+      // а фокус уже внутри формы, и возвращать его на кнопку нельзя
+      if (!document.querySelector('dialog[open]')) trigger.focus();
+    };
+
+    trigger.addEventListener('click', () => {
+      dialog.showModal();
+      lockScroll(dialog);
+    });
+
+    dialog.addEventListener('close', cleanup);
+
+    dialog.querySelector('[data-close]')?.addEventListener('click', () => {
+      dialog.close();
+      cleanup();
+    });
+
+    // Клик мимо панели закрывает окно: у самого dialog нет отступов,
+    // поэтому попадание за пределы панели надёжно определяется рамкой
+    dialog.addEventListener('click', (event) => {
+      const panel = dialog.querySelector('.track-modal__panel');
+      if (!panel || !(event.target instanceof Node)) return;
+      if (panel.contains(event.target)) return;
+      dialog.close();
+      cleanup();
+    });
+  });
+</script>

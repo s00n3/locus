@@ -486,6 +486,49 @@ content:
         label: Описание иллюстрации
         type: string
 
+  - name: professions
+    label: Профессии
+    description: >-
+      Результат подбора на «Проектах» и будущая паутина компетенций. Это не
+      роли в команде (координатор, техписатель, менеджер), а профессии,
+      к которым ведут направления.
+    type: collection
+    path: src/content/professions
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: title
+        label: Название профессии
+        type: string
+        required: true
+      - name: directions
+        label: Направления
+        type: string
+        list: true
+        description: >-
+          Названия направлений слово в слово. Профессия покажется, если выбрано
+          хотя бы одно из них. Сейчас связки расставлены по смыслу и ждут
+          подтверждения.
+      - name: competencies
+        label: Компетенции
+        type: string
+        list: true
+        description: Понадобятся для паутины компетенций. Пока не используются.
+      - name: image
+        label: Фотография
+        type: image
+      - name: imageAlt
+        label: Описание фотографии
+        type: string
+
   - name: faq
     label: Вопросы и ответы
     description: Аккордеон на главной.

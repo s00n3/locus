@@ -1,0 +1,9 @@
+order: 1
+title: ML-разработчик в medtech
+# Связка черновая: по смыслу названия. Ждёт подтверждения заказчика.
+directions:
+  - Искусственный интеллект в медицине
+  - MedTech
+competencies: []
+image: /src/assets/uploads/profession-ml.jpg
+imageAlt: Разработчик за экранами с медицинскими данными

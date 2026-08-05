@@ -1,0 +1,462 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Блок «{ Тебе подойдут }» — нода Figma «Блок6» (9:1753). Результат подбора:
+// рекомендованный трек, подходящие проекты и профессии.
+//
+// Всё содержимое рендерится сразу, а показом управляет скрипт по выбору
+// конструктора (см. src/lib/constructor-answers.ts). Так сделано намеренно:
+// данных мало, вариантов немного, и статическая разметка с фильтром по
+// атрибутам не требует ни рантайма, ни запросов. Когда заказчик заведёт
+// управление сборкой в админке, меняется правило отбора, а не вёрстка.
+//
+// Замыкающая кнопка блока в макете стоит ПОСЛЕ паутины компетенций,
+// поэтому придёт вместе с ней.
+
+const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
+const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const professions = (await getCollection('professions')).sort((a, b) => a.data.order - b.data.order);
+
+const uploads = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+const cover = (path?: string) => (path ? uploads[path]?.default : undefined);
+
+// Направление → трек. Скрипту нужна эта таблица, чтобы посчитать,
+// какой трек набрал больше выбранных направлений.
+const directionTrack = Object.fromEntries(
+  directions.filter((d) => d.data.track).map((d) => [d.data.title, d.data.track]),
+);
+---
+
+<section class="result" data-reveal aria-labelledby="result-title" hidden>
+  <div class="result__inner">
+    <h2 class="result__title" id="result-title">
+      <span class="result__brace">&#123;</span> Тебе подойдут <span class="result__brace">&#125;</span>
+    </h2>
+
+    {/* --- Трек --- */}
+    <div class="result__part" data-part="track" hidden>
+      <p class="result__label">Трек</p>
+
+    {
+      tracks.map((track) => (
+        <article class="wide" data-track={track.id} hidden>
+          {
+            cover(track.data.modalImage) && (
+              <span class="wide__media">
+                <Image
+                  src={cover(track.data.modalImage)!}
+                  alt={track.data.modalImageAlt}
+                  widths={[720, 1440]}
+                  sizes="1360px"
+                  loading="lazy"
+                />
+              </span>
+            )
+          }
+
+          <span class="wide__body">
+            <span class="wide__title">{track.data.title}</span>
+
+            <span class="wide__row">
+              {/* Первые три навыка: в панель больше одной строки чипов
+                  не помещается, а в макете их и вовсе два */}
+              <span class="wide__chips">
+                {track.data.skills.slice(0, 3).map((skill) => (
+                  <span class="chip">{skill}</span>
+                ))}
+              </span>
+
+              {/* Открывает попап этого трека — тот же, что карточки на главной */}
+              <button class="chip chip--action" type="button" data-track-open={track.id}>
+                Подробнее о треке
+              </button>
+            </span>
+          </span>
+        </article>
+      ))
+    }
+    </div>
+
+    {/* --- Проекты --- */}
+    <div class="result__part" data-part="projects" hidden>
+      <p class="result__label">Проекты</p>
+
+    <ul class="result__grid" data-projects>
+      {
+        projects.map((project) => (
+          <li class="card" data-direction={project.data.direction} hidden>
+            <article class="card__inner">
+              {
+                cover(project.data.image) && (
+                  <span class="card__media">
+                    <Image
+                      src={cover(project.data.image)!}
+                      alt={project.data.imageAlt}
+                      widths={[440, 880]}
+                      sizes="440px"
+                      loading="lazy"
+                    />
+                  </span>
+                )
+              }
+
+              <span class="card__body">
+                <span class="card__title">{project.data.title}</span>
+                {
+                  project.data.skills.length > 0 && (
+                    <span class="card__chips">
+                      {project.data.skills.map((skill) => (
+                        <span class="chip">{skill}</span>
+                      ))}
+                    </span>
+                  )
+                }
+              </span>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+    </div>
+
+    {/* --- Профессии --- */}
+    <div class="result__part" data-part="professions" hidden>
+      <p class="result__label">Профессии</p>
+
+    <ul class="result__pair" data-professions>
+      {
+        professions.map((profession) => (
+          <li class="wide wide--profession" data-directions={profession.data.directions.join('|')} hidden>
+            {
+              cover(profession.data.image) && (
+                <span class="wide__media">
+                  <Image
+                    src={cover(profession.data.image)!}
+                    alt={profession.data.imageAlt}
+                    widths={[654, 1308]}
+                    sizes="654px"
+                    loading="lazy"
+                  />
+                </span>
+              )
+            }
+
+            <span class="wide__body wide__body--profession">
+              <span class="wide__title">{profession.title ?? profession.data.title}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ directionTrack }}>
+  // Пересборка результата по выбору конструктора. Всё уже в разметке,
+  // скрипт только решает, что показать.
+  const section = document.querySelector('.result');
+
+  if (section) {
+    const trackCards = [...section.querySelectorAll('[data-track]')];
+    const projectCards = [...section.querySelectorAll('[data-projects] > li')];
+    const professionCards = [...section.querySelectorAll('[data-professions] > li')];
+    const parts = {
+      track: section.querySelector('[data-part="track"]'),
+      projects: section.querySelector('[data-part="projects"]'),
+      professions: section.querySelector('[data-part="professions"]'),
+    };
+
+    // Выбранные направления читаем у чипов первого шага. Тот же контракт,
+    // что у формы индивидуального плана: атрибут плюс aria-pressed.
+    const selected = () =>
+      [...document.querySelectorAll('button[data-direction]')]
+        .filter((el) => el.getAttribute('aria-pressed') === 'true')
+        .map((el) => el.dataset.direction);
+
+    const apply = () => {
+      const chosen = selected();
+
+      // Трек: у какого больше выбранных направлений. При равенстве —
+      // первый по порядку, потому что перебираем карточки в их порядке.
+      const score = {};
+      for (const name of chosen) {
+        const id = directionTrack[name];
+        if (id) score[id] = (score[id] ?? 0) + 1;
+      }
+      const best = Math.max(0, ...Object.values(score));
+      let shown = false;
+      for (const card of trackCards) {
+        const hit = !shown && best > 0 && score[card.dataset.track] === best;
+        card.hidden = !hit;
+        if (hit) shown = true;
+      }
+
+      for (const card of projectCards) {
+        card.hidden = !chosen.includes(card.dataset.direction);
+      }
+
+      for (const card of professionCards) {
+        const own = (card.dataset.directions || '').split('|').filter(Boolean);
+        card.hidden = !own.some((name) => chosen.includes(name));
+      }
+
+      // Часть без содержимого прячем вместе с её заголовком: пустая
+      // «Проекты» под подписью выглядела бы сломанной. Секцию целиком —
+      // когда не осталось ни одной части.
+      const visible = (cards) => cards.some((card) => !card.hidden);
+      parts.track.hidden = !visible(trackCards);
+      parts.projects.hidden = !visible(projectCards);
+      parts.professions.hidden = !visible(professionCards);
+
+      section.hidden = parts.track.hidden && parts.projects.hidden && parts.professions.hidden;
+    };
+
+    // Чипы живут в другом блоке, поэтому слушаем клики по документу:
+    // так не нужно связывать компоненты между собой.
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('button[data-direction]')) {
+        apply();
+      }
+    });
+
+    apply();
+  }
+</script>
+
+<style>
+  .result {
+    padding-block: 64px 40px;
+  }
+
+  .result[hidden] {
+    display: none;
+  }
+
+  .result__inner {
+    width: var(--layout-width);
+    max-width: 100%;
+    padding-inline: var(--container-pad);
+    margin-inline: auto;
+  }
+
+  .result__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-align: center;
+  }
+
+  .result__brace {
+    font-family: var(--font-mono);
+  }
+
+  /* Подпись части стоит вплотную к предыдущему блоку: в макете «Трек»
+     начинается на 125, а заголовок раздела заканчивается на 126 */
+  .result__part:first-of-type {
+    margin-top: 3px;
+  }
+
+  .result__part + .result__part {
+    margin-top: 36px;
+  }
+
+  .result__label {
+    margin-bottom: 3px;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-primary);
+  }
+
+  .result__part[hidden] {
+    display: none;
+  }
+
+  /* --- Широкая карточка: трек и профессия --- */
+
+  /* Кадр выше видимой части: низ уходит под полупрозрачную панель
+     и просвечивает сквозь неё — тот же приём, что на карточках шага 2 */
+  .wide {
+    position: relative;
+    display: block;
+    border-radius: 40px;
+    background: #020d20;
+    overflow: hidden;
+  }
+
+  .wide[hidden] {
+    display: none;
+  }
+
+  .wide__media {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+  .wide__media :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .wide__body {
+    position: relative;
+    display: block;
+    margin-top: 431px;
+    padding: 16px 29px 6px;
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+    background: rgba(28, 94, 116, 0.2);
+  }
+
+  .wide__title {
+    display: block;
+    font-size: 32px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-primary);
+  }
+
+  .wide__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: 43px;
+  }
+
+  .wide__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Профессии ниже и без чипов: панель тоньше, кадр — крупнее */
+  .wide--profession {
+    min-height: 455px;
+  }
+
+  .wide__body--profession {
+    margin-top: 292px;
+    padding-block: 27px 33px;
+    padding-inline: 43px;
+  }
+
+  /* --- Чипы --- */
+
+  .chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 18px;
+    border: 1px solid var(--text-primary);
+    border-radius: 8px;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: normal;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .chip--action {
+    flex: none;
+    background: rgba(255, 255, 255, 0.19);
+    transition: background-color var(--transition-fast);
+  }
+
+  .chip--action:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* --- Сетка проектов --- */
+
+  /* Ширина от колонки, а не числом: при жёстких значениях третья карточка
+     выбивалась на новый ряд от любого округления */
+  .result__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 16px;
+  }
+
+  .result__grid > li {
+    display: flex;
+    flex: 0 0 calc((100% - 2 * 16px) / 3);
+    max-width: 100%;
+  }
+
+  .result__grid > li[hidden] {
+    display: none;
+  }
+
+  .result__pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 55px;
+  }
+
+  .result__pair > li {
+    flex: 0 0 calc((100% - 55px) / 2);
+    max-width: 100%;
+  }
+
+  .card__inner {
+    position: relative;
+    display: block;
+    height: 100%;
+    min-height: 312px;
+    border-radius: var(--radius-block);
+    background: #020d20;
+    overflow: hidden;
+  }
+
+  .card__media {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 307px;
+  }
+
+  .card__media :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 153px;
+    padding: 16px 29px 16px;
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+    background: rgba(28, 94, 116, 0.2);
+  }
+
+  .card__title {
+    font-size: 32px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-primary);
+  }
+
+  .card__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>

@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import TrackCard from './TrackCard.astro';
-import TrackModal from './TrackModal.astro';
+import TrackModals from './TrackModals.astro';
 
 const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
 
@@ -52,55 +52,10 @@ const pixels: [x: number, y: number, color: string][] = [
     </button>
   </div>
 
-  {tracks.map((track) => <TrackModal id={track.id} {...track.data} />)}
+  {/* Сами окна и их открытие живут отдельным компонентом: те же попапы
+      открывает кнопка «Подробнее о треке» в результате подбора */}
+  <TrackModals />
 </section>
-
-<script>
-  import { lockScroll, unlockScroll } from '../lib/scroll-lock';
-
-  // Открытие и закрытие попапов треков. Нативный dialog берёт на себя
-  // фокус, Esc и подложку — остаётся связать карточку с окном и вернуть
-  // фокус на карточку после закрытия.
-  document.querySelectorAll<HTMLButtonElement>('[data-track-open]').forEach((trigger) => {
-    const dialog = document.getElementById(
-      `track-modal-${trigger.dataset.trackOpen}`,
-    ) as HTMLDialogElement | null;
-    if (!dialog) return;
-
-    // Прибираемся и по событию close, и в явных обработчиках. Событие
-    // покрывает закрытие по Esc, но полагаться только на него нельзя:
-    // если оно не придёт, страница останется без прокрутки.
-    const cleanup = () => {
-      unlockScroll(dialog);
-      // Из этого окна можно уйти в форму заявки — тогда оно закрывается,
-      // а фокус уже внутри формы, и возвращать его на карточку нельзя
-      if (!document.querySelector('dialog[open]')) trigger.focus();
-    };
-
-    trigger.addEventListener('click', () => {
-      dialog.showModal();
-      // Пока окно открыто, страница под ним не должна прокручиваться
-      lockScroll(dialog);
-    });
-
-    dialog.addEventListener('close', cleanup);
-
-    dialog.querySelector('[data-close]')?.addEventListener('click', () => {
-      dialog.close();
-      cleanup();
-    });
-
-    // Клик мимо панели закрывает окно: у самого dialog нет отступов,
-    // поэтому попадание за пределы панели надёжно определяется рамкой
-    dialog.addEventListener('click', (event) => {
-      const panel = dialog.querySelector('.track-modal__panel');
-      if (!panel || !(event.target instanceof Node)) return;
-      if (panel.contains(event.target)) return;
-      dialog.close();
-      cleanup();
-    });
-  });
-</script>
 
 <style>
   /* Отрицательный отступ: в макете секция начинается на 859, а герой

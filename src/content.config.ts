@@ -207,6 +207,9 @@ const projects = defineCollection({
     type: z.string().default(''),
     /** Навыки-теги проекта. Пока пусто, см. комментарий у directions */
     skills: z.array(z.string()).default([]),
+    /** Кадр на карточке в блоке результата подбора */
+    image: z.string().optional(),
+    imageAlt: z.string().default(''),
   }),
 });
 
@@ -250,6 +253,32 @@ const levels = defineCollection({
   }),
 });
 
+/**
+ * Профессии — результат подбора на «Проектах» и будущая паутина компетенций.
+ *
+ * Не путать с ролями из пояснения к ТЗ (координатор, технический писатель,
+ * менеджер команды): те описывают роли внутри проектной команды, а здесь —
+ * профессии как итог воронки. В макете «Профессии» и чипы паутины показывают
+ * одни и те же названия, поэтому коллекция одна на два блока.
+ */
+const professions = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/professions' }),
+  schema: z.object({
+    /** Порядок в ряду: меньше — левее */
+    order: z.number().default(0),
+    title: z.string(),
+    /**
+     * Названия направлений, к которым ведёт профессия. Связка ЧЕРНОВАЯ:
+     * ни в ТЗ, ни в пояснении её нет, выставлена по смыслу названий.
+     */
+    directions: z.array(z.string()).default([]),
+    /** Компетенции для паутины. Пока пусто: заполняет заказчик */
+    competencies: z.array(z.string()).default([]),
+    image: z.string().optional(),
+    imageAlt: z.string().default(''),
+  }),
+});
+
 /** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
 const faq = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
@@ -275,4 +304,5 @@ export const collections = {
   projects,
   areas,
   levels,
+  professions,
 };

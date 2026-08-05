@@ -5,6 +5,8 @@ import Cases from '../components/Cases.astro';
 import TrackBuilder from '../components/TrackBuilder.astro';
 import ProjectAreas from '../components/ProjectAreas.astro';
 import ExperienceLevels from '../components/ExperienceLevels.astro';
+import RecommendedResult from '../components/RecommendedResult.astro';
+import TrackModals from '../components/TrackModals.astro';
 ---
 
 <BaseLayout
@@ -31,6 +33,15 @@ import ExperienceLevels from '../components/ExperienceLevels.astro';
       «Подобрать индивидуальный план обучения» — вторая точка входа
       в форму помимо кнопки под треками на главной. */}
   <ExperienceLevels />
+
+  {/* Результат подбора, нода Блок6 (9:1753). Собирается из выбранных
+      направлений: трек по большинству, проекты и профессии фильтром.
+      Пока ничего не выбрано — блок скрыт. */}
+  <RecommendedResult />
+
+  {/* Окна треков: их открывает кнопка «Подробнее о треке» в результате
+      подбора. На главной те же окна подключает блок треков. */}
+  <TrackModals />
 
   {/*
     Блоки страницы «Проекты» (ТЗ, раздел 4.2 / порядок 9.1):
