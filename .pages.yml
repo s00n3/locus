@@ -1,0 +1,55 @@
+# Конфигурация git-админки Pages CMS — https://pagescms.org
+#
+# Контент лежит файлами в репозитории: сохранение в админке создаёт коммит,
+# коммит запускает пересборку сайта через GitHub Actions. Ни базы, ни сервера.
+#
+# Заявки сюда НЕ попадают и попасть не могут: персональные данные по 152-ФЗ
+# должны храниться в России, а репозиторий — на GitHub. Форма подключается
+# отдельно, когда появится сервер университета.
+
+media:
+  input: public/uploads
+  output: /uploads
+  categories: [image]
+
+content:
+  - name: tracks
+    label: Образовательные треки
+    description: Карточки на главной. Порядок задаётся полем «Порядок».
+    type: collection
+    path: src/content/tracks
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, tags, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: title
+        label: Название трека
+        type: string
+        required: true
+      - name: tags
+        label: Теги
+        type: string
+        list: true
+        description: Кому подойдёт или ключевые технологии.
+      - name: image
+        label: Изображение
+        type: image
+      - name: imageAlt
+        label: Описание изображения
+        type: string
+        description: Для незрячих и на случай, если картинка не загрузится.
+      - name: href
+        label: Ссылка
+        type: string
+        description: Куда ведёт карточка. Пока можно оставить пустым.
+
+settings:
+  content:
+    merge: true
