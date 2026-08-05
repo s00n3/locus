@@ -543,6 +543,59 @@ content:
         label: Описание фотографии
         type: string
 
+  - name: experts
+    label: Эксперты проекта
+    description: >-
+      Блок на странице «Люди». Стороны рядов чередуются сами — думать
+      о том, слева или справа карточка, не нужно.
+    type: collection
+    path: src/content/experts
+    filename: '{fields.name}.yaml'
+    format: yaml
+    view:
+      fields: [name, role, order]
+      sort: [order, name]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — выше.
+        default: 1
+      - name: name
+        label: Имя и фамилия
+        type: string
+        required: true
+      - name: role
+        label: Должность
+        type: text
+        required: true
+        description: Строка под именем.
+      - name: bio
+        label: О себе
+        type: text
+        required: true
+      - name: photo
+        label: Фотография
+        type: image
+        description: Вертикальная. Лицо лучше в верхней половине кадра.
+      - name: photoAlt
+        label: Описание фотографии
+        type: string
+      - name: projectsLead
+        label: Название проекта
+        type: string
+        description: >-
+          Для панели «Основные проекты в сфере», если это один проект
+          с описанием. Иначе оставьте пустым и заполните список ниже.
+      - name: projectsText
+        label: Описание проекта
+        type: text
+      - name: projectsItems
+        label: Список проектов
+        type: string
+        list: true
+        description: Нумерация добавится сама. Заполнять вместо названия и описания.
+
   - name: faq
     label: Вопросы и ответы
     description: Аккордеон на главной.

@@ -291,6 +291,36 @@ const professions = defineCollection({
   }),
 });
 
+/**
+ * Блок 18 «Сообщества» — эксперты проекта (ТЗ, раздел 4.3).
+ *
+ * Ряды в макете чередуются: у первого и третьего эксперта карточка слева,
+ * панель проектов справа, у второго наоборот. Порядок задаёт вёрстка,
+ * в контенте этого нет — заказчику незачем думать про сторону.
+ */
+const experts = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/experts' }),
+  schema: z.object({
+    /** Порядок сверху вниз */
+    order: z.number().default(0),
+    name: z.string(),
+    /** Должность и специализация — строка под именем */
+    role: z.string(),
+    /** Рассказ от первого лица или справка. Абзац целиком */
+    bio: z.string(),
+    photo: z.string().optional(),
+    photoAlt: z.string().default(''),
+    /**
+     * Панель «Основные проекты в сфере». В макете два вида: у одного
+     * эксперта название проекта плюс абзац, у остальных нумерованный
+     * список. Поддерживаем оба, заполнять нужно только своё.
+     */
+    projectsLead: z.string().default(''),
+    projectsText: z.string().default(''),
+    projectsItems: z.array(z.string()).default([]),
+  }),
+});
+
 /** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
 const faq = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
@@ -317,4 +347,5 @@ export const collections = {
   areas,
   levels,
   professions,
+  experts,
 };
