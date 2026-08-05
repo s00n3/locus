@@ -207,3 +207,15 @@
 .has-motion .hero__pointer-head {
   animation: hero-arrow-head-in 400ms cubic-bezier(0.34, 1.4, 0.64, 1) 1900ms both;
 }
+
+/* Выноска на «Сообществе» — две линии, а не стрелка. Они обведены штрихом,
+   поэтому прорисовываются так же, как стрелка на главной. Вторая линия
+   идёт с задержкой: рука ведёт их по очереди, а не одновременно. */
+.has-motion .hero__leader path {
+  stroke-dasharray: 1;
+  animation: hero-draw 700ms ease-out 1100ms both;
+}
+
+.has-motion .hero__leader path:last-child {
+  animation-delay: 1450ms;
+}

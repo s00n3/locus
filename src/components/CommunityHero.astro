@@ -2,8 +2,6 @@
 import { Image } from 'astro:assets';
 import membrane from '../assets/images/membrane.png';
 import sechenovLogo from '../assets/icons/sechenov.svg?url';
-import arrowCurve from '../assets/icons/projects-arrow-curve.svg?raw';
-import arrowHead from '../assets/icons/projects-arrow-head.svg?raw';
 import lineShort from '../assets/icons/hero-line-short.svg?url';
 import lineLong from '../assets/icons/hero-line-long.svg?url';
 
@@ -84,12 +82,31 @@ const pixels: Pixel[] = [
     Подать заявку
   </button>
 
-  {/* Рукописная подпись со стрелкой к мембране. Стрелка встроена,
-      а не подключена картинкой: только так её можно прорисовать
-      при появлении. В макете это две фигуры — дуга и остриё. */}
+  {/* Рукописная подпись с выноской к мембране. В макете это НЕ стрелка:
+      две отдельные линии, сходящиеся к подписи, без острия. Обе обведены
+      штрихом, поэтому их можно прорисовать так же, как стрелку на главной —
+      через stroke-dashoffset (pathLength=1 нормирует длину). */}
   <p class="hero__note">Люди, которые открывают возможности</p>
-  <span class="hero__pointer" aria-hidden="true" set:html={arrowCurve} />
-  <span class="hero__pointer-head" aria-hidden="true" set:html={arrowHead} />
+  <span class="hero__leader" aria-hidden="true">
+    <svg viewBox="0 0 78 76" width="78" height="76">
+      <path
+        pathLength="1"
+        d="M28 2 Q40 34 75 55"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <path
+        pathLength="1"
+        d="M2 72 Q30 66 68 55"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+    </svg>
+  </span>
 
   <img class="hero__university" src={sechenovLogo} alt="Сеченовский университет" width="211" height="57" />
   <span class="hero__amp" aria-hidden="true">&&</span>
@@ -280,27 +297,20 @@ const pixels: Pixel[] = [
     letter-spacing: normal;
   }
 
-  /* Имена свои, а не общие с главной: там стрелка обведена штрихом
-     и прорисовывается через stroke-dashoffset, здесь она залита контуром */
-  .hero__pointer {
-    left: 320px;
-    top: 352px;
-    width: 89.446px;
-    height: 60.5px;
+  /* Выноска: две линии от мембраны к подписи. Координаты сняты с рендера —
+     верхняя идёт от (386, 388) к (433, 441), нижняя от (360, 458) к (426, 441) */
+  .hero__leader {
+    left: 358px;
+    top: 386px;
+    width: 78px;
+    height: 76px;
   }
 
-  .hero__pointer-head {
-    left: 310px;
-    top: 345px;
-    width: 20.963px;
-    height: 20.248px;
-  }
-
-  .hero__pointer :global(svg),
-  .hero__pointer-head :global(svg) {
+  .hero__leader svg {
     display: block;
     width: 100%;
     height: 100%;
+    overflow: visible;
   }
 
   /* --- Нижний ряд --- */
