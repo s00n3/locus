@@ -1,0 +1,8 @@
+order: 4
+title: BioTech/Биоинформатика
+description: Работать с генетическими, молекулярными и другими биологическими данными.
+skills:
+  - Python/R
+  - Геномика
+image: /src/assets/uploads/area-biotech.png
+imageAlt: Модель ДНК рядом с лабораторными колбами

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectsHero from '../components/ProjectsHero.astro';
 import Cases from '../components/Cases.astro';
 import TrackBuilder from '../components/TrackBuilder.astro';
+import ProjectAreas from '../components/ProjectAreas.astro';
 ---
 
 <BaseLayout
@@ -20,6 +21,10 @@ import TrackBuilder from '../components/TrackBuilder.astro';
       по макету идут «Какие задачи хочешь решать» (шаг 2) и «Уровень
       опыта» (шаг 3), их ответы уходят в форму индивидуального плана. */}
   <TrackBuilder />
+
+  {/* Второй шаг конструктора, нода Блок4 (9:1644). Выбор один — его
+      ответ уходит в «вопрос 2» формы индивидуального плана. */}
+  <ProjectAreas />
 
   {/*
     Блоки страницы «Проекты» (ТЗ, раздел 4.2 / порядок 9.1):

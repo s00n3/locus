@@ -185,6 +185,26 @@ const projects = defineCollection({
   }),
 });
 
+/**
+ * Блок 14 «Проектов» — второй шаг конструктора, «Какие задачи хочешь решать».
+ * Набор здесь свой, он НЕ совпадает с чипами первого шага: там семь узких
+ * направлений, тут пять широких областей развития.
+ */
+const areas = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/areas' }),
+  schema: z.object({
+    /** Порядок в сетке: слева направо, сверху вниз */
+    order: z.number().default(0),
+    title: z.string(),
+    description: z.string(),
+    /** Чипы навыков в подвале карточки */
+    skills: z.array(z.string()).default([]),
+    /** Путь вида /src/assets/uploads/foo.png */
+    image: z.string().optional(),
+    imageAlt: z.string().default(''),
+  }),
+});
+
 /** Блок 10 главной — FAQ (ТЗ, раздел 4.1) */
 const faq = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/faq' }),
@@ -208,4 +228,5 @@ export const collections = {
   faq,
   directions,
   projects,
+  areas,
 };

@@ -1,0 +1,11 @@
+order: 5
+title: MedTech-инженерия
+description: >-
+  Создавать медицинские устройства, сенсоры, прототипы и программно-аппаратные
+  системы.
+skills:
+  - Электроника
+  - IoT
+  - CAD
+image: /src/assets/uploads/area-medtech.png
+imageAlt: Носимое медицинское устройство с кардиограммой

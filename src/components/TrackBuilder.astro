@@ -28,10 +28,17 @@ for (const project of projects) {
 
 <section class="builder" data-reveal aria-labelledby="builder-title">
   <div class="builder__inner">
-    {/* Фигурные скобки набраны моноширинным — так во всех заголовках макета */}
-    <h2 class="builder__title" id="builder-title">
-      <span class="builder__brace">&#123;</span>Собери свой трек<span class="builder__brace">&#125;</span>
-    </h2>
+    {/* Номер шага. В макете он есть у второго и третьего шагов конструктора,
+        у первого его забыли — добавлен по просьбе заказчика, стиль взят
+        с ноды 9:1647. Заголовок при этом остаётся по центру колонки. */}
+    <div class="builder__heading">
+      <p class="builder__step" aria-hidden="true">1</p>
+
+      {/* Фигурные скобки набраны моноширинным — так во всех заголовках макета */}
+      <h2 class="builder__title" id="builder-title">
+        <span class="builder__brace">&#123;</span>Собери свой трек<span class="builder__brace">&#125;</span>
+      </h2>
+    </div>
 
     <div class="builder__head">
       <p class="builder__lead">
@@ -153,6 +160,30 @@ for (const project of projects) {
     width: 1320px;
     max-width: calc(100% - 2 * var(--container-pad));
     margin-inline: auto;
+  }
+
+  /* Кружок стоит слева, заголовок остаётся по центру колонки: сетка из трёх
+     колонок с равными краями держит его на месте независимо от номера */
+  .builder__heading {
+    display: grid;
+    grid-template-columns: 57.14px 1fr 57.14px;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  /* Нода 9:1647: обводка #64b2bf, заливка белым почти прозрачно */
+  .builder__step {
+    display: grid;
+    place-items: center;
+    width: 57.14px;
+    height: 57.14px;
+    border: 1px solid #64b2bf;
+    border-radius: 50%;
+    background: rgba(217, 217, 217, 0.09);
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: normal;
+    color: var(--text-primary);
   }
 
   /* В макете заголовок сдвинут влево от центра колонки на 43px — ручная

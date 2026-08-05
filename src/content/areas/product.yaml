@@ -1,0 +1,9 @@
+order: 3
+title: Цифровые продукты
+description: Проектировать приложения, платформы и удобные пользовательские сценарии.
+skills:
+  - UX/UI
+  - Frontend
+  - API
+image: /src/assets/uploads/area-product.png
+imageAlt: Два смартфона с интерфейсом медицинского приложения

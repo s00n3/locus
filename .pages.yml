@@ -373,6 +373,46 @@ content:
           Должно совпадать с названием направления слово в слово, иначе
           карточка не попадёт под фильтр.
 
+  - name: areas
+    label: Задачи в проекте (шаг 2)
+    description: >-
+      Пять карточек второго шага конструктора на «Проектах». Это не те же
+      направления, что в чипах первого шага — набор здесь свой.
+    type: collection
+    path: src/content/areas
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Слева направо, сверху вниз.
+        default: 1
+      - name: title
+        label: Название
+        type: string
+        required: true
+      - name: description
+        label: Описание
+        type: text
+        required: true
+      - name: skills
+        label: Навыки
+        type: string
+        list: true
+        description: Показываются чипами в нижней части карточки.
+      - name: image
+        label: Изображение
+        type: image
+        description: Широкое, примерно 3:2.
+      - name: imageAlt
+        label: Описание изображения
+        type: string
+        description: Для незрячих и на случай, если картинка не загрузится.
+
   - name: faq
     label: Вопросы и ответы
     description: Аккордеон на главной.

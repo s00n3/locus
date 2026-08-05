@@ -1,0 +1,9 @@
+order: 1
+title: Искусственный интеллект
+description: Создавать и обучать модели, работать с нейросетями, LLM и ИИ-агентами
+skills:
+  - Python
+  - ML
+  - LLM
+image: /src/assets/uploads/area-ai.png
+imageAlt: Светящаяся модель мозга из нейронных связей
