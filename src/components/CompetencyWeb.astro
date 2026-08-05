@@ -134,6 +134,7 @@ const first = withAxes[0];
       data-shapes={JSON.stringify(shapes)}
       data-points={JSON.stringify(points)}
       data-descriptions={JSON.stringify(descriptions)}
+      hidden
     >
       <div class="web__inner">
         <header class="web__head">
@@ -145,16 +146,19 @@ const first = withAxes[0];
           </p>
         </header>
 
-        {/* Выбор один: паутина показывает одну профессию за раз */}
+        {/* Выбор один: паутина показывает одну профессию за раз. Набор чипов
+            не постоянный — его отбирают направления, выбранные в конструкторе,
+            так же как в блоке результата. */}
         <ul class="web__chips" role="radiogroup" aria-labelledby="web-title">
           {withAxes.map((profession) => (
-            <li>
+            <li data-chip hidden>
               <button
                 class="web__chip"
                 type="button"
                 role="radio"
-                aria-checked={profession.id === first.id ? 'true' : 'false'}
+                aria-checked="false"
                 data-profession={profession.id}
+                data-directions={profession.data.directions.join('|')}
               >
                 {profession.data.title}
               </button>
@@ -243,13 +247,53 @@ const first = withAxes[0];
       if (desc) desc.textContent = descriptions[id] ?? '';
     };
 
+    const select = (chip: HTMLButtonElement) => {
+      for (const other of chips) other.setAttribute('aria-checked', 'false');
+      chip.setAttribute('aria-checked', 'true');
+      show(chip.dataset.profession ?? '');
+    };
+
     for (const chip of chips) {
-      chip.addEventListener('click', () => {
-        for (const other of chips) other.setAttribute('aria-checked', 'false');
-        chip.setAttribute('aria-checked', 'true');
-        show(chip.dataset.profession ?? '');
-      });
+      chip.addEventListener('click', () => select(chip));
     }
+
+    // Состав чипов задают направления, выбранные в конструкторе: паутина
+    // показывает те же профессии, что и блок результата, а не все сразу.
+    // Ничего не выбрано — блока нет, как и результата.
+    const selectedDirections = () =>
+      [...document.querySelectorAll<HTMLElement>('button[data-direction]')]
+        .filter((el) => el.getAttribute('aria-pressed') === 'true')
+        .map((el) => el.dataset.direction);
+
+    const sync = () => {
+      const chosen = selectedDirections();
+      let firstVisible: HTMLButtonElement | null = null;
+
+      for (const chip of chips) {
+        const own = (chip.dataset.directions || '').split('|').filter(Boolean);
+        const hit = chosen.length > 0 && own.some((name) => chosen.includes(name));
+        chip.closest('li')?.toggleAttribute('hidden', !hit);
+        if (hit && !firstVisible) firstVisible = chip;
+      }
+
+      section.hidden = !firstVisible;
+      if (!firstVisible) return;
+
+      // Выбранная профессия могла уйти из набора — тогда берём первую
+      // из оставшихся, и фигура доигрывает переход к ней
+      const active = chips.find(
+        (chip) => chip.getAttribute('aria-checked') === 'true' && !chip.closest('li')?.hidden,
+      );
+      select(active ?? firstVisible);
+    };
+
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('button[data-direction]')) {
+        sync();
+      }
+    });
+
+    sync();
 
     // Наведение на подпись оси подсвечивает её вершину — то самое
     // «наведи на профессию или навык» из макета
