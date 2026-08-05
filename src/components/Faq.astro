@@ -44,13 +44,73 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
               {item.data.question}
               <span class="faq__marker" aria-hidden="true" />
             </summary>
-            <p class="faq__answer">{item.data.answer}</p>
+            <div class="faq__body">
+              <p class="faq__answer">{item.data.answer}</p>
+            </div>
           </details>
         ))
       }
     </div>
   </div>
 </section>
+
+<script>
+  // Оба направления приходится вести вручную. При раскрытии браузер
+  // показывает содержимое сразу в конечном состоянии, при сворачивании —
+  // сразу прячет. И там и там переходу не с чего начинать, поэтому
+  // выставляем нулевую высоту явно и только потом отпускаем.
+  document.querySelectorAll<HTMLDetailsElement>('.faq__item').forEach((details) => {
+    const summary = details.querySelector('summary');
+    const body = details.querySelector<HTMLElement>('.faq__body');
+    if (!summary || !body) return;
+
+    let busy = false;
+
+    /** Ждёт конец перехода, но не зависает, если его не случилось */
+    const afterTransition = (run: () => void) => {
+      let done = false;
+      const once = () => {
+        if (done) return;
+        done = true;
+        run();
+      };
+      body.addEventListener('transitionend', once, { once: true });
+      setTimeout(once, 500);
+    };
+
+    /** Длительность перехода в миллисекундах; 0 — анимации нет */
+    const duration = () => parseFloat(getComputedStyle(body).transitionDuration) * 1000 || 0;
+
+    summary.addEventListener('click', (event) => {
+      // Анимации отключены (например, системной настройкой) — не мешаем
+      // браузеру переключать пункт самому, иначе он ждал бы страховочный
+      // таймер и реагировал с задержкой
+      if (duration() === 0) return;
+
+      event.preventDefault();
+      if (busy) return;
+      busy = true;
+
+      if (details.open) {
+        details.classList.add('is-collapsed');
+        afterTransition(() => {
+          details.open = false;
+          details.classList.remove('is-collapsed');
+          busy = false;
+        });
+      } else {
+        // фиксируем нулевую высоту до показа, иначе анимироваться не с чего
+        details.classList.add('is-collapsed');
+        details.open = true;
+        void body.offsetHeight;
+        details.classList.remove('is-collapsed');
+        afterTransition(() => {
+          busy = false;
+        });
+      }
+    });
+  });
+</script>
 
 <style>
   .faq {
@@ -102,6 +162,33 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     border: 1px solid var(--border-warm);
     border-radius: var(--radius-card);
     background: rgba(217, 217, 217, 0.2);
+  }
+
+  /* Плавное раскрытие: анимируем долю строки сетки с 0fr до 1fr.
+     Обёртка, а не ::details-content — псевдоэлемент в проверке
+     не отдавал содержимому высоту, и пункт застревал полураскрытым. */
+  .faq__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--transition-base);
+  }
+
+  .faq__item[open] .faq__body {
+    grid-template-rows: 1fr;
+  }
+
+  /* Скрипт навешивает этот класс, чтобы принудительно держать нулевую
+     высоту поверх [open] — с него начинается раскрытие и им же
+     заканчивается сворачивание */
+  .faq__item[open].is-collapsed .faq__body {
+    grid-template-rows: 0fr;
+  }
+
+  /* Обязательные спутники приёма: overflow прячет текст на сжатой строке,
+     min-height позволяет ей сжаться до нуля */
+  .faq__answer {
+    min-height: 0;
+    overflow: hidden;
   }
 
   .faq__question {
