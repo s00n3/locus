@@ -88,18 +88,20 @@ const pixels: Pixel[] = [
       через stroke-dashoffset (pathLength=1 нормирует длину). */}
   <p class="hero__note">Люди, которые открывают возможности</p>
   <span class="hero__leader" aria-hidden="true">
-    <svg viewBox="0 0 78 76" width="78" height="76">
+    <svg viewBox="0 0 209 72" width="209" height="72">
+      {/* Верхняя: от правого края мембраны вниз к подписи */}
       <path
         pathLength="1"
-        d="M28 2 Q40 34 75 55"
+        d="M160 2 Q184.5 39.5 207 55"
         fill="none"
         stroke="#ffffff"
         stroke-width="2"
         stroke-linecap="round"
       />
+      {/* Нижняя: длинная и провисающая, уходит под мембрану до её левого края */}
       <path
         pathLength="1"
-        d="M2 72 Q30 66 68 55"
+        d="M2 53 Q105 84 204 55"
         fill="none"
         stroke="#ffffff"
         stroke-width="2"
@@ -298,12 +300,14 @@ const pixels: Pixel[] = [
   }
 
   /* Выноска: две линии от мембраны к подписи. Координаты сняты с рендера —
-     верхняя идёт от (386, 388) к (433, 441), нижняя от (360, 458) к (426, 441) */
+     верхняя идёт от (386, 388) к (433, 441), нижняя от (228, 439) к (430, 441)
+     с провисом до 455 посередине: она проходит под мембраной, а не рядом
+     с подписью. */
   .hero__leader {
-    left: 358px;
+    left: 226px;
     top: 386px;
-    width: 78px;
-    height: 76px;
+    width: 209px;
+    height: 72px;
   }
 
   .hero__leader svg {
