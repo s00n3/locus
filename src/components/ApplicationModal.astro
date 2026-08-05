@@ -462,15 +462,19 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
   /* --- Согласие --- */
 
   /* Стоит в правой колонке последнего ряда, вровень с полем слева,
-     но подписи над собой не имеет */
+     но подписи над собой не имеет.
+     Содержимое прижато влево на те же 19px, что текст во всех остальных
+     полях. В макете оно по центру, но рядом с левым полем, где текст
+     у самого края, центрированная пара «галочка + подпись» читалась
+     как съехавшая, хотя рамки боксов совпадают пиксель в пиксель. */
   .application-modal__consent {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 16px;
     align-self: end;
     height: 60px;
+    padding-inline: 19px;
     border: 1px solid var(--border-warm);
     border-radius: var(--radius-card);
     background: rgba(217, 217, 217, 0.2);
