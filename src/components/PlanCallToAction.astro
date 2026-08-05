@@ -1,0 +1,53 @@
+---
+// Замыкающая кнопка блока результата подбора — нода Figma 9:1797.
+// В макете стоит последней в «Блок6», уже после паутины компетенций,
+// поэтому и в вёрстке идёт отдельной полосой за ней.
+//
+// В отличие от паутины и самого результата, кнопка не прячется без выбора:
+// это не результат подбора, а действие, и последняя точка конверсии
+// на странице. Открывает ту же форму, что CTA под уровнями опыта.
+---
+
+<section class="plan-cta" data-reveal>
+  <div class="plan-cta__inner">
+    <button class="plan-cta__button" type="button" data-modal="individual-plan" aria-haspopup="dialog">
+      Подать заявку с индивидуальным планом
+    </button>
+  </div>
+</section>
+
+<style>
+  .plan-cta {
+    padding-block: 0 64px;
+  }
+
+  .plan-cta__inner {
+    width: var(--layout-width);
+    max-width: 100%;
+    padding-inline: var(--container-pad);
+    margin-inline: auto;
+  }
+
+  /* Здесь кнопка ровно по центру колонки — в отличие от CTA под уровнями
+     опыта, которую в макете сдвинули влево на 16px */
+  .plan-cta__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1061px;
+    max-width: 100%;
+    height: 78px;
+    margin-inline: auto;
+    padding-inline: 22.857px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .plan-cta__button:hover {
+    background: var(--accent-terracotta-light);
+  }
+</style>

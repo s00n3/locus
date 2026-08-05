@@ -7,6 +7,7 @@ import ProjectAreas from '../components/ProjectAreas.astro';
 import ExperienceLevels from '../components/ExperienceLevels.astro';
 import RecommendedResult from '../components/RecommendedResult.astro';
 import CompetencyWeb from '../components/CompetencyWeb.astro';
+import PlanCallToAction from '../components/PlanCallToAction.astro';
 import TrackModals from '../components/TrackModals.astro';
 ---
 
@@ -44,6 +45,10 @@ import TrackModals from '../components/TrackModals.astro';
       статичная иллюстрация, но по требованию заказчика генерируется
       из цифр в админке и перестраивается с анимацией. */}
   <CompetencyWeb />
+
+  {/* Замыкающая кнопка блока результата (нода 9:1797) — в макете она
+      стоит после паутины, поэтому и здесь идёт за ней */}
+  <PlanCallToAction />
 
   {/* Окна треков: их открывает кнопка «Подробнее о треке» в результате
       подбора. На главной те же окна подключает блок треков. */}
