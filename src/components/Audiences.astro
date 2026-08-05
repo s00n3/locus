@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+
+const audiences = (await getCollection('audiences')).sort((a, b) => a.data.order - b.data.order);
+
+// Декоративные пиксели слева сверху — нода «Пиксели 9» (9:241).
+// Часть уходит выше нуля секции и обрезается — так в макете.
+const T = 'var(--surface-panel)';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+const pixels: [x: number, y: number, color: string][] = [
+  [132.57, 83.29, T], [132.57, -31, TH], [109.71, 60.43, OH],
+  [132.57, 37.57, TH], [155.43, 37.57, TH], [109.71, 37.57, T],
+  [178.29, 14.71, OH], [64, 83.29, OH], [155.43, -8.14, T],
+  [132.57, 14.71, OH], [64, 37.57, T], [155.43, 14.71, TH],
+  [86.86, 37.57, TH],
+];
+---
+
+<section class="audiences" aria-labelledby="audiences-title">
+  <div class="audiences__pixels" aria-hidden="true">
+    {pixels.map(([x, y, color]) => <span style={`left:${x}px;top:${y}px;background:${color}`} />)}
+  </div>
+
+  <div class="container">
+    {/* Угловые скобки — часть оформления, как «///» и «{}» в соседних секциях */}
+    <h2 class="audiences__title" id="audiences-title">&lt;H1&gt; Кому подойдет? &lt;/H1&gt;</h2>
+
+    <ul class="audiences__grid">
+      {
+        audiences.map((item) => (
+          <li class="audience">
+            <p class="audience__label">{item.data.label}</p>
+            <h3 class="audience__title">{item.data.title}</h3>
+            <ul class="audience__points">
+              {item.data.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .audiences {
+    position: relative;
+    overflow: hidden;
+    padding-block: 64px;
+  }
+
+  .audiences__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-align: center;
+  }
+
+  .audiences__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 18.4px;
+  }
+
+  /* --- Карточка аудитории --- */
+
+  .audience {
+    height: 246px;
+    padding: 19px 24px 24px;
+    background: rgba(217, 217, 217, 0.2);
+    border: 1px solid var(--border-warm);
+    border-radius: var(--radius-card);
+  }
+
+  /* Зелёный вне палитры из handoff — в макете он только здесь */
+  .audience__label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    font-weight: 300;
+    font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #5dff73;
+  }
+
+  .audience__label::before {
+    content: '•';
+  }
+
+  /* min-height в две строки: заголовки разной длины, а описания под ними
+     в макете начинаются на одной высоте */
+  .audience__title {
+    min-height: 80px;
+    margin-top: 25px;
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 1.25;
+    letter-spacing: normal;
+  }
+
+  .audience__points {
+    margin-top: var(--space-1);
+    font-weight: 300;
+    font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: normal;
+  }
+
+  .audience__points li::before {
+    content: '-';
+  }
+
+  /* Сцена 1440 — координаты пикселей ложатся 1:1 */
+  .audiences__pixels {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: var(--layout-width);
+    height: 100%;
+    margin-left: calc(var(--layout-width) / -2);
+    pointer-events: none;
+  }
+
+  .audiences__pixels :global(span) {
+    position: absolute;
+    width: 22.857px;
+    height: 22.857px;
+  }
+</style>

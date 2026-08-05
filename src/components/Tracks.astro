@@ -5,10 +5,11 @@ import TrackCard from './TrackCard.astro';
 const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
 
 // Декоративные пиксели справа внизу — координаты с ноды «Пиксели 10» (9:47).
-// В макете кластер начинается на 1212 и наезжает на кнопку, которая кончается
-// на 1251. Сдвигаем вправо, чтобы между ними остался зазор — так в правленой
-// компоновке.
-const PIXELS_OFFSET_X = 52;
+// В макете кластер начинается на 1212 и целиком наезжает на кнопку.
+// Сдвигаем вправо так, чтобы крайний левый пиксель наполовину уходил ЗА
+// кнопку — он рисуется под ней (см. z-index ниже), поэтому выглядывает
+// из-за края, а не лежит поверх.
+const PIXELS_OFFSET_X = 26;
 const T = 'var(--surface-panel)';
 const TH = 'rgba(28,94,116,0.5)';
 const OH = 'rgba(195,106,73,0.5)';
@@ -23,6 +24,14 @@ const pixels: [x: number, y: number, color: string][] = [
 ---
 
 <section class="tracks" aria-labelledby="tracks-title">
+  <div class="tracks__pixels" aria-hidden="true">
+    {
+      pixels.map(([x, y, color]) => (
+        <span style={`left:${x + PIXELS_OFFSET_X}px;top:${y}px;background:${color}`} />
+      ))
+    }
+  </div>
+
   <div class="container">
     <h2 class="tracks__title" id="tracks-title">/// Образовательные треки</h2>
 
@@ -40,14 +49,6 @@ const pixels: [x: number, y: number, color: string][] = [
     <button class="tracks__cta" type="button" data-modal="individual-plan">
       Подобрать индивидуальный план обучения
     </button>
-  </div>
-
-  <div class="tracks__pixels" aria-hidden="true">
-    {
-      pixels.map(([x, y, color]) => (
-        <span style={`left:${x + PIXELS_OFFSET_X}px;top:${y}px;background:${color}`} />
-      ))
-    }
   </div>
 </section>
 
@@ -97,11 +98,19 @@ const pixels: [x: number, y: number, color: string][] = [
     background: var(--accent-terracotta-light);
   }
 
+  /* Контейнер выше пикселей по слою — иначе кнопка не закрыла бы
+     заезжающий под неё квадрат */
+  .tracks .container {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Сцена 1440 — как у героя, чтобы координаты пикселей ложились 1:1 */
   .tracks__pixels {
     position: absolute;
     left: 50%;
     top: 0;
+    z-index: 0;
     width: var(--layout-width);
     height: 100%;
     margin-left: calc(var(--layout-width) / -2);

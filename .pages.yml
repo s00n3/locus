@@ -53,6 +53,37 @@ content:
         type: string
         description: Куда ведёт карточка. Пока можно оставить пустым.
 
+  - name: audiences
+    label: Кому подойдёт
+    description: Карточки аудиторий на главной.
+    type: collection
+    path: src/content/audiences
+    filename: '{fields.title}.yaml'
+    format: yaml
+    view:
+      fields: [title, label, order]
+      sort: [order, title]
+    fields:
+      - name: order
+        label: Порядок
+        type: number
+        description: Меньше — левее.
+        default: 1
+      - name: title
+        label: Кому
+        type: string
+        required: true
+      - name: label
+        label: Метка в углу
+        type: string
+        required: true
+        description: Короткий глагол по-английски — learn, search, work, grow.
+      - name: points
+        label: Что получат
+        type: string
+        list: true
+        description: По одному пункту в строке. Дефис в начале подставится сам.
+
 settings:
   content:
     merge: true

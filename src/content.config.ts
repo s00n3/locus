@@ -35,4 +35,18 @@ const tracks = defineCollection({
   }),
 });
 
-export const collections = { tracks };
+/** Блок 6 главной — кому подойдёт (ТЗ, раздел 4.1) */
+const audiences = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/audiences' }),
+  schema: z.object({
+    /** Порядок в ряду: меньше — левее */
+    order: z.number().default(0),
+    title: z.string(),
+    /** Короткая метка-глагол в углу карточки: learn, search, work, grow */
+    label: z.string(),
+    /** Пункты списка; дефис в начале строки добавляет вёрстка */
+    points: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { tracks, audiences };
