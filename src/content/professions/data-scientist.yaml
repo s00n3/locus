@@ -1,15 +1,13 @@
-order: 3
-title: ML-инженер в MedTech
+order: 2
+title: Data Scientist в здравоохранении
 # Связки черновые: по смыслу названия. Ждут подтверждения заказчика.
 directions:
+  - Анализ медицинских данных
   - Искусственный интеллект в медицине
-  - MedTech
 # Оси паутины — сняты с макета (нода 9:2009), значения кратны 20.
 competencies:
   - { name: AI / ML, value: 100 }
-  - { name: Данные, value: 80 }
+  - { name: Данные, value: 100 }
   - { name: Медтех, value: 80 }
   - { name: Продукт, value: 40 }
   - { name: Коммуникации, value: 60 }
-image: /src/assets/uploads/profession-ml.jpg
-imageAlt: Разработчик за экранами с медицинскими данными

@@ -18,7 +18,13 @@ import type { ImageMetadata } from 'astro';
 const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
 const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const professions = (await getCollection('professions')).sort((a, b) => a.data.order - b.data.order);
+// В карточки идут только профессии с кадром: карточка в макете построена
+// вокруг фотографии, без неё остаётся пустая тёмная плита. Остальные
+// профессии живут в паутине компетенций и появятся здесь сами, как только
+// заказчик добавит им кадр.
+const professions = (await getCollection('professions'))
+  .filter((p) => p.data.image)
+  .sort((a, b) => a.data.order - b.data.order);
 
 const uploads = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
@@ -148,7 +154,7 @@ const directionTrack = Object.fromEntries(
             }
 
             <span class="wide__body wide__body--profession">
-              <span class="wide__title">{profession.title ?? profession.data.title}</span>
+              <span class="wide__title">{profession.data.title}</span>
             </span>
           </li>
         ))
@@ -353,6 +359,7 @@ const directionTrack = Object.fromEntries(
     padding-block: 27px 33px;
     padding-inline: 43px;
   }
+
 
   /* --- Чипы --- */
 

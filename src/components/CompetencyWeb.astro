@@ -49,7 +49,9 @@ const CX = W / 2;
 const CY = 366;
 const R = 270;
 const LABEL_GAP = 26;
-const RINGS = 4;
+// Пять колец — как в наборе паутин на ноде 9:2009, где значения кратны 20:
+// кольцо на каждые 20 пунктов, и вершина всегда ложится ровно на кольцо
+const RINGS = 5;
 
 const angleOf = (index: number) => (-90 + (360 / axes.length) * index) * (Math.PI / 180);
 

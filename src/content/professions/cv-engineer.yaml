@@ -1,15 +1,13 @@
-order: 3
-title: ML-инженер в MedTech
+order: 4
+title: Инженер компьютерного зрения в медицине
 # Связки черновые: по смыслу названия. Ждут подтверждения заказчика.
 directions:
   - Искусственный интеллект в медицине
-  - MedTech
+  - VR/AR в медицине
 # Оси паутины — сняты с макета (нода 9:2009), значения кратны 20.
 competencies:
   - { name: AI / ML, value: 100 }
   - { name: Данные, value: 80 }
-  - { name: Медтех, value: 80 }
-  - { name: Продукт, value: 40 }
-  - { name: Коммуникации, value: 60 }
-image: /src/assets/uploads/profession-ml.jpg
-imageAlt: Разработчик за экранами с медицинскими данными
+  - { name: Медтех, value: 100 }
+  - { name: Продукт, value: 20 }
+  - { name: Коммуникации, value: 40 }
