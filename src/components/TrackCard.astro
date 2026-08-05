@@ -1,0 +1,134 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  title: string;
+  tags: string[];
+  image?: string;
+  imageAlt?: string;
+  href?: string;
+}
+
+const { title, tags, image, imageAlt = '', href } = Astro.props;
+
+// Картинки приходят из CMS путями вида /src/assets/uploads/foo.webp.
+// Astro не умеет импортировать по переменной, поэтому собираем карту заранее —
+// так изображения проходят через оптимизацию, а не отдаются как есть.
+const uploads = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
+  { eager: true },
+);
+const resolved = image ? uploads[image]?.default : undefined;
+
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag class="track" href={href}>
+  {
+    resolved && (
+      <Image
+        class="track__image"
+        src={resolved}
+        alt={imageAlt}
+        widths={[670, 1340]}
+        sizes="670px"
+        loading="lazy"
+      />
+    )
+  }
+
+  <div class="track__body">
+    <h3 class="track__title">{title}</h3>
+
+    {
+      tags.length > 0 && (
+        <ul class="track__tags">
+          {tags.map((tag) => (
+            <li class="track__tag">{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    {/* Вектором, а не символом «→»: U+2192 нет в подключённых сабсетах
+        IBM Plex, и глиф подставлялся системным шрифтом — на каждой ОС свой */}
+    <svg class="track__arrow" viewBox="0 0 58 18" width="58" height="18" aria-hidden="true">
+      <path
+        d="M1 9 H55 M45 1 L56 9 L45 17"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </div>
+</Tag>
+
+<style>
+  .track {
+    position: relative;
+    display: block;
+    height: 504px;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    color: var(--text-primary);
+  }
+
+  .track__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Полупрозрачная подложка поверх фотографии: снимок продолжает
+     просвечивать, как в макете */
+  .track__body {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 280px;
+    padding: 15px 28px 0;
+    background: rgba(28, 94, 116, 0.2);
+  }
+
+  .track__title {
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.22;
+    letter-spacing: normal;
+    color: var(--text-soft);
+    text-wrap: balance;
+  }
+
+  /* В макете зазоры между тегами гуляют от 21 до 28 — усреднено */
+  .track__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .track__tag {
+    padding: 10px 17px;
+    border: 1px solid var(--text-primary);
+    border-radius: 8px;
+    font-size: 24px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .track__arrow {
+    position: absolute;
+    right: 20px;
+    bottom: 45px;
+    color: var(--accent-terracotta);
+    transition: transform var(--transition-base);
+  }
+
+  a.track:hover .track__arrow {
+    transform: translateX(8px);
+  }
+</style>

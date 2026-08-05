@@ -7,9 +7,12 @@
 # должны храниться в России, а репозиторий — на GitHub. Форма подключается
 # отдельно, когда появится сервер университета.
 
+# Картинки лежат в src, а не в public: так Astro их оптимизирует при сборке
+# (webp, нужные размеры, ретина). Путь в контенте хранится как /src/assets/…,
+# компонент резолвит его через import.meta.glob.
 media:
-  input: public/uploads
-  output: /uploads
+  input: src/assets/uploads
+  output: /src/assets/uploads
   categories: [image]
 
 content:
