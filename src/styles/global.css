@@ -15,8 +15,18 @@ html {
   color-scheme: dark;
 }
 
+/* Градиент страницы снят с ноды 9:23. В макете он растянут на все 6676px
+   высоты, поэтому пока блоков мало — выглядит сжатым; по мере появления
+   секций приближается к оригиналу. */
 body {
   background-color: var(--bg-deep);
+  background-image: linear-gradient(
+    -79.31deg,
+    rgb(28, 94, 116) 5.81%,
+    rgb(11, 35, 44) 48.66%,
+    rgb(9, 19, 21) 112.73%
+  );
+  background-repeat: no-repeat;
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-weight: 400;

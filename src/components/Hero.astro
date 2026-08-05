@@ -1,0 +1,315 @@
+---
+import chromosome from '../assets/images/chromosome.png';
+import sechenovLogo from '../assets/icons/sechenov.svg?url';
+import arrow from '../assets/icons/hero-arrow.svg?url';
+import lineShort from '../assets/icons/hero-line-short.svg?url';
+import lineLong from '../assets/icons/hero-line-long.svg?url';
+import { Image } from 'astro:assets';
+
+// Декоративные пиксели — 52 квадрата, координаты сняты с нод «Пиксели 1–4».
+// Цвета: t — сплошной бирюзовый, th — он же под 50%, oh — терракота под 50%.
+const T = '#1c5e74';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+type Pixel = [x: number, y: number, color: string, size?: number];
+
+const pixels: Pixel[] = [
+  // Пиксели 3
+  [677.91, 351.62, T], [677.91, 465.9, TH], [700.76, 374.48, OH],
+  [677.91, 397.33, TH], [655.05, 397.33, TH], [700.76, 397.33, T],
+  [632.19, 420.19, OH], [746.48, 351.62, OH], [655.05, 443.05, T],
+  [677.91, 420.19, OH], [746.48, 397.33, T], [655.05, 420.19, TH],
+  [723.62, 397.33, TH],
+  // Пиксели 4 — в макете повёрнуты на −89.25°, но квадрат от этого не меняется
+  [516.6, 372.57, T, 23.154], [630.87, 374.06, TH, 23.154],
+  [539.75, 350.01, OH, 23.154], [562.31, 373.16, TH, 23.154],
+  [562.01, 396.02, TH, 23.154], [562.6, 350.31, T, 23.154],
+  [584.57, 419.17, OH, 23.154], [517.49, 304, OH, 23.154],
+  [607.72, 396.62, T, 23.154], [585.16, 373.46, OH, 23.154],
+  [563.2, 304.6, '#d87551', 23.154], [584.87, 396.32, TH, 23.154],
+  [562.91, 327.45, TH, 23.154],
+  // Пиксели 2
+  [230.48, 287.81, T], [230.48, 402.1, TH], [253.33, 310.67, OH],
+  [230.48, 333.52, TH], [207.62, 333.52, TH], [253.33, 333.52, T],
+  [184.76, 356.38, OH], [299.05, 287.81, OH], [207.62, 379.24, T],
+  [230.48, 356.38, OH], [299.05, 333.52, T], [207.62, 356.38, TH],
+  [276.19, 333.52, TH],
+  // Пиксели 1
+  [231.35, 175.92, T], [231.35, 290.2, TH], [254.21, 198.78, OH],
+  [231.35, 221.63, TH], [208.49, 221.63, TH], [254.21, 221.63, T],
+  [185.63, 244.49, OH], [299.92, 175.92, OH], [208.49, 267.35, T],
+  [231.35, 244.49, OH], [299.92, 221.63, T], [208.49, 244.49, TH],
+  [277.06, 221.63, TH],
+];
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  {/* Огромный «</>» за панелью — фоновая графика макета */}
+  <span class="hero__code" aria-hidden="true">&lt;/&gt;</span>
+
+  {/* Стеклянная панель: размытый слой даёт свечение, поверх — чёткая рамка */}
+  <div class="hero__panel-glow" aria-hidden="true"></div>
+  <div class="hero__panel" aria-hidden="true"></div>
+
+  {/* Кадр в макете растянут непропорционально (1672×941 → 420×651), поэтому
+      пережимаем сразу в нужную геометрию с fit=fill и в 2× под ретину —
+      иначе браузер берёт узкий вариант из srcset и тянет его по вертикали */}
+  <Image
+    class="hero__chromosome"
+    src={chromosome}
+    alt=""
+    width={841}
+    height={1303}
+    fit="fill"
+    quality={80}
+    loading="eager"
+    aria-hidden="true"
+  />
+
+  <div class="hero__pixels" aria-hidden="true">
+    {
+      pixels.map(([x, y, color, size = 22.857]) => (
+        <span
+          style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}`}
+        />
+      ))
+    }
+  </div>
+
+  <p class="hero__eyebrow">проектная школа × digital health</p>
+
+  <h1 class="hero__logo" id="hero-title">
+    <span class="hero__bracket" aria-hidden="true">[</span>
+    <span class="hero__wordmark">ЛОКУС</span>
+    <span class="hero__bracket" aria-hidden="true">]</span>
+  </h1>
+
+  <img class="hero__line-short" src={lineShort} alt="" width="183" height="2" aria-hidden="true" />
+  <p class="hero__tagline">цифровая проектная школа</p>
+
+  {/* Рукописная подпись со стрелкой к хромосоме */}
+  <p class="hero__note">Место, где запускаются проекты</p>
+  <img class="hero__arrow" src={arrow} alt="" width="59" height="74" aria-hidden="true" />
+
+  <img class="hero__university" src={sechenovLogo} alt="Сеченовский университет" width="211" height="57" />
+  <span class="hero__amp" aria-hidden="true">&&</span>
+  <span class="hero__credits-logo" aria-hidden="true">
+    <span class="hero__bracket hero__bracket--sm">[</span>
+    <span class="hero__wordmark hero__wordmark--sm">ЛОКУС</span>
+    <span class="hero__bracket hero__bracket--sm">]</span>
+  </span>
+  <img class="hero__line-long" src={lineLong} alt="" width="754" height="2" aria-hidden="true" />
+
+  <p class="hero__lead">
+    Цифровая Проектная Школа Сеченовского университета, где междисциплинарные команды
+    участников решают реальные задачи здравоохранения под руководством экспертов
+  </p>
+</section>
+
+<style>
+  /* Сцена 1440×883 — ровно фрейм «Блок1». Всё внутри позиционируется
+     абсолютными координатами из Figma, поэтому 1:1 переносится и проверяется.
+     Отрицательный margin поднимает сцену под шапку: хромосома в макете
+     выходит выше панели, в зону навигации. */
+  .hero {
+    position: relative;
+    width: var(--layout-width);
+    max-width: 100%;
+    height: 883px;
+    margin-inline: auto;
+    margin-top: -75px;
+    overflow: hidden;
+  }
+
+  .hero > * {
+    position: absolute;
+  }
+
+  /* --- Фон --- */
+
+  .hero__code {
+    left: 123.81px;
+    top: 81.33px;
+    font-weight: 300;
+    font-size: 666.667px;
+    line-height: 1;
+    letter-spacing: normal;
+    color: #5f5f5f;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .hero__panel-glow,
+  .hero__panel {
+    left: 40px;
+    top: 75px;
+    height: 513.333px;
+    border-radius: 60px;
+  }
+
+  .hero__panel-glow {
+    width: 1358px;
+    background: rgba(28, 94, 116, 0.05);
+    border: 1px solid #f6cfba;
+    filter: blur(4.762px);
+  }
+
+  .hero__panel {
+    width: 1360px;
+    background: rgba(217, 217, 217, 0.2);
+    border: 1px solid var(--border-warm);
+  }
+
+  /* Кадр растянут (object-fit: fill) — так в макете, отсюда вытянутый силуэт.
+     Исходник синеватый, в макете обесцвечен. */
+  .hero__chromosome {
+    left: 387.2px;
+    top: 321.67px;
+    width: 420.205px;
+    height: 651.305px;
+    transform: translate(-50%, -50%) rotate(-47.64deg);
+    object-fit: fill;
+    /* 0.97 подобран по эталону: обесцвеченный исходник даёт яркость 186,
+       в макете тело хромосомы — 180 */
+    filter: grayscale(1) brightness(0.97);
+    pointer-events: none;
+  }
+
+  .hero__pixels :global(span) {
+    position: absolute;
+  }
+
+  /* --- Логотип и подписи --- */
+
+  .hero__eyebrow {
+    left: 988px;
+    top: 140px;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    color: var(--accent-terracotta);
+    white-space: nowrap;
+  }
+
+  /* Зазор 58px подобран так, чтобы логотип занял ту же ширину, что в макете
+     (763.7 → 1374). В Figma зазоры разные — 26 слева и 107 справа, это
+     ручная расстановка, симметрия читается лучше. */
+  .hero__logo {
+    left: 763.71px;
+    top: 170px;
+    display: flex;
+    align-items: baseline;
+    gap: 58px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hero__wordmark {
+    font-weight: 400;
+    font-size: 123.81px;
+    letter-spacing: normal;
+  }
+
+  .hero__bracket {
+    font-weight: 300;
+    font-size: 152.381px;
+  }
+
+  .hero__line-short {
+    left: 751.71px;
+    top: 341.43px;
+    width: 182.857px;
+    height: 2px;
+  }
+
+  .hero__tagline {
+    left: 959.33px;
+    top: 323.33px;
+    font-weight: 300;
+    font-size: 30.476px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    white-space: nowrap;
+  }
+
+  /* --- Подпись со стрелкой --- */
+
+  .hero__note {
+    left: 86px;
+    top: 465px;
+    width: 233px;
+    font-weight: 400;
+    font-size: 38.095px;
+    line-height: 1.05;
+    letter-spacing: normal;
+  }
+
+  /* Позиционируется по центру бокса из макета: поворот раздувает
+     bounding box, и привязка по левому верхнему углу уводила бы стрелку */
+  .hero__arrow {
+    left: 298px;
+    top: 461.5px;
+    width: 58.79px;
+    height: 73.53px;
+    transform: translate(-50%, -50%) rotate(25.25deg);
+  }
+
+  /* --- Нижний ряд --- */
+
+  /* Нижний ряд: три части стоят по своим координатам из макета,
+     флексом их не собрать — в Figma они выставлены вручную и заходят
+     друг на друга */
+  .hero__university {
+    left: 51.98px;
+    top: 663.04px;
+    width: 210.8px;
+    height: 56.84px;
+  }
+
+  .hero__amp {
+    left: 310.2px;
+    top: 683.9px;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--text-soft);
+    transform: translate(-50%, -50%) rotate(-10.46deg);
+  }
+
+  .hero__credits-logo {
+    left: 352px;
+    top: 663px;
+    display: flex;
+    align-items: baseline;
+    gap: 25px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hero__wordmark--sm {
+    font-size: 45.714px;
+  }
+
+  .hero__bracket--sm {
+    font-size: 57.143px;
+  }
+
+  .hero__line-long {
+    left: 603px;
+    top: 688px;
+    width: 754px;
+    height: 2px;
+  }
+
+  .hero__lead {
+    left: 51px;
+    top: 751px;
+    width: 1284px;
+    font-weight: 300;
+    font-size: 28px;
+    line-height: 1.35;
+    letter-spacing: normal;
+  }
+</style>
