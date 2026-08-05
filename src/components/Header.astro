@@ -101,10 +101,13 @@ const isActive = (href: string) => !href.startsWith('#') && normalize(href) === 
   }
 
   /* margin-left, а не только justify-content: на главной логотипа нет,
-     и space-between прижал бы единственного ребёнка к левому краю */
+     и space-between прижал бы единственного ребёнка к левому краю.
+     Отступ справа равен радиусу скругления панели под шапкой — иначе
+     «Контакты» приходятся ровно на дугу угла и висят в воздухе. */
   .header__nav {
     flex: none;
     margin-left: auto;
+    margin-right: 60px;
   }
 
   .header__list {

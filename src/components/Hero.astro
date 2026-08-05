@@ -187,13 +187,18 @@ const pixels: Pixel[] = [
 
   /* --- Логотип и подписи --- */
 
+  /* Привязка по правому краю, а не по левому: строка выравнивается с правой
+     скобкой логотипа (1374) и не вылезает за панель. В макете она начинается
+     на 988 и уезжает за край фрейма — там это обрезано артбордом.
+     Начертание Medium вместо Bold: 700 в шкале нет и self-host его не несёт,
+     браузер подделывал жирность, а фейковый бол ещё и шире настоящего. */
   .hero__eyebrow {
-    left: 988px;
+    right: 65.7px;
     top: 140px;
-    font-weight: 700;
-    font-size: 24px;
+    font-weight: 500;
+    font-size: 20px;
     line-height: 1.2;
-    letter-spacing: normal;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     color: var(--accent-terracotta);
     white-space: nowrap;
