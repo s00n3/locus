@@ -1,0 +1,140 @@
+---
+import { Image } from 'astro:assets';
+import group from '../assets/uploads/team-group.png';
+
+// Блок «Команда проекта» — последний на «Сообществе» (ТЗ, раздел 4.3).
+//
+// ЗАГЛУШКА, и это сознательно. Заказчик хочет наведение: участник остаётся
+// в цвете, остальные уходят в чёрно-белое, справа выезжает карточка с его
+// данными. С текущими материалами это не собрать — групповое фото один
+// растр, и хотя фон в нём вырезан, силуэт слитный: одна связная область
+// 1650×815, всё остальное пиксельный шум. Разделить людей нечем, а
+// grayscale красит элемент целиком.
+//
+// Чтобы включить наведение, нужны восемь вырезок PNG с прозрачностью —
+// по одной на участника, каждая в размер всего кадра. Тогда меняется
+// только этот файл: восемь слоёв вместо одного, hover гасит соседей.
+// Разметка страницы и остальные блоки не затрагиваются.
+//
+// Текст здесь в коде, а не в админке: пока блок статичный, выносить
+// нечего. Когда появятся вырезки — заводится коллекция с участниками,
+// их ролями, ссылками и описаниями из спецификации.
+
+const T = '#1c5e74';
+const TH = 'rgba(28,94,116,0.5)';
+const OH = 'rgba(195,106,73,0.5)';
+
+const pixels: [x: number, y: number, color: string][] = [
+  [1394, 13, TH], [1371, 36, OH], [1394, 36, T], [1417, 36, TH],
+  [1371, 59, T], [1394, 59, TH], [1417, 82, OH],
+  [0, 230, OH], [23, 230, T], [0, 253, TH],
+];
+---
+
+<section class="team" data-reveal aria-labelledby="team-title">
+  <div class="team__pixels" aria-hidden="true">
+    {pixels.map(([x, y, color]) => <span style={`left:${x}px;top:${y}px;background:${color}`} />)}
+  </div>
+
+  <div class="team__inner">
+    {/* Фигурные скобки моноширинным — так во всех заголовках макета */}
+    <h2 class="team__title" id="team-title">
+      <span class="team__brace">&#123;</span> Команда проекта <span class="team__brace">&#125;</span>
+    </h2>
+
+    <p class="team__lead">
+      Мы — команда, которая создаёт и развивает Локус. Объединяем экспертизу
+      в медицине, технологиях, образовании и коммуникациях, чтобы строить
+      будущее цифрового здравоохранения
+    </p>
+
+    <div class="team__panel">
+      <Image
+        class="team__photo"
+        src={group}
+        alt="Команда проекта ЛОКУС"
+        widths={[1024, 1652]}
+        sizes="1000px"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .team {
+    position: relative;
+    overflow: hidden;
+    padding-block: 40px 64px;
+  }
+
+  /* Сцена 1440 — координаты пикселей ложатся 1:1 */
+  .team__pixels {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: var(--layout-width);
+    height: 100%;
+    margin-left: calc(var(--layout-width) / -2);
+    pointer-events: none;
+  }
+
+  .team__pixels span {
+    position: absolute;
+    width: 22.857px;
+    height: 22.857px;
+  }
+
+  .team__inner {
+    position: relative;
+    width: var(--layout-width);
+    max-width: 100%;
+    padding-inline: var(--container-pad);
+    margin-inline: auto;
+  }
+
+  .team__title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    letter-spacing: normal;
+  }
+
+  .team__brace {
+    font-family: var(--font-mono);
+  }
+
+  .team__lead {
+    max-width: 610px;
+    margin-top: 18px;
+    font-size: 24px;
+    line-height: 36px;
+    letter-spacing: normal;
+    color: var(--text-soft);
+  }
+
+  /* --- Панель с фотографией --- */
+
+  /* Фото прижато к низу: люди стоят на нижнем крае панели, и при любой
+     её высоте должны оставаться там же */
+  .team__panel {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 502px;
+    margin-top: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px;
+    background: rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+  }
+
+  .team__photo {
+    display: block;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: bottom;
+  }
+</style>

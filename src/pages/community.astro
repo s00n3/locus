@@ -4,6 +4,7 @@ import CommunityHero from '../components/CommunityHero.astro';
 import Experts from '../components/Experts.astro';
 import Mentors from '../components/Mentors.astro';
 import Graduates from '../components/Graduates.astro';
+import Team from '../components/Team.astro';
 ---
 
 <BaseLayout
@@ -17,11 +18,14 @@ import Graduates from '../components/Graduates.astro';
       она идёт сразу за экспертами. Отдельного компонента не заводим —
       иначе правку пришлось бы вносить дважды. */}
   <Mentors showHead={false} />
+  {/* Он же «Вы можете быть здесь» из ТЗ: рукописное приглашение со
+      стрелкой к первой карточке и есть этот пункт */}
   <Graduates />
 
-  {/*
-    Блоки страницы «Сообщество» (ТЗ, раздел 4.3 / порядок 9.1):
-      19. «Вы можете быть здесь»
-      20. Команда проекта
-  */}
+  {/* Заглушка: наведение с подсветкой участника ждёт восьми вырезок,
+      подробности в самом компоненте */}
+  <Team />
+
+  {/* Страница «Сообщество» собрана (ТЗ, раздел 4.3). Дальше по разделу 9.1
+      остался попап «Команда проекта» и адаптив по разделу 9.2. */}
 </BaseLayout>
