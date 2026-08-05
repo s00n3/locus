@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CommunityHero from '../components/CommunityHero.astro';
 import Experts from '../components/Experts.astro';
+import Mentors from '../components/Mentors.astro';
 ---
 
 <BaseLayout
@@ -10,6 +11,11 @@ import Experts from '../components/Experts.astro';
 >
   <CommunityHero />
   <Experts />
+
+  {/* Та же карусель, что на главной, но без шапки: в макете «Сообщества»
+      она идёт сразу за экспертами. Отдельного компонента не заводим —
+      иначе правку пришлось бы вносить дважды. */}
+  <Mentors showHead={false} />
 
   {/*
     Блоки страницы «Сообщество» (ТЗ, раздел 4.3 / порядок 9.1):

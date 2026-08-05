@@ -4,6 +4,18 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import noteArrow from '../assets/icons/mentors-note-arrow.svg?url';
 
+interface Props {
+  /**
+   * Заголовок с рукописной подноской и декоративные пиксели нужны только
+   * на главной. На «Сообществе» карусель идёт сразу за экспертами, без
+   * шапки — так в макете. Пиксели там тоже свои, снятые под другой блок,
+   * поэтому уходят вместе с ней.
+   */
+  showHead?: boolean;
+}
+
+const { showHead = true } = Astro.props;
+
 const mentors = (await getCollection('mentors')).sort((a, b) => a.data.order - b.data.order);
 
 const uploads = import.meta.glob<{ default: ImageMetadata }>(
@@ -30,21 +42,32 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
 ];
 ---
 
-<section class="mentors" data-reveal aria-labelledby="mentors-title">
-  <div class="mentors__pixels" aria-hidden="true">
-    {
-      pixels.map(([x, y, size, color]) => (
-        <span style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}`} />
-      ))
-    }
-  </div>
+<section
+  class:list={['mentors', { 'mentors--bare': !showHead }]}
+  data-reveal
+  aria-labelledby={showHead ? 'mentors-title' : undefined}
+  aria-label={showHead ? undefined : 'Менторы'}
+>
+  {
+    showHead && (
+      <div class="mentors__pixels" aria-hidden="true">
+        {pixels.map(([x, y, size, color]) => (
+          <span style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}`} />
+        ))}
+      </div>
+    )
+  }
 
-  <div class="mentors__head">
-    <h2 class="mentors__title" id="mentors-title">/// Менторы</h2>
+  {
+    showHead && (
+      <div class="mentors__head">
+        <h2 class="mentors__title" id="mentors-title">/// Менторы</h2>
 
-    <p class="mentors__note">Организовывают работу и помогают с любой проблемой</p>
-    <img class="mentors__note-arrow" src={noteArrow} alt="" width="23" height="53" aria-hidden="true" />
-  </div>
+        <p class="mentors__note">Организовывают работу и помогают с любой проблемой</p>
+        <img class="mentors__note-arrow" src={noteArrow} alt="" width="23" height="53" aria-hidden="true" />
+      </div>
+    )
+  }
 
   <div class="mentors__carousel">
     <button class="mentors__nav" type="button" data-dir="-1" aria-label="Предыдущие менторы">
@@ -133,6 +156,16 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     position: relative;
     overflow: hidden;
     padding-block: 59px 64px;
+  }
+
+  /* Без шапки карусель прижимается к предыдущему блоку: в макете
+     «Сообщества» она идёт сразу за экспертами */
+  .mentors--bare {
+    padding-block: 30px 64px;
+  }
+
+  .mentors--bare .mentors__carousel {
+    margin-top: 0;
   }
 
   /* --- Заголовок и рукописная подноска --- */
