@@ -1,0 +1,146 @@
+/* ---------------------------------------------------------------------------
+   Движение: появление секций при прокрутке и вход героя.
+
+   Класс `has-motion` вешает встроенный скрипт в <head> — и только если
+   пользователь не просил уменьшить движение. Поэтому:
+   — без JS контент виден сразу, ничего не прячется;
+   — при системной настройке «меньше движения» анимаций нет вовсе,
+     а не «есть, но короткие».
+   Анимируются только opacity и transform: они не вызывают пересчёт вёрстки.
+   --------------------------------------------------------------------------- */
+
+/* --- Появление секций --- */
+
+.has-motion [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.has-motion [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Вход героя ---
+   Порядок осмысленный: сначала панель и фон, потом хромосома, затем
+   подписи, и в конце стрелка прорисовывается и «дописывается» заметка. */
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+
+@keyframes hero-chromosome-in {
+  from {
+    opacity: 0;
+    transform: scale(1.07);
+  }
+}
+
+/* Медленный дрейф. Родитель повёрнут на -47.64°, поэтому смещение
+   идёт вдоль оси хромосомы — она словно покачивается по своей длине. */
+@keyframes hero-drift {
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes hero-pixel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes hero-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Заметка проявляется слева направо — как будто её пишут от руки */
+@keyframes hero-write {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 -4% 0 0);
+  }
+}
+
+.has-motion .hero__panel-glow,
+.has-motion .hero__panel,
+.has-motion .hero__code {
+  animation: hero-fade 900ms ease both;
+}
+
+.has-motion .hero__chromosome-img {
+  animation:
+    hero-chromosome-in 1300ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both,
+    hero-drift 11s ease-in-out 1500ms infinite;
+}
+
+.has-motion .hero__pixels span {
+  animation: hero-pixel-in 500ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.has-motion .hero__eyebrow {
+  animation: hero-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) 450ms both;
+}
+
+.has-motion .hero__logo {
+  animation: hero-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) 550ms both;
+}
+
+.has-motion .hero__line-short,
+.has-motion .hero__tagline {
+  animation: hero-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) 700ms both;
+}
+
+.has-motion .hero__university,
+.has-motion .hero__amp,
+.has-motion .hero__credits-logo,
+.has-motion .hero__line-long,
+.has-motion .hero__lead {
+  animation: hero-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) 850ms both;
+}
+
+/* «&&» в макете повёрнут — держим поворот и в анимации, иначе он выпрямится */
+@keyframes hero-rise-amp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 22px)) rotate(-10.46deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-10.46deg);
+  }
+}
+
+.has-motion .hero__amp {
+  animation-name: hero-rise-amp;
+}
+
+.has-motion .hero__arrow {
+  animation: hero-fade 200ms ease 1100ms both;
+}
+
+.has-motion .hero__arrow path {
+  stroke-dasharray: 1;
+  animation: hero-draw 1000ms ease-out 1100ms both;
+}
+
+.has-motion .hero__note {
+  animation: hero-write 900ms ease-out 1700ms both;
+}

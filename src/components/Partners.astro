@@ -26,7 +26,7 @@ const pixels: [x: number, y: number, color: string][] = [
 ];
 ---
 
-<section class="partners" aria-labelledby="partners-title">
+<section class="partners" data-reveal aria-labelledby="partners-title">
   <div class="partners__pixels" aria-hidden="true">
     {pixels.map(([x, y, color]) => <span style={`left:${x}px;top:${y}px;background:${color}`} />)}
   </div>

@@ -51,6 +51,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
     <link rel="preload" href={sansCyr400} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={sansCyr500} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoCyr400} as="font" type="font/woff2" crossorigin />
+    {/* Встроенный и до отрисовки: класс должен появиться раньше, чем
+        браузер покажет страницу, иначе секции моргнут из скрытого
+        состояния в видимое. Уважаем системную настройку движения. */}
+    <script is:inline>
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('has-motion');
+      }
+    </script>
   </head>
 
   <body>
@@ -63,5 +71,44 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
     </main>
 
     <Footer />
+
+    <script>
+      // Появление секций при прокрутке. Наблюдатель, а не CSS-таймлайн
+      // прокрутки: тот пока есть не во всех браузерах, а тут поведение
+      // одинаково везде.
+      const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      const enabled = document.documentElement.classList.contains('has-motion');
+
+      if (!enabled || !('IntersectionObserver' in window)) {
+        // Движение выключено или наблюдателя нет — просто показываем всё
+        targets.forEach((el) => el.classList.add('is-visible'));
+      } else {
+        let observerFired = false;
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            observerFired = true;
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          },
+          // Показываем, когда секция зашла в кадр примерно на десятую часть
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
+        );
+
+        targets.forEach((el) => observer.observe(el));
+
+        // Страховка от пустой страницы. Наблюдатель обязан позвать колбэк
+        // сразу после подписки — даже если ничего не пересекается. Если
+        // за три секунды он не позвал ни разу, значит сломан, и прятать
+        // контент дальше нельзя.
+        setTimeout(() => {
+          if (observerFired) return;
+          targets.forEach((el) => el.classList.add('is-visible'));
+        }, 3000);
+      }
+    </script>
   </body>
 </html>

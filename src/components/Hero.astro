@@ -1,7 +1,7 @@
 ---
 import chromosome from '../assets/images/chromosome.png';
 import sechenovLogo from '../assets/icons/sechenov.svg?url';
-import arrow from '../assets/icons/hero-arrow.svg?url';
+import arrowMarkup from '../assets/icons/hero-arrow.svg?raw';
 import lineShort from '../assets/icons/hero-line-short.svg?url';
 import lineLong from '../assets/icons/hero-line-long.svg?url';
 import { Image } from 'astro:assets';
@@ -54,22 +54,25 @@ const pixels: Pixel[] = [
 
   {/* Отдаём кадр в исходной пропорции: кадрирование делает CSS (object-fit:
       cover), поэтому пережимать заранее нельзя — иначе хромосома сплющится */}
-  <Image
-    class="hero__chromosome"
-    src={chromosome}
-    alt=""
-    width={1672}
-    height={941}
-    quality={78}
-    loading="eager"
-    aria-hidden="true"
-  />
+  {/* Обёртка держит позицию и поворот, анимация живёт на самом кадре —
+      иначе дрейф стирал бы поворот */}
+  <div class="hero__chromosome" aria-hidden="true">
+    <Image
+      class="hero__chromosome-img"
+      src={chromosome}
+      alt=""
+      width={1672}
+      height={941}
+      quality={78}
+      loading="eager"
+    />
+  </div>
 
   <div class="hero__pixels" aria-hidden="true">
     {
-      pixels.map(([x, y, color, size = 22.857]) => (
+      pixels.map(([x, y, color, size = 22.857], index) => (
         <span
-          style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color}`}
+          style={`left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};animation-delay:${400 + index * 14}ms`}
         />
       ))
     }
@@ -88,7 +91,9 @@ const pixels: Pixel[] = [
 
   {/* Рукописная подпись со стрелкой к хромосоме */}
   <p class="hero__note">Место, где запускаются проекты</p>
-  <img class="hero__arrow" src={arrow} alt="" width="59" height="74" aria-hidden="true" />
+  {/* Стрелка встроена, а не подключена картинкой: только так можно
+      прорисовать её обводку при появлении */}
+  <span class="hero__arrow" aria-hidden="true" set:html={arrowMarkup} />
 
   <img class="hero__university" src={sechenovLogo} alt="Сеченовский университет" width="211" height="57" />
   <span class="hero__amp" aria-hidden="true">&&</span>
@@ -178,6 +183,12 @@ const pixels: Pixel[] = [
     width: 420.205px;
     height: 651.305px;
     transform: translate(-50%, -50%) rotate(-47.64deg);
+    pointer-events: none;
+  }
+
+  .hero__chromosome-img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: center bottom;
     /* 0.97 подобран по эталону: обесцвеченный исходник даёт яркость 186,
@@ -271,6 +282,12 @@ const pixels: Pixel[] = [
     width: 58.79px;
     height: 73.53px;
     transform: translate(-50%, -50%) rotate(25.25deg);
+  }
+
+  .hero__arrow :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   /* --- Нижний ряд --- */
