@@ -3,6 +3,17 @@ import { getCollection } from 'astro:content';
 
 const audiences = (await getCollection('audiences')).sort((a, b) => a.data.order - b.data.order);
 
+// TODO(заказчик): формулировка условий участия (ТЗ 2.4). Кто может подать
+// заявку, обязателен ли статус студента Сеченовского, есть ли отбор и
+// сроки — точный текст за заказчиком.
+//
+// В CMS не вынесено намеренно: это постоянный текст вёрстки, а не список,
+// который правят регулярно (см. комментарий в src/content.config.ts).
+// Пока строка пуста, абзац не выводится — на сайте нет ни пустого места,
+// ни выдуманной формулировки. Как текст придёт — вписать сюда, и он
+// появится под заголовком.
+const CONDITIONS = '';
+
 // Декоративные пиксели слева сверху — нода «Пиксели 9» (9:241).
 // Часть уходит выше нуля секции и обрезается — так в макете.
 const T = 'var(--surface-panel)';
@@ -25,7 +36,9 @@ const pixels: [x: number, y: number, color: string][] = [
 
   <div class="container">
     {/* Угловые скобки — часть оформления, как «///» и «{}» в соседних секциях */}
-    <h2 class="audiences__title" id="audiences-title">&lt;H1&gt; Кому подойдет? &lt;/H1&gt;</h2>
+    <h2 class="audiences__title" id="audiences-title">&lt;H1&gt; Кому подойдёт обучение? &lt;/H1&gt;</h2>
+
+    {CONDITIONS && <p class="audiences__conditions">{CONDITIONS}</p>}
 
     <ul class="audiences__grid">
       {
@@ -58,6 +71,18 @@ const pixels: [x: number, y: number, color: string][] = [
     line-height: 1.2;
     letter-spacing: normal;
     text-align: center;
+  }
+
+  /* Условия участия: строка под заголовком. Пока текста нет, абзац не
+     выводится вовсе, поэтому отступ сетки от него не зависит. */
+  .audiences__conditions {
+    max-width: 70ch;
+    margin: 16px auto 0;
+    font-size: 20px;
+    line-height: 1.4;
+    letter-spacing: normal;
+    text-align: center;
+    color: var(--text-muted);
   }
 
   .audiences__grid {
