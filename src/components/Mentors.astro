@@ -254,11 +254,15 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
 
   /* --- Карточка --- */
 
+  /* Высота из макета как минимум, а не жёстко: метка стоит абсолютно у нижнего
+     края, и при длинном описании текст заезжал под неё (проверено — на «Medtech»
+     перекрытие было 12px). Теперь длинный текст растит карточку, а не лезет
+     на метку; в ряду карточки тянутся по самой высокой. */
   .mentor {
     position: relative;
     flex: none;
     width: 320.086px;
-    height: 231.429px;
+    min-height: 231.429px;
     padding: 14.29px 17.46px;
     border: 1px solid var(--border-warm);
     border-radius: var(--radius-card);
@@ -313,8 +317,11 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     color: #d9d9d9;
   }
 
+  /* Нижний отступ резервирует полосу под рукописную метку: без него
+     описание доходило до неё и накладывалось */
   .mentor__text {
     margin-top: 23px;
+    margin-bottom: 44px;
     font-size: 14px;
     line-height: 1.3;
     letter-spacing: normal;
