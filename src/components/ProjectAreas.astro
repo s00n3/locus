@@ -46,8 +46,8 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
                       <Image
                         src={cover}
                         alt={area.data.imageAlt}
-                        widths={[433, 866]}
-                        sizes="433px"
+                        widths={[358, 716]}
+                        sizes="358px"
                         loading="lazy"
                       />
                     </span>
@@ -166,12 +166,18 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
      ручной подбор колонок. В макете второй ряд сдвинут вправо на 26px —
      ручная расстановка, центрируем. */
 
+  /* Заказчик просил карточки меньше (ТЗ 7.2). Уменьшаем не только высоту,
+     но и ширину — колонка сетки сужена до 1140, поэтому карточка стала
+     ~358px вместо 432. Раскладка 3 + 2 сохранена: пять карточек в один
+     ряд ужались бы до 256px, и заголовки посыпались бы на три строки. */
   .areas__grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 24px 32px;
-    margin-top: 33px;
+    width: 1140px;
+    max-width: 100%;
+    margin: 33px auto 0;
   }
 
   /* Ширина считается от колонки, а не задана числом: при жёстких 432px
@@ -191,7 +197,7 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
     flex-direction: column;
     flex: 1;
     min-width: 0;
-    min-height: 468px;
+    min-height: 340px;
     border: 1px solid transparent;
     border-radius: var(--radius-block);
     background: #020d20;
@@ -218,14 +224,15 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
     outline-offset: var(--focus-offset);
   }
 
-  /* Кадр выше, чем видимая часть: нижние 88px уходят под полупрозрачную
-     панель и просвечивают через неё — так в макете */
+  /* Кадр выше, чем видимая часть: нижние 60px уходят под полупрозрачную
+     панель и просвечивают через неё — так в макете. В исходных размерах
+     подложка накрывала 88px, пропорция сохранена (ТЗ 7.2). */
   .area__media {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
-    height: 292px;
+    height: 200px;
   }
 
   .area__media :global(img) {
@@ -240,27 +247,28 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 14px;
-    margin-top: 204px;
+    gap: 10px;
+    margin-top: 140px;
     /* Справа отступ меньше, чем слева — так в макете: заголовку карточки
        нужна почти вся ширина панели, иначе он ломается на две строки */
-    padding: 17px 14px 16px 27px;
+    padding: 14px 12px 14px 20px;
     border-radius: 0 0 var(--radius-card) var(--radius-card);
     background: rgba(28, 94, 116, 0.2);
   }
 
-  /* 30, а не округлённые до 32: в макете кегль 30.476, и на 32 длинное
-     «Искусственный интеллект» переставало влезать в строку */
+  /* В макете кегль 30.476 при карточке 432px. Карточка стала уже (ТЗ 7.2),
+     поэтому кегли пересчитаны в той же пропорции — иначе «Искусственный
+     интеллект» ломался бы на три строки. */
   .area__title {
-    font-size: 30px;
+    font-size: 23px;
     line-height: 1.3;
     letter-spacing: normal;
     color: var(--text-primary);
   }
 
   .area__text {
-    font-size: 24px;
-    line-height: 30px;
+    font-size: 18px;
+    line-height: 23px;
     letter-spacing: normal;
     color: var(--text-primary);
   }
@@ -270,15 +278,15 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
   .area__skills {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
     margin-top: auto;
   }
 
   .area__skill {
-    padding: 9px 17px;
+    padding: 6px 12px;
     border: 1px solid var(--text-primary);
     border-radius: 8px;
-    font-size: 24px;
+    font-size: 15px;
     line-height: 1.1;
     letter-spacing: normal;
     color: var(--text-primary);
