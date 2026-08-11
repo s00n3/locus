@@ -26,7 +26,10 @@ for (const project of projects) {
 }
 ---
 
-<section class="builder" data-reveal aria-labelledby="builder-title">
+{/* id на секции, а не на заголовке: якорь с главной (кнопка «Подобрать
+    индивидуальный план обучения») должен приводить к началу шага вместе
+    с номером «1», а не к строке заголовка */}
+<section class="builder" id="builder" data-reveal aria-labelledby="builder-title">
   <div class="builder__inner">
     {/* Номер шага. В макете он есть у второго и третьего шагов конструктора,
         у первого его забыли — добавлен по просьбе заказчика, стиль взят
@@ -152,8 +155,11 @@ for (const project of projects) {
 <style>
   /* Сцена 1440, поля 60 — у этого блока своя колонка: остальной сайт
      живёт в контейнере 40…1400, здесь макет даёт 60…1380 */
+  /* Отступ при переходе по якорю #builder с главной: без него верхний
+     padding секции упирается в край окна и шаг читается обрезанным */
   .builder {
     padding-block: 71px 49px;
+    scroll-margin-top: 24px;
   }
 
   .builder__inner {

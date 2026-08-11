@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import TrackCard from './TrackCard.astro';
 import TrackModals from './TrackModals.astro';
+import { withBase } from '../lib/url';
 
 const tracks = (await getCollection('tracks')).sort((a, b) => a.data.order - b.data.order);
 
@@ -46,10 +47,12 @@ const pixels: [x: number, y: number, color: string][] = [
       }
     </ul>
 
-    {/* Откроет форму индивидуального плана — попап появится на блоке 22 */}
-    <button class="tracks__cta" type="button" data-modal="individual-plan">
+    {/* Ведёт в конструктор «Собери свой трек» на «Проектах», а не сразу в
+        форму: форма индивидуального плана подставляет ответы конструктора,
+        и открывать её с пустыми полями с главной было бессмысленно. */}
+    <a class="tracks__cta" href={withBase('/projects#builder')}>
       Подобрать индивидуальный план обучения
-    </button>
+    </a>
   </div>
 
   {/* Сами окна и их открытие живут отдельным компонентом: те же попапы
