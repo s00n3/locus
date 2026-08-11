@@ -118,9 +118,17 @@ import { withBase } from '../lib/url';
     color: var(--text-muted);
   }
 
+  /* Подчёркивание и отклик на наведение: цветом одним ссылка от текста
+     отличалась слабо, а состояния у неё не было вовсе (аудит по ТЗ 3.2) */
   .cookie__body a {
     color: var(--brand-cyan);
+    text-decoration: underline;
     text-underline-offset: 3px;
+    transition: color var(--transition-fast);
+  }
+
+  .cookie__body a:hover {
+    color: var(--text-primary);
   }
 
   .cookie__button {

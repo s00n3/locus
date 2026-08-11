@@ -93,6 +93,13 @@ const isActive = (href: string) => !href.startsWith('#') && normalize(href) === 
     color: var(--text-primary);
     line-height: 1;
     white-space: nowrap;
+    /* Логотип — ссылка на главную, а отклика на наведение у него не было
+       (аудит по ТЗ 3.2). Приглушение, как у иконок соцсетей в футере. */
+    transition: opacity var(--transition-fast);
+  }
+
+  .header__logo:hover {
+    opacity: 0.75;
   }
 
   .header__wordmark {

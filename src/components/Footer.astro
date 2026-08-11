@@ -145,6 +145,8 @@ const docLinks = [{ label: 'Политика конфиденциальност�
 
   /* --- Левый блок: логотип, подпись, соцсети --- */
 
+  /* Отклика на наведение у логотипа-ссылки не было (аудит по ТЗ 3.2) —
+     приглушаем так же, как иконки соцсетей рядом */
   .footer__logo {
     display: flex;
     align-items: center;
@@ -152,6 +154,11 @@ const docLinks = [{ label: 'Политика конфиденциальност�
     color: var(--text-primary);
     line-height: 1;
     white-space: nowrap;
+    transition: opacity var(--transition-fast);
+  }
+
+  .footer__logo:hover {
+    opacity: 0.75;
   }
 
   .footer__wordmark {
