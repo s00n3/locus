@@ -89,6 +89,14 @@ const pixels: Pixel[] = [
   <img class="hero__line-short" src={lineShort} alt="" width="183" height="2" aria-hidden="true" />
   <p class="hero__tagline">цифровая проектная школа</p>
 
+  {/* Кнопка по ТЗ 1.2. В макете главной её нет, поэтому место и вид взяты
+      с героя «Проектов» — та же композиция и те же координаты (1137, 372),
+      чтобы первый экран двух страниц не расходился. Открывает уже
+      существующую форму заявки: обработчик ищет кнопки по всему документу. */}
+  <button class="hero__cta" type="button" data-modal="application" aria-haspopup="dialog">
+    Подать заявку
+  </button>
+
   {/* Рукописная подпись со стрелкой к хромосоме */}
   <p class="hero__note">Место, где запускаются проекты</p>
   {/* Стрелка встроена, а не подключена картинкой: только так можно
@@ -259,6 +267,29 @@ const pixels: Pixel[] = [
     line-height: 1.2;
     letter-spacing: normal;
     white-space: nowrap;
+  }
+
+  /* Координаты и размер — как у такой же кнопки в герое «Проектов» */
+  .hero__cta {
+    left: 1137px;
+    top: 372px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 232px;
+    height: 60px;
+    padding: 12px 24px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .hero__cta:hover {
+    background: var(--accent-terracotta-light);
   }
 
   /* --- Подпись со стрелкой --- */
