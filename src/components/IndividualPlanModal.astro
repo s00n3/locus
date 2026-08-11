@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { withBase } from '../lib/url';
 
 // Попап «Заявка с индивидуальным планом» — нода Figma 9:1076 (ТЗ, раздел 4.4).
 // Открывается кнопками [data-modal="individual-plan"]: пока это кнопка
@@ -170,9 +171,20 @@ const pixels: [x: number, y: number, color: string][] = [
             stroke-linejoin="round"
           />
         </svg>
-        <label class="plan-modal__consent-text" for="plan-consent">
-          Согласен на обработку персональных данных
-        </label>
+        {/* Ссылка вынесена из <label>: внутри него клик по ней заодно
+            переключал бы галочку. Открывается в новой вкладке, иначе уход
+            на политику стёр бы заполненную форму. */}
+        <span class="plan-modal__consent-text">
+          <label for="plan-consent">Согласен на обработку</label>{' '}
+          <a
+            class="plan-modal__consent-link"
+            href={withBase('/privacy')}
+            target="_blank"
+            rel="noopener"
+          >
+            персональных данных
+          </a>
+        </span>
       </p>
 
       <div class="plan-modal__footer">
@@ -582,6 +594,21 @@ const pixels: [x: number, y: number, color: string][] = [
     line-height: normal;
     letter-spacing: normal;
     cursor: pointer;
+  }
+
+  /* Невидимый чекбокс растянут на всю строку (иначе по галочке нельзя было
+     попасть) и как позиционированный элемент рисуется поверх текста —
+     ссылку приходится поднимать над ним, иначе клик уходит в чекбокс. */
+  .plan-modal__consent-link {
+    position: relative;
+    z-index: 1;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--transition-fast);
+  }
+
+  .plan-modal__consent-link:hover {
+    color: var(--brand-cyan);
   }
 
   /* --- Нижняя строка --- */

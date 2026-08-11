@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { withBase } from '../lib/url';
 
 // Попап «Форма подачи заявки» — нода Figma 9:1011 (ТЗ, раздел 4.4).
 // Открывается кнопками [data-modal="application"]: CTA главной и кнопка
@@ -186,9 +187,20 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
               stroke-linejoin="round"
             />
           </svg>
-          <label class="application-modal__consent-text" for="application-consent">
-            Согласен на обработку персональных данных
-          </label>
+          {/* Ссылка вынесена из <label>: внутри него клик по ней заодно
+              переключал бы галочку. Открывается в новой вкладке, иначе
+              уход на политику стёр бы заполненную форму. */}
+          <span class="application-modal__consent-text">
+            <label for="application-consent">Согласен на обработку</label>{' '}
+            <a
+              class="application-modal__consent-link"
+              href={withBase('/privacy')}
+              target="_blank"
+              rel="noopener"
+            >
+              персональных данных
+            </a>
+          </span>
         </p>
       </div>
 
@@ -533,6 +545,21 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     line-height: normal;
     letter-spacing: normal;
     cursor: pointer;
+  }
+
+  /* Невидимый чекбокс растянут на всю строку (иначе по галочке нельзя было
+     попасть) и как позиционированный элемент рисуется поверх текста —
+     ссылку приходится поднимать над ним, иначе клик уходит в чекбокс. */
+  .application-modal__consent-link {
+    position: relative;
+    z-index: 1;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--transition-fast);
+  }
+
+  .application-modal__consent-link:hover {
+    color: var(--brand-cyan);
   }
 
   /* --- Кнопка --- */
