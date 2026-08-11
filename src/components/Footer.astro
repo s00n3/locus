@@ -18,6 +18,10 @@ const resourceLinks = [
   { label: 'faq', href: `${home}#faq` },
   { label: 'Партнерам', href: `${home}#partners` },
 ];
+
+// Юридические документы (ТЗ 5.6). Полный список за заказчиком — пока
+// только политика конфиденциальности, страница которой ждёт текста.
+const docLinks = [{ label: 'Политика конфиденциальности', href: withBase('/privacy') }];
 ---
 
 <footer class="footer" data-reveal id="contacts">
@@ -62,20 +66,43 @@ const resourceLinks = [
         </ul>
       </nav>
 
-      <nav class="footer__col" aria-labelledby="footer-resources-title">
-        <h2 class="footer__title" id="footer-resources-title">Ресурсы</h2>
-        <ul class="footer__list">
-          {
-            resourceLinks.map((link) => (
-              <li>
-                <a class="footer__link" href={link.href}>
-                  {link.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
+      <div class="footer__col">
+        <nav aria-labelledby="footer-resources-title">
+          <h2 class="footer__title" id="footer-resources-title">Ресурсы</h2>
+          <ul class="footer__list">
+            {
+              resourceLinks.map((link) => (
+                <li>
+                  <a class="footer__link" href={link.href}>
+                    {link.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+
+        {/* Раздел с документами (ТЗ 5.6). Ссылка на политику до этого стояла
+            в нижней строке — теперь у неё есть собственное место, а нижняя
+            строка вернулась к виду из макета.
+
+            Список документов заказчик уточняет: пока в нём только политика.
+            Новые пункты добавлять в docLinks выше. */}
+        <nav class="footer__docs" aria-labelledby="footer-docs-title">
+          <h2 class="footer__title" id="footer-docs-title">Документы</h2>
+          <ul class="footer__list footer__list--docs">
+            {
+              docLinks.map((link) => (
+                <li>
+                  <a class="footer__link footer__link--doc" href={link.href}>
+                    {link.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
 
       <div class="footer__col">
         <h2 class="footer__title">Контакты</h2>
@@ -95,9 +122,6 @@ const resourceLinks = [
         width="211"
         height="57"
       />
-
-      {/* Требование ТЗ (раздел 6); в макете ссылки нет, текст политики готовится */}
-      <a class="footer__policy" href={withBase('/privacy')}>Политика конфиденциальности</a>
 
       <p class="footer__federal">Федеральный проект «Цифровые кафедры»</p>
     </div>
@@ -247,17 +271,23 @@ const resourceLinks = [
     letter-spacing: normal;
   }
 
-  .footer__policy {
-    font-weight: 300;
-    font-size: 24px;
-    line-height: 1.3;
+  /* --- Документы --- */
+
+  .footer__docs {
+    margin-top: 28px;
+  }
+
+  .footer__list--docs {
+    gap: 12px;
+  }
+
+  /* Кегль меньше, чем у остальных ссылок футера: названия документов
+     длинные и на 32px рассыпались бы на три строки в узкой колонке */
+  .footer__link--doc {
+    font-size: 20px;
+    line-height: 1.25;
     color: var(--text-muted);
     text-decoration: underline;
     text-underline-offset: 4px;
-    transition: color var(--transition-fast);
-  }
-
-  .footer__policy:hover {
-    color: var(--text-primary);
   }
 </style>
