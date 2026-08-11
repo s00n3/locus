@@ -32,6 +32,20 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
 );
 const cover = (path?: string) => (path ? uploads[path]?.default : undefined);
 
+// Проект с направлением, которого нет среди чипов конструктора, ни под один
+// выбор не попадёт. Сборку не роняем — заказчик правит контент в админке
+// и увидит подсказку в логах. Проверка жила в «Собери свой трек», пока
+// карточки показывал он; после ТЗ 7.1 выдача только здесь.
+const known = new Set(directions.map((d) => d.data.title));
+for (const project of projects) {
+  if (!known.has(project.data.direction)) {
+    console.warn(
+      `[Тебе подойдут] проект «${project.data.title}»: направления ` +
+        `«${project.data.direction}» нет среди чипов — карточка не попадёт в подбор`,
+    );
+  }
+}
+
 // Направление → трек. Скрипту нужна эта таблица, чтобы посчитать,
 // какой трек набрал больше выбранных направлений.
 const directionTrack = Object.fromEntries(

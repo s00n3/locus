@@ -7,23 +7,9 @@ import { getCollection } from 'astro:content';
 // поштучно, как в старом слое.
 //
 // Старое «колесо» в макете скрыто (не удалено) — верстается замена:
-// ряд чипов с мультивыбором, под ними карточки проектов.
+// ряд чипов с мультивыбором и счётчик отмеченного.
 
 const directions = (await getCollection('directions')).sort((a, b) => a.data.order - b.data.order);
-const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-
-// Проект с направлением, которого нет в списке чипов, отфильтровать нечем.
-// Не роняем сборку — заказчик правит контент в админке и увидит подсказку
-// в логах, а карточка останется видна при пустом выборе.
-const known = new Set(directions.map((d) => d.data.title));
-for (const project of projects) {
-  if (!known.has(project.data.direction)) {
-    console.warn(
-      `[Собери свой трек] проект «${project.data.title}»: направления ` +
-        `«${project.data.direction}» нет среди чипов — карточка не попадёт под фильтр`,
-    );
-  }
-}
 ---
 
 {/* id на секции, а не на заголовке: якорь с главной (кнопка «Подобрать
@@ -44,8 +30,10 @@ for (const project of projects) {
     </div>
 
     <div class="builder__head">
+      {/* Формулировка изменена вместе с ТЗ 7.1: карточки проектов больше не
+          появляются тут же, поэтому обещание перенесено на итог подбора */}
       <p class="builder__lead">
-        Отметь направления — покажем проекты по ним. Можно выбрать несколько.
+        Отметь направления — подходящие проекты покажем в конце. Можно выбрать несколько.
       </p>
 
       {/* Живёт рядом с чипами, поэтому об изменениях сообщаем вежливо:
@@ -86,53 +74,29 @@ for (const project of projects) {
       }
     </ul>
 
-    <ul class="builder__grid" data-grid>
-      {
-        projects.map((project) => (
-          <li class="builder__item" data-direction={project.data.direction}>
-            <article class="builder__card">
-              <p class="builder__tag">{project.data.direction}</p>
-              <h3 class="builder__card-title">{project.data.title}</h3>
-              <p class="builder__card-text">{project.data.summary}</p>
-            </article>
-          </li>
-        ))
-      }
-    </ul>
-
-    {/* Показывается, когда под выбранные направления проектов ещё нет */}
-    <p class="builder__empty" data-empty hidden>
-      По выбранным направлениям проектов пока нет — снимите часть отметок.
-    </p>
+    {/* Карточек проектов здесь больше нет (ТЗ 7.1): подходящие проекты
+        показывает блок результата после третьего шага, а на первом шаге
+        выдача забегала вперёд и дублировала его. Остался счётчик. */}
   </div>
 </section>
 
 <script>
-  // Мультивыбор направлений. Без острова на React: тумблеры и фильтрация
-  // сетки — это десяток строк, ради них тащить рантайм незачем.
+  // Мультивыбор направлений. Без острова на React: тумблеры и счётчик —
+  // это десяток строк, ради них тащить рантайм незачем.
   const section = document.querySelector<HTMLElement>('.builder');
 
   if (section) {
     const chips = [...section.querySelectorAll<HTMLButtonElement>('[data-direction]')].filter(
       (el) => el.tagName === 'BUTTON',
     );
-    const items = [...section.querySelectorAll<HTMLElement>('.builder__item')];
     const counter = section.querySelector<HTMLElement>('[data-counter-value]');
-    const empty = section.querySelector<HTMLElement>('[data-empty]');
     const selected = new Set<string>();
 
+    // Отметки читают другие блоки — результат подбора и паутина —
+    // прямо из aria-pressed чипов (src/lib/constructor-answers.ts).
+    // Здесь остаётся только счётчик.
     const apply = () => {
-      // Пустой выбор показывает всё: так блок остаётся осмысленным
-      // до первого клика (ТЗ, раздел 5.1)
-      let visible = 0;
-      for (const item of items) {
-        const match = selected.size === 0 || selected.has(item.dataset.direction ?? '');
-        item.hidden = !match;
-        if (match) visible += 1;
-      }
-
       if (counter) counter.textContent = String(selected.size);
-      if (empty) empty.hidden = visible > 0;
     };
 
     for (const chip of chips) {
@@ -295,60 +259,4 @@ for (const project of projects) {
     flex: none;
   }
 
-  /* --- Карточки проектов --- */
-
-  .builder__grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-    margin-top: 29px;
-  }
-
-  .builder__item[hidden] {
-    display: none;
-  }
-
-  .builder__card {
-    display: flex;
-    flex-direction: column;
-    gap: 13px;
-    height: 100%;
-    padding: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    border-radius: var(--radius-card);
-    background: var(--surface-glass);
-  }
-
-  .builder__tag {
-    font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 1.4;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--brand-cyan);
-  }
-
-  .builder__card-title {
-    font-weight: 500;
-    font-size: 23px;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-  }
-
-  .builder__card-text {
-    font-size: 20px;
-    line-height: 1.5;
-    letter-spacing: -0.02em;
-    color: var(--text-muted);
-  }
-
-  .builder__empty {
-    margin-top: 24px;
-    font-size: 16px;
-    line-height: 1.5;
-    letter-spacing: -0.02em;
-    color: var(--text-muted);
-  }
 </style>
