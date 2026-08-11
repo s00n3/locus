@@ -45,11 +45,21 @@ const cover = (path?: string) => (path ? uploads[path]?.default : undefined);
 // карточки показывал он; после ТЗ 7.1 выдача только здесь.
 const known = new Set(directions.map((d) => d.data.title));
 for (const project of projects) {
-  if (!known.has(project.data.direction)) {
+  if (project.data.directions.length === 0) {
     console.warn(
-      `[Тебе подойдут] проект «${project.data.title}»: направления ` +
-        `«${project.data.direction}» нет среди чипов — карточка не попадёт в подбор`,
+      `[Тебе подойдут] у проекта «${project.data.title}» не указано ни одного ` +
+        `направления — карточка не попадёт ни в один подбор`,
     );
+    continue;
+  }
+
+  for (const name of project.data.directions) {
+    if (!known.has(name)) {
+      console.warn(
+        `[Тебе подойдут] проект «${project.data.title}»: направления ` +
+          `«${name}» нет среди чипов — по нему карточка не подберётся`,
+      );
+    }
   }
 }
 
@@ -136,10 +146,12 @@ const directionTrack = Object.fromEntries(
     <div class="result__part" data-part="projects" hidden>
       <p class="result__label">Проекты</p>
 
+    {/* Направления карточки перечислены через «|» — тот же контракт, что
+        у профессий: карточка подходит, если совпало хотя бы одно */}
     <ul class="result__grid" data-projects>
       {
         projects.map((project) => (
-          <li class="card" data-direction={project.data.direction} hidden>
+          <li class="card" data-directions={project.data.directions.join('|')} hidden>
             <article class="card__inner">
               {
                 cover(project.data.image) && (
@@ -250,7 +262,8 @@ const directionTrack = Object.fromEntries(
       }
 
       for (const card of projectCards) {
-        card.hidden = !chosen.includes(card.dataset.direction);
+        const own = (card.dataset.directions || '').split('|').filter(Boolean);
+        card.hidden = !own.some((name) => chosen.includes(name));
       }
 
       for (const card of professionCards) {

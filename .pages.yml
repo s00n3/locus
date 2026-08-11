@@ -365,7 +365,7 @@ content:
     filename: '{fields.title}.yaml'
     format: yaml
     view:
-      fields: [title, direction, order]
+      fields: [title, directions, order]
       sort: [order, title]
     fields:
       - name: order
@@ -382,13 +382,14 @@ content:
         type: text
         required: true
         description: Одно-два предложения — больше в карточку не помещается.
-      - name: direction
-        label: Направление
+      - name: directions
+        label: Направления
         type: string
+        list: true
         required: true
         description: >-
-          Должно совпадать с названием направления слово в слово, иначе
-          карточка не попадёт под фильтр.
+          Можно указать несколько. Каждое должно совпадать с названием
+          направления слово в слово, иначе по нему карточка не подберётся.
       - name: type
         label: Тип проекта
         type: select
