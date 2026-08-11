@@ -73,6 +73,25 @@ const sections = [
     -webkit-backdrop-filter: blur(9px);
     backdrop-filter: blur(9px);
     overflow: hidden;
+    transition:
+      transform var(--transition-base),
+      border-color var(--transition-base),
+      box-shadow var(--transition-base);
+  }
+
+  /* Отклик на наведение (ТЗ 6.4): тот же подъём и та же тень, что у карточек
+     треков — токены общие. Карточка пока ничего не открывает, поэтому
+     cursor не меняем: пусть вид не обещает клика, которого нет. Когда
+     появится попап проекта, останется навесить обработчик.
+     Обводка уже есть — усиливаем её цветом, размеры не двигаются. */
+  .case:hover {
+    transform: translateY(var(--hover-lift));
+    border-color: var(--border-warm);
+    box-shadow: var(--hover-shadow);
+  }
+
+  .case:hover .case__image {
+    transform: scale(1.04);
   }
 
   .case__media {
@@ -85,6 +104,7 @@ const sections = [
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform var(--transition-base);
   }
 
   .case__tag {

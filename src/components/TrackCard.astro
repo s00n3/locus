@@ -77,6 +77,19 @@ const resolved = image ? uploads[image]?.default : undefined;
     border-radius: var(--radius-card);
     overflow: hidden;
     color: var(--text-primary);
+    transition:
+      transform var(--transition-base),
+      box-shadow var(--transition-base);
+  }
+
+  /* Отклик на наведение (ТЗ 2.1): карточка приподнимается, ложится тень
+     и проступает тёплая обводка. Обводка — внутренней тенью, а не border:
+     настоящая рамка сдвинула бы содержимое на пиксель. */
+  .track:hover {
+    transform: translateY(var(--hover-lift));
+    box-shadow:
+      inset 0 0 0 1px var(--border-warm),
+      var(--hover-shadow);
   }
 
   .track__image {
@@ -85,6 +98,13 @@ const resolved = image ? uploads[image]?.default : undefined;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  /* Снимок наезжает чуть ближе — движение читается и на карточках,
+     где стекло занимает больше половины кадра */
+  .track:hover .track__image {
+    transform: scale(1.04);
   }
 
   /* Матовое стекло поверх фотографии: снимок просвечивает, но размыт.
