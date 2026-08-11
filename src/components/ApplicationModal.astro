@@ -504,6 +504,39 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     cursor: pointer;
   }
 
+  /* Состояния списка (ТЗ 5.4) — те же, что в форме индивидуального плана.
+     Рамку фокуса показывает обёртка, а не сам select: он внутри бокса без
+     границ, и подсветка обводила бы текст, а не поле. */
+  .application-modal__select:focus-visible {
+    outline: none;
+  }
+
+  /* Список раскрывается системным виджетом — цвета пунктам задаём явно,
+     как в форме плана, чтобы не зависеть от темы браузера */
+  .application-modal__select option {
+    background: #0b232c;
+    color: var(--text-primary);
+  }
+
+  .application-modal__control:hover {
+    border-color: var(--text-primary);
+  }
+
+  .application-modal__control:focus-within {
+    border-color: var(--brand-cyan);
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* Пока вариант не выбран, подпись ведёт себя как placeholder */
+  .application-modal__select:has(option[value='']:checked) {
+    color: var(--text-muted);
+  }
+
+  .application-modal__control:focus-within .application-modal__chevron {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
   .application-modal__select:focus-visible {
     outline: none;
   }
@@ -522,6 +555,7 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
     transform: translateY(-50%);
     pointer-events: none;
     color: var(--text-primary);
+    transition: transform var(--transition-fast);
   }
 
   /* --- Согласие --- */

@@ -605,12 +605,36 @@ const pixels: [x: number, y: number, color: string][] = [
     background: none;
     font: inherit;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
     cursor: pointer;
   }
 
+  /* Состояния списка (ТЗ 5.4) — те же, что в форме заявки. Рамку фокуса
+     показывает обёртка: сам select лежит в боксе без границ, и подсветка
+     обводила бы текст, а не поле. До этой правки select гасил обводку,
+     а обёртка её не показывала — с клавиатуры фокус был не виден. */
   .plan-modal__select:focus-visible {
     outline: none;
+  }
+
+  .plan-modal__control:hover {
+    border-color: var(--text-primary);
+  }
+
+  .plan-modal__control:focus-within {
+    border-color: var(--brand-cyan);
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* Пока вариант не выбран, подпись ведёт себя как placeholder */
+  .plan-modal__select:has(option[value='']:checked) {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .plan-modal__control:focus-within .plan-modal__chevron {
+    transform: rotate(180deg);
   }
 
   /* Список раскрывается системным виджетом — на тёмном фоне он остаётся
@@ -623,7 +647,8 @@ const pixels: [x: number, y: number, color: string][] = [
   .plan-modal__chevron {
     flex: none;
     pointer-events: none;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
+    transition: transform var(--transition-fast);
   }
 
   /* --- Согласие --- */
