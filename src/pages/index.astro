@@ -9,9 +9,14 @@ import Mentors from '../components/Mentors.astro';
 import Partners from '../components/Partners.astro';
 import Faq from '../components/Faq.astro';
 import CallToAction from '../components/CallToAction.astro';
+import SectionNav from '../components/SectionNav.astro';
 ---
 
 <BaseLayout title="ЛОКУС — цифровая проектная школа" headerLogo={false}>
+  {/* Навигация по разделам (ТЗ 3.1) — только на главной: она одна такой
+      длины, у «Проектов» и «Сообщества» блоков втрое меньше */}
+  <SectionNav />
+
   <Hero />
   <Tracks />
   <Cases />

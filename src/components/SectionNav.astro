@@ -1,0 +1,179 @@
+---
+// Боковая навигация по разделам главной (ТЗ 3.1).
+//
+// В макете её нет — это служебный элемент для длинной страницы, поэтому
+// сделана нарочито тихой: столбик точек в левом поле, подпись выезжает
+// только под курсором и по фокусу с клавиатуры.
+//
+// Почему точки, а не полоса с подписями: страница живёт в колонке 1440,
+// и на 1440 слева свободны только 40px внутреннего поля контейнера.
+// Столбик шириной 12px в него укладывается и ничего не перекрывает;
+// на 1920 поле шире, и та же навигация просто оказывается дальше от текста.
+//
+// Плавность прокрутки берётся из глобального scroll-behavior: smooth,
+// который в reset.css отключается при prefers-reduced-motion.
+
+const items = [
+  { id: 'hero', label: 'Начало' },
+  { id: 'tracks', label: 'Треки' },
+  { id: 'cases', label: 'Кейсы' },
+  { id: 'audiences', label: 'Кому подойдёт' },
+  { id: 'benefits', label: 'Что получает' },
+  { id: 'mentors', label: 'Менторы' },
+  { id: 'partners', label: 'Партнёры' },
+  { id: 'faq', label: 'FAQ' },
+];
+---
+
+<nav class="section-nav" aria-label="Разделы страницы">
+  <ul class="section-nav__list">
+    {
+      items.map((item) => (
+        <li>
+          <a class="section-nav__link" href={`#${item.id}`} data-nav-to={item.id}>
+            <span class="section-nav__dot" aria-hidden="true" />
+            <span class="section-nav__label">{item.label}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<script>
+  // Активный пункт — по секции, попавшей в середину экрана. Полоса
+  // -45% сверху и снизу оставляет от окна тонкий поясок: в него в любой
+  // момент попадает ровно одна секция, поэтому подсветка не мигает
+  // на стыках и не требует ручного счёта координат.
+  const nav = document.querySelector<HTMLElement>('.section-nav');
+
+  if (nav) {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('[data-nav-to]')];
+    const byId = new Map(links.map((link) => [link.dataset.navTo ?? '', link]));
+
+    const sections = links
+      .map((link) => document.getElementById(link.dataset.navTo ?? ''))
+      .filter((section): section is HTMLElement => section !== null);
+
+    const setActive = (id: string) => {
+      for (const link of links) {
+        const on = link.dataset.navTo === id;
+        link.classList.toggle('is-active', on);
+        // aria-current, а не только класс: иначе состояние видно
+        // только глазами
+        if (on) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.target.id) setActive(entry.target.id);
+        }
+      },
+      { rootMargin: '-45% 0px -45% 0px' },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    // До первой прокрутки поясок может не задеть ни одну секцию —
+    // подсвечиваем первый пункт, чтобы навигация не выглядела мёртвой
+    if (byId.size > 0) setActive(sections[0]?.id ?? '');
+  }
+</script>
+
+<style>
+  /* Fixed, а не sticky: sticky пришлось бы вешать на общего родителя всех
+     секций, а он один на всю страницу — прилипать было бы не к чему.
+     z-index 20 — как у куки-уведомления: выше шапки и декора секций. */
+  .section-nav {
+    position: fixed;
+    left: 12px;
+    top: 50%;
+    z-index: 20;
+    transform: translateY(-50%);
+  }
+
+  .section-nav__list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Ссылка шире точки: 8px точка в поле 20px — по такой цели попасть мышью
+     реально, а видно по-прежнему только точку. Шире делать нельзя: на 1440
+     контент начинается на 40px, и зона клика подошла бы к нему вплотную. */
+  .section-nav__link {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 22px;
+  }
+
+  .section-nav__dot {
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--border-warm);
+    border-radius: 50%;
+    background: transparent;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .section-nav__link:hover .section-nav__dot {
+    background: var(--border-warm);
+  }
+
+  .section-nav__link.is-active .section-nav__dot {
+    border-color: var(--accent-terracotta);
+    background: var(--accent-terracotta);
+    transform: scale(1.35);
+  }
+
+  /* Подпись выезжает поверх контента и только на время наведения:
+     держать её всегда негде — на 1440 слева свободно 40px. */
+  .section-nav__label {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    padding: 6px 12px;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-pill);
+    background: rgba(7, 31, 41, 0.92);
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    color: var(--text-soft);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-6px, -50%);
+    pointer-events: none;
+    transition:
+      opacity var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .section-nav__link:hover .section-nav__label,
+  .section-nav__link:focus-visible .section-nav__label {
+    opacity: 1;
+    transform: translate(4px, -50%);
+  }
+
+  .section-nav__link:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+    border-radius: 50%;
+  }
+
+  /* Узкое окно: столбик встал бы на текст. Адаптив по разделу 9.2 ещё
+     впереди — до него навигация просто не показывается там, где мешает. */
+  @media (max-width: 1100px) {
+    .section-nav {
+      display: none;
+    }
+  }
+</style>
