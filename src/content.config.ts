@@ -81,6 +81,14 @@ const cases = defineCollection({
     /** Путь вида /src/assets/uploads/foo.webp */
     image: z.string().optional(),
     imageAlt: z.string().default(''),
+    /**
+     * Плашка направления. Придёт вместо ИИ-превью (ТЗ №1, п. 6.2 и 6.3):
+     * если поле заполнено, в кадре карточки рисуется она, а не фотография.
+     * Пока файлов нет — поле пустое, и на этом месте стоит заглушка
+     * того же размера (ТЗ №2, п. 3).
+     */
+    poster: z.string().optional(),
+    posterAlt: z.string().default(''),
     problem: z.string(),
     solution: z.string(),
     result: z.string(),

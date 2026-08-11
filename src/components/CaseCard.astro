@@ -7,18 +7,42 @@ interface Props {
   title: string;
   image?: string;
   imageAlt?: string;
+  /**
+   * Плашка направления — придёт вместо ИИ-превью (ТЗ №1, п. 6.2 и 6.3).
+   * Файлов ещё нет, поэтому поле пустое: на его месте рисуется заглушка
+   * ровно того же размера. Как файлы появятся, достаточно указать путь
+   * в админке — вёрстку менять не придётся.
+   */
+  poster?: string;
+  posterAlt?: string;
   problem: string;
   solution: string;
   result: string;
 }
 
-const { tag, title, image, imageAlt = '', problem, solution, result } = Astro.props;
+const {
+  tag,
+  title,
+  image,
+  imageAlt = '',
+  poster,
+  posterAlt = '',
+  problem,
+  solution,
+  result,
+} = Astro.props;
 
 const uploads = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
   { eager: true },
 );
-const resolved = image ? uploads[image]?.default : undefined;
+
+// Плашка направления главнее фотографии: она её и заменяет. Пока нет ни
+// той, ни другой — в кадре стоит заглушка с названием направления.
+const resolvedPoster = poster ? uploads[poster]?.default : undefined;
+const resolvedPhoto = image ? uploads[image]?.default : undefined;
+const cover = resolvedPoster ?? resolvedPhoto;
+const coverAlt = resolvedPoster ? posterAlt : imageAlt;
 
 const sections = [
   { label: 'Проблема', text: problem, accent: false },
@@ -32,15 +56,24 @@ const sections = [
 <article class="case">
   <div class="case__media">
     {
-      resolved && (
+      cover ? (
         <Image
           class="case__image"
-          src={resolved}
-          alt={imageAlt}
+          src={cover}
+          alt={coverAlt}
           widths={[440, 880]}
           sizes="440px"
           loading="lazy"
         />
+      ) : (
+        /* Заглушка занимает тот же кадр, что и будущая плашка: подпись
+           направления по центру, чтобы место читалось осмысленно,
+           а не как дыра в карточке. aria-hidden — метка направления
+           рядом уже озвучена в .case__tag. */
+        <p class="case__poster" aria-hidden="true">
+          <span class="case__poster-name">{tag}</span>
+          <span class="case__poster-note">плашка направления</span>
+        </p>
       )
     }
     <p class="case__tag">{tag}</p>
@@ -94,10 +127,14 @@ const sections = [
     transform: scale(1.04);
   }
 
+  /* Кадр задан пропорцией, а не высотой: 440 × 216 — размер из макета при
+     карточке 440px. Так плашка направления, когда её пришлют, ляжет ровно
+     в это место при любой ширине колонки, и переверстывать не придётся.
+     Высота при 1440 остаётся теми же 216px (проверено). */
   .case__media {
     position: relative;
     flex: none;
-    height: 216px;
+    aspect-ratio: 440 / 216;
   }
 
   .case__image {
@@ -105,6 +142,43 @@ const sections = [
     height: 100%;
     object-fit: cover;
     transition: transform var(--transition-base);
+  }
+
+  /* Заглушка под плашку направления. Никаких «битых картинок»: ровный
+     тёмный кадр в цвете панели, по центру — направление. Полоски по
+     диагонали дают понять, что это место под ассет, а не финальный вид. */
+  .case__poster {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(28, 94, 116, 0.35);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.05) 0 10px,
+      transparent 10px 20px
+    );
+    text-align: center;
+  }
+
+  .case__poster-name {
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+  }
+
+  .case__poster-note {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
   .case__tag {

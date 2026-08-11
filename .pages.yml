@@ -142,6 +142,16 @@ content:
         label: Описание изображения
         type: string
         description: Для незрячих и на случай, если картинка не загрузится.
+      - name: poster
+        label: Плашка направления
+        type: image
+        description: >-
+          Заменяет изображение выше, когда заполнена. Пока пусто — в карточке
+          стоит заглушка того же размера с названием направления.
+      - name: posterAlt
+        label: Описание плашки
+        type: string
+        description: Для незрячих. Заполнять вместе с плашкой.
       - name: problem
         label: Проблема
         type: text
