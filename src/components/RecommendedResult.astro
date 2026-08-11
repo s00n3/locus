@@ -26,6 +26,13 @@ const professions = (await getCollection('professions'))
   .filter((p) => p.data.image)
   .sort((a, b) => a.data.order - b.data.order);
 
+// Плашки профессий в карточке трека (ТЗ 7.4) уводят к профессии в паутине,
+// поэтому набор здесь ровно тот же, что там: с заполненными осями. Кадр
+// для плашки не нужен — она текстовая, поэтому фильтр по image не при чём.
+const webProfessions = (await getCollection('professions'))
+  .filter((p) => p.data.competencies.length > 0)
+  .sort((a, b) => a.data.order - b.data.order);
+
 const uploads = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/uploads/*.{jpg,jpeg,png,webp,avif}',
   { eager: true },
@@ -96,6 +103,28 @@ const directionTrack = Object.fromEntries(
               <button class="chip chip--action" type="button" data-track-open={track.id}>
                 Подробнее о треке
               </button>
+            </span>
+
+            {/* Плашки профессий (ТЗ 7.4). Набор тот же, что у чипов паутины:
+                профессии с заполненными осями, отобранные выбранными
+                направлениями. Клик уводит к этой профессии в паутине —
+                отдельного виджета с подробностями не заводим, подробности
+                там и живут. */}
+            <span class="wide__professions" data-profession-badges hidden>
+              <span class="wide__professions-label">Кем можно стать:</span>
+              {
+                webProfessions.map((profession) => (
+                  <button
+                    class="chip chip--profession"
+                    type="button"
+                    data-profession-badge={profession.id}
+                    data-directions={profession.data.directions.join('|')}
+                    hidden
+                  >
+                    {profession.data.title}
+                  </button>
+                ))
+              }
             </span>
           </span>
         </article>
@@ -185,6 +214,8 @@ const directionTrack = Object.fromEntries(
 
   if (section) {
     const trackCards = [...section.querySelectorAll('[data-track]')];
+    const badgeGroups = [...section.querySelectorAll('[data-profession-badges]')];
+    const badges = [...section.querySelectorAll('[data-profession-badge]')];
     const projectCards = [...section.querySelectorAll('[data-projects] > li')];
     const professionCards = [...section.querySelectorAll('[data-professions] > li')];
     const parts = {
@@ -227,6 +258,17 @@ const directionTrack = Object.fromEntries(
         card.hidden = !own.some((name) => chosen.includes(name));
       }
 
+      // Плашки профессий в карточке трека — по тому же правилу, что чипы
+      // паутины: иначе плашка вела бы к профессии, которой там нет
+      for (const badge of badges) {
+        const own = (badge.dataset.directions || '').split('|').filter(Boolean);
+        badge.hidden = !own.some((name) => chosen.includes(name));
+      }
+
+      for (const group of badgeGroups) {
+        group.hidden = ![...group.querySelectorAll('[data-profession-badge]')].some((b) => !b.hidden);
+      }
+
       // Часть без содержимого прячем вместе с её заголовком: пустая
       // «Проекты» под подписью выглядела бы сломанной. Секцию целиком —
       // когда не осталось ни одной части.
@@ -245,6 +287,24 @@ const directionTrack = Object.fromEntries(
         apply();
       }
     });
+
+    // Плашка профессии уводит к ней в паутине (ТЗ 7.4). Связь через тот же
+    // приём, что и остальные блоки конструктора: находим в паутине чип с
+    // этим id и нажимаем его — фигура доигрывает переход сама. Если паутины
+    // на странице нет, плашка просто ничего не делает.
+    for (const badge of badges) {
+      badge.addEventListener('click', () => {
+        const id = badge.dataset.professionBadge;
+        const chip = document.querySelector(`.web [data-profession="${id}"]`);
+        if (!chip) return;
+
+        chip.click();
+        // Прокрутка к паутине, а не к чипу: чипы стоят над ней, и после
+        // прыжка к чипу сама фигура оставалась бы за краем экрана
+        document.querySelector('.web')?.scrollIntoView({ block: 'start' });
+        chip.focus();
+      });
+    }
 
     apply();
   }
@@ -399,6 +459,50 @@ const directionTrack = Object.fromEntries(
 
   .chip--action:hover {
     background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* --- Плашки профессий (ТЗ 7.4) --- */
+
+  .wide__professions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .wide__professions[hidden] {
+    display: none;
+  }
+
+  .wide__professions-label {
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: normal;
+    color: var(--text-muted);
+  }
+
+  /* Кегль меньше, чем у чипов навыков: плашек может быть много, и в один
+     ряд с ними они читаются как вторая, служебная строка */
+  .chip--profession {
+    padding: 8px 14px;
+    border-color: var(--border-warm);
+    font-size: 18px;
+    color: var(--text-soft);
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .chip--profession[hidden] {
+    display: none;
+  }
+
+  .chip--profession:hover {
+    border-color: var(--brand-cyan);
+    background: var(--brand-cyan-25);
+    color: var(--text-primary);
   }
 
   /* --- Сетка проектов --- */
