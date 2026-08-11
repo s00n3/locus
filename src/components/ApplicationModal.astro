@@ -59,8 +59,19 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
       <span aria-hidden="true">×</span>
     </button>
 
-    <p class="application-modal__eyebrow">Последний шаг</p>
-    <h2 class="application-modal__title" id="application-modal-title">Форма подачи заявки</h2>
+    {/* Шапка меняет текст в состоянии-подтверждении (ТЗ 5.1): второй вариант
+        лежит в data-атрибуте, как подводка в форме индивидуального плана.
+        Заголовок остаётся на месте, поэтому имя окна для скринридера не
+        пропадает вместе с полями. */}
+    <p class="application-modal__eyebrow" data-eyebrow data-eyebrow-done="Готово">Последний шаг</p>
+    <h2
+      class="application-modal__title"
+      id="application-modal-title"
+      data-title
+      data-title-done="Заявка отправлена"
+    >
+      Форма подачи заявки
+    </h2>
 
     <div class="application-modal__card">
       <div class="application-modal__grid">
@@ -210,6 +221,13 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
           нет, но молча терять заявку хуже, чем признаться */}
       <p class="application-modal__status" data-status role="status" aria-live="polite"></p>
     </div>
+
+    {/* Подтверждение вместо полей — то же окно, а не новое (ТЗ 5.1).
+        Получает фокус, поэтому читается сразу после отправки. */}
+    <div class="application-modal__done" data-done tabindex="-1">
+      <p class="application-modal__done-text">Проверьте почту</p>
+      <button class="application-modal__done-close" type="button" data-close>Закрыть</button>
+    </div>
   </form>
 </dialog>
 
@@ -221,19 +239,38 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
   if (dialog) {
     const form = dialog.querySelector('form') as HTMLFormElement;
     const status = dialog.querySelector('[data-status]') as HTMLElement;
+    const eyebrow = dialog.querySelector('[data-eyebrow]') as HTMLElement;
+    const title = dialog.querySelector('[data-title]') as HTMLElement;
+    const done = dialog.querySelector('[data-done]') as HTMLElement;
+    const DEFAULT_EYEBROW = eyebrow.textContent ?? '';
+    const DEFAULT_TITLE = title.textContent ?? '';
 
     setupModal(dialog, {
       triggers: '[data-modal="application"]',
       panel: '.application-modal__panel',
       onOpen: () => {
         status.textContent = '';
+        delete status.dataset.state;
+
+        // Возвращаем форму только после отправки: при обычном закрытии
+        // введённое сохраняется, иначе случайный Esc стирал бы всё
+        if (form.dataset.state === 'done') {
+          delete form.dataset.state;
+          eyebrow.textContent = DEFAULT_EYEBROW;
+          title.textContent = DEFAULT_TITLE;
+          form.reset();
+        }
       },
     });
 
     // Отправлять заявку пока некуда: персональные данные по 152-ФЗ хранятся
     // только в России, а сайт живёт на GitHub Pages. Бэкенд появится вместе
-    // с сервером университета. До тех пор проверяем поля и честно говорим,
-    // что данные не ушли, — молча терять заявку нельзя.
+    // с сервером университета.
+    //
+    // Подтверждение по ТЗ 5.1 показывается по факту нажатия — так просил
+    // заказчик, зная, что бэкенда нет. Когда сервер появится: отправить
+    // fetch и показывать это состояние ТОЛЬКО на успешный ответ, а на
+    // ошибку возвращать форму и писать в строку статуса, что не ушло.
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
@@ -244,8 +281,11 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
         return;
       }
 
-      status.textContent = 'Отправка заявок пока не подключена — форма ждёт сервер университета.';
-      status.dataset.state = 'notice';
+      form.dataset.state = 'done';
+      eyebrow.textContent = eyebrow.dataset.eyebrowDone ?? DEFAULT_EYEBROW;
+      title.textContent = title.dataset.titleDone ?? DEFAULT_TITLE;
+      // Фокус на подтверждение: иначе он остался бы на скрытой кнопке
+      done.focus();
     });
   }
 </script>
@@ -587,6 +627,58 @@ const pixels: [x: number, y: number, size: number, color: string][] = [
 
   .application-modal__status:empty {
     display: none;
+  }
+
+  /* --- Состояние-подтверждение (ТЗ 5.1) --- */
+
+  /* Прячем поля, кнопку и строку статуса, а не оборачиваем их в лишний
+     контейнер. Шапка и крестик остаются: окно должно сохранить и заголовок,
+     и штатное закрытие. Ширина блока равна кнопке отправки — панель
+     не схлопывается в узкую полоску. */
+  .application-modal__done {
+    display: none;
+    width: 1061px;
+    max-width: 100%;
+    margin: 48px auto 0;
+    text-align: center;
+  }
+
+  .application-modal__panel[data-state='done'] .application-modal__card,
+  .application-modal__panel[data-state='done'] .application-modal__submit,
+  .application-modal__panel[data-state='done'] .application-modal__status {
+    display: none;
+  }
+
+  .application-modal__panel[data-state='done'] .application-modal__done {
+    display: block;
+  }
+
+  .application-modal__done:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .application-modal__done-text {
+    font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-soft);
+  }
+
+  .application-modal__done-close {
+    height: 60px;
+    margin-top: 32px;
+    padding-inline: 40px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-size: 24px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .application-modal__done-close:hover {
+    background: var(--accent-terracotta-light);
   }
 
   .application-modal__status {

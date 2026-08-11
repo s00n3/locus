@@ -37,11 +37,23 @@ const pixels: [x: number, y: number, color: string][] = [
       <span aria-hidden="true">×</span>
     </button>
 
+    {/* Шапка меняет текст в состоянии-подтверждении (ТЗ 5.1): второй вариант
+        лежит в data-атрибуте, как и подводка ниже. Заголовок остаётся, поэтому
+        имя окна для скринридера не пропадает вместе с полями. */}
     <header class="plan-modal__header">
-      <p class="plan-modal__eyebrow">ПОСЛЕДНИЙ ШАГ</p>
-      <h2 class="plan-modal__title" id="plan-modal-title">Заявка с индивидуальным планом</h2>
+      <p class="plan-modal__eyebrow" data-eyebrow data-eyebrow-done="ГОТОВО">ПОСЛЕДНИЙ ШАГ</p>
+      <h2 class="plan-modal__title" id="plan-modal-title" data-title data-title-done="Заявка отправлена">
+        Заявка с индивидуальным планом
+      </h2>
       <p class="plan-modal__lead" data-lead data-lead-filled={LEAD_FILLED}>{LEAD_EMPTY}</p>
     </header>
+
+    {/* Подтверждение вместо полей — то же окно, а не новое (ТЗ 5.1).
+        Получает фокус, поэтому читается сразу после отправки. */}
+    <div class="plan-modal__done" data-done tabindex="-1">
+      <p class="plan-modal__done-text">Проверьте почту</p>
+      <button class="plan-modal__done-close" type="button" data-close>Закрыть</button>
+    </div>
 
     <div class="plan-modal__card">
       <p class="plan-modal__field">
@@ -222,8 +234,13 @@ const pixels: [x: number, y: number, color: string][] = [
     const form = dialog.querySelector('form') as HTMLFormElement;
     const status = dialog.querySelector('[data-status]') as HTMLElement;
     const lead = dialog.querySelector('[data-lead]') as HTMLElement;
+    const eyebrow = dialog.querySelector('[data-eyebrow]') as HTMLElement;
+    const title = dialog.querySelector('[data-title]') as HTMLElement;
+    const done = dialog.querySelector('[data-done]') as HTMLElement;
     const DEFAULT_NOTE = status.textContent ?? '';
     const DEFAULT_LEAD = lead.textContent ?? '';
+    const DEFAULT_EYEBROW = eyebrow.textContent ?? '';
+    const DEFAULT_TITLE = title.textContent ?? '';
 
     const answerFields = [...dialog.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
       '[data-plan-answer]',
@@ -235,6 +252,15 @@ const pixels: [x: number, y: number, color: string][] = [
       onOpen: () => {
         status.textContent = DEFAULT_NOTE;
         delete status.dataset.state;
+
+        // Возвращаем форму только после отправки: при обычном закрытии
+        // введённое сохраняется, иначе случайный Esc стирал бы всё
+        if (form.dataset.state === 'done') {
+          delete form.dataset.state;
+          eyebrow.textContent = DEFAULT_EYEBROW;
+          title.textContent = DEFAULT_TITLE;
+          form.reset();
+        }
 
         // Читаем выбор конструктора при каждом открытии, а не храним его:
         // между открытиями пользователь мог поменять отметки. На страницах
@@ -258,8 +284,12 @@ const pixels: [x: number, y: number, color: string][] = [
 
     // Отправлять некуда: персональные данные по 152-ФЗ хранятся только
     // в России, а сайт живёт на GitHub Pages. Бэкенд появится вместе
-    // с сервером университета. До тех пор проверяем поля и честно говорим,
-    // что данные не ушли, — молча терять заявку нельзя.
+    // с сервером университета.
+    //
+    // Подтверждение по ТЗ 5.1 показывается по факту нажатия — так просил
+    // заказчик, зная, что бэкенда нет. Когда сервер появится: отправить
+    // fetch и показывать это состояние ТОЛЬКО на успешный ответ, а на
+    // ошибку возвращать форму и писать в строку статуса, что не ушло.
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
@@ -270,8 +300,11 @@ const pixels: [x: number, y: number, color: string][] = [
         return;
       }
 
-      status.textContent = 'Заявка заполнена, но отправка пока не подключена.';
-      status.dataset.state = 'notice';
+      form.dataset.state = 'done';
+      eyebrow.textContent = eyebrow.dataset.eyebrowDone ?? DEFAULT_EYEBROW;
+      title.textContent = title.dataset.titleDone ?? DEFAULT_TITLE;
+      // Фокус на подтверждение: иначе он остался бы на скрытой кнопке
+      done.focus();
     });
   }
 </script>
@@ -441,6 +474,56 @@ const pixels: [x: number, y: number, color: string][] = [
     border: 1px solid var(--border-warm);
     border-radius: var(--radius-card);
     background: rgba(217, 217, 217, 0.1);
+  }
+
+  /* --- Состояние-подтверждение (ТЗ 5.1) --- */
+
+  /* Прячем карточку с полями (кнопка и строка статуса лежат внутри неё),
+     а не оборачиваем разметку в лишний контейнер. Шапка и крестик остаются:
+     окно должно сохранить и заголовок, и штатное закрытие. */
+  .plan-modal__done {
+    display: none;
+    padding-block: 24px;
+    text-align: center;
+  }
+
+  /* Подводка тоже уходит: она объясняет, что делать с полями,
+     а полей в этом состоянии нет */
+  .plan-modal__panel[data-state='done'] .plan-modal__card,
+  .plan-modal__panel[data-state='done'] .plan-modal__lead {
+    display: none;
+  }
+
+  .plan-modal__panel[data-state='done'] .plan-modal__done {
+    display: block;
+  }
+
+  .plan-modal__done:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .plan-modal__done-text {
+    font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: var(--text-soft);
+  }
+
+  .plan-modal__done-close {
+    height: 56px;
+    margin-top: 28px;
+    padding-inline: 36px;
+    border-radius: var(--radius-card);
+    background: var(--accent-terracotta);
+    font-size: 20px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .plan-modal__done-close:hover {
+    background: var(--accent-terracotta-light);
   }
 
   .plan-modal__row {

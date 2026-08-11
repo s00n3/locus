@@ -56,7 +56,12 @@ export function setupModal(dialog: HTMLDialogElement, { triggers, panel, onOpen 
   });
 
   dialog.addEventListener('close', cleanup);
-  dialog.querySelector('[data-close]')?.addEventListener('click', close);
+
+  // Все кнопки закрытия, а не первая: у окна их может быть несколько —
+  // крестик в углу и «Закрыть» в состоянии-подтверждении (ТЗ 5.1)
+  dialog.querySelectorAll('[data-close]').forEach((button) => {
+    button.addEventListener('click', close);
+  });
 
   // Клик мимо панели закрывает окно: у самого dialog нет отступов, поэтому
   // попадание за её пределы надёжно определяется рамкой
