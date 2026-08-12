@@ -147,8 +147,9 @@ const first = withAxes[0];
         </header>
 
         {/* Выбор один: паутина показывает одну профессию за раз. Набор чипов
-            не постоянный — его отбирают направления, выбранные в конструкторе,
-            так же как в блоке результата. */}
+            не постоянный — его отбирает правило подбора из админки (ТЗ №4):
+            теги профессии сверяются с отмеченным на всех трёх шагах, так же
+            как в блоке результата. */}
         <ul class="web__chips" role="radiogroup" aria-labelledby="web-title">
           {withAxes.map((profession) => (
             <li data-chip hidden>
@@ -158,7 +159,15 @@ const first = withAxes[0];
                 role="radio"
                 aria-checked="false"
                 data-profession={profession.id}
-                data-directions={profession.data.directions.join('|')}
+                data-match-min={profession.data.matchMin}
+                data-required-tags={profession.data.tags
+                  .filter((t) => t.required)
+                  .map((t) => t.tag)
+                  .join('|')}
+                data-optional-tags={profession.data.tags
+                  .filter((t) => !t.required)
+                  .map((t) => t.tag)
+                  .join('|')}
               >
                 {profession.data.title}
               </button>
@@ -223,6 +232,8 @@ const first = withAxes[0];
 <script>
   // Переключение профессии. Ни перерисовки, ни покадровой анимации:
   // подменяем d у контура и transform у точек, дальше работает CSS.
+  import { matchesRule, onConstructorChange, readChosenTags, readRule } from '../lib/constructor-answers';
+
   const section = document.querySelector<HTMLElement>('.web');
 
   if (section) {
@@ -257,21 +268,17 @@ const first = withAxes[0];
       chip.addEventListener('click', () => select(chip));
     }
 
-    // Состав чипов задают направления, выбранные в конструкторе: паутина
-    // показывает те же профессии, что и блок результата, а не все сразу.
-    // Ничего не выбрано — блока нет, как и результата.
-    const selectedDirections = () =>
-      [...document.querySelectorAll<HTMLElement>('button[data-direction]')]
-        .filter((el) => el.getAttribute('aria-pressed') === 'true')
-        .map((el) => el.dataset.direction);
-
+    // Состав чипов задаёт правило подбора из админки (ТЗ №4): у профессии
+    // теги с флажком «обязательно» и порог по остальным, сверяются с
+    // отмеченным на всех трёх шагах. Правило общее с блоком результата —
+    // паутина показывает те же профессии, что и он. Ничего не подошло —
+    // блока нет, как и результата.
     const sync = () => {
-      const chosen = selectedDirections();
+      const chosenTags = readChosenTags();
       let firstVisible: HTMLButtonElement | null = null;
 
       for (const chip of chips) {
-        const own = (chip.dataset.directions || '').split('|').filter(Boolean);
-        const hit = chosen.length > 0 && own.some((name) => chosen.includes(name));
+        const hit = matchesRule(readRule(chip), chosenTags);
         chip.closest('li')?.toggleAttribute('hidden', !hit);
         if (hit && !firstVisible) firstVisible = chip;
       }
@@ -287,11 +294,9 @@ const first = withAxes[0];
       select(active ?? firstVisible);
     };
 
-    document.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('button[data-direction]')) {
-        sync();
-      }
-    });
+    // Слушаем все три шага: после ТЗ №4 выбор задачи и уровня опыта тоже
+    // меняет состав профессий, а не только направления.
+    onConstructorChange(sync);
 
     sync();
 

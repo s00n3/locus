@@ -39,6 +39,56 @@ const uploads = import.meta.glob<{ default: ImageMetadata }>(
 );
 const cover = (path?: string) => (path ? uploads[path]?.default : undefined);
 
+/* --- Правило подбора профессий (ТЗ №4) ---
+   Правило целиком приходит из CMS: список тегов с флажком «обязательно»
+   и порог по остальным. Разметка отдаёт его скриптам через data-*, сверку
+   делает src/lib/constructor-answers.ts — одна на этот блок и на паутину. */
+
+const rule = (tags: { tag: string; required: boolean }[]) => ({
+  'data-required-tags': tags.filter((t) => t.required).map((t) => t.tag).join('|'),
+  'data-optional-tags': tags.filter((t) => !t.required).map((t) => t.tag).join('|'),
+});
+
+// Теги сверяем с названиями чипов и карточек всех трёх шагов: опечатка
+// в админке иначе тихо выключила бы профессию из подбора. Сборку не роняем,
+// как и в остальных проверках контента, — пишем в лог.
+const areas = await getCollection('areas');
+const levels = await getCollection('levels');
+const knownTags = new Set([
+  ...directions.map((d) => d.data.title),
+  ...areas.map((a) => a.data.title),
+  ...levels.map((l) => l.data.title),
+]);
+
+for (const profession of await getCollection('professions')) {
+  const { title, tags, matchMin } = profession.data;
+
+  if (tags.length === 0) {
+    console.warn(
+      `[Тебе подойдут] у профессии «${title}» не задано ни одного тега — ` +
+        `правило подбора пустое, она не покажется никому`,
+    );
+    continue;
+  }
+
+  const необязательных = tags.filter((t) => !t.required).length;
+  if (matchMin > необязательных) {
+    console.warn(
+      `[Тебе подойдут] у профессии «${title}» порог совпадений ${matchMin}, ` +
+        `а необязательных тегов ${необязательных} — она не покажется никому`,
+    );
+  }
+
+  for (const { tag } of tags) {
+    if (!knownTags.has(tag)) {
+      console.warn(
+        `[Тебе подойдут] у профессии «${title}» тег «${tag}» не совпадает ` +
+          `ни с одним чипом или карточкой конструктора — по нему подбора не будет`,
+      );
+    }
+  }
+}
+
 // Проект с направлением, которого нет среди чипов конструктора, ни под один
 // выбор не попадёт. Сборку не роняем — заказчик правит контент в админке
 // и увидит подсказку в логах. Проверка жила в «Собери свой трек», пока
@@ -70,7 +120,16 @@ const directionTrack = Object.fromEntries(
 );
 ---
 
-<section class="result" data-reveal aria-labelledby="result-title" hidden>
+{/* Таблица «направление → трек» уходит в data-атрибут, а не в define:vars:
+    скрипту нужны импорты из src/lib, а define:vars делает его встроенным,
+    и импорты в нём невозможны. Тот же приём, что у паутины компетенций. */}
+<section
+  class="result"
+  data-reveal
+  aria-labelledby="result-title"
+  data-direction-track={JSON.stringify(directionTrack)}
+  hidden
+>
   <div class="result__inner">
     <h2 class="result__title" id="result-title">
       <span class="result__brace">&#123;</span> Тебе подойдут <span class="result__brace">&#125;</span>
@@ -128,7 +187,8 @@ const directionTrack = Object.fromEntries(
                     class="chip chip--profession"
                     type="button"
                     data-profession-badge={profession.id}
-                    data-directions={profession.data.directions.join('|')}
+                    data-match-min={profession.data.matchMin}
+                    {...rule(profession.data.tags)}
                     hidden
                   >
                     {profession.data.title}
@@ -193,7 +253,12 @@ const directionTrack = Object.fromEntries(
     <ul class="result__pair" data-professions>
       {
         professions.map((profession) => (
-          <li class="wide wide--profession" data-directions={profession.data.directions.join('|')} hidden>
+          <li
+            class="wide wide--profession"
+            data-match-min={profession.data.matchMin}
+            {...rule(profession.data.tags)}
+            hidden
+          >
             {
               cover(profession.data.image) && (
                 <span class="wide__media">
@@ -219,32 +284,45 @@ const directionTrack = Object.fromEntries(
   </div>
 </section>
 
-<script define:vars={{ directionTrack }}>
+<script>
   // Пересборка результата по выбору конструктора. Всё уже в разметке,
   // скрипт только решает, что показать.
-  const section = document.querySelector('.result');
+  import {
+    matchesRule,
+    onConstructorChange,
+    readChosenTags,
+    readRule,
+  } from '../lib/constructor-answers';
+
+  const section = document.querySelector<HTMLElement>('.result');
 
   if (section) {
-    const trackCards = [...section.querySelectorAll('[data-track]')];
-    const badgeGroups = [...section.querySelectorAll('[data-profession-badges]')];
-    const badges = [...section.querySelectorAll('[data-profession-badge]')];
-    const projectCards = [...section.querySelectorAll('[data-projects] > li')];
-    const professionCards = [...section.querySelectorAll('[data-professions] > li')];
+    const directionTrack = JSON.parse(section.dataset.directionTrack ?? '{}') as Record<
+      string,
+      string
+    >;
+    const trackCards = [...section.querySelectorAll<HTMLElement>('[data-track]')];
+    const badgeGroups = [...section.querySelectorAll<HTMLElement>('[data-profession-badges]')];
+    const badges = [...section.querySelectorAll<HTMLElement>('[data-profession-badge]')];
+    const projectCards = [...section.querySelectorAll<HTMLElement>('[data-projects] > li')];
+    const professionCards = [...section.querySelectorAll<HTMLElement>('[data-professions] > li')];
     const parts = {
-      track: section.querySelector('[data-part="track"]'),
-      projects: section.querySelector('[data-part="projects"]'),
-      professions: section.querySelector('[data-part="professions"]'),
+      track: section.querySelector<HTMLElement>('[data-part="track"]')!,
+      projects: section.querySelector<HTMLElement>('[data-part="projects"]')!,
+      professions: section.querySelector<HTMLElement>('[data-part="professions"]')!,
     };
 
-    // Выбранные направления читаем у чипов первого шага. Тот же контракт,
-    // что у формы индивидуального плана: атрибут плюс aria-pressed.
-    const selected = () =>
-      [...document.querySelectorAll('button[data-direction]')]
+    // Трек и проекты подбираются только по направлениям первого шага —
+    // это правило ТЗ №4 не меняет. Профессии смотрят на все три шага,
+    // поэтому у них свой набор (readChosenTags).
+    const selectedDirections = () =>
+      [...document.querySelectorAll<HTMLElement>('button[data-direction]')]
         .filter((el) => el.getAttribute('aria-pressed') === 'true')
-        .map((el) => el.dataset.direction);
+        .map((el) => el.dataset.direction ?? '');
 
     const apply = () => {
-      const chosen = selected();
+      const chosen = selectedDirections();
+      const chosenTags = readChosenTags();
 
       // Трек: у какого больше выбранных направлений. При равенстве —
       // первый по порядку, потому что перебираем карточки в их порядке.
@@ -266,16 +344,16 @@ const directionTrack = Object.fromEntries(
         card.hidden = !own.some((name) => chosen.includes(name));
       }
 
+      // Профессии — по правилу из админки: все обязательные теги плюс
+      // порог по остальным (ТЗ №4). Теги берутся со всех трёх шагов.
       for (const card of professionCards) {
-        const own = (card.dataset.directions || '').split('|').filter(Boolean);
-        card.hidden = !own.some((name) => chosen.includes(name));
+        card.hidden = !matchesRule(readRule(card), chosenTags);
       }
 
       // Плашки профессий в карточке трека — по тому же правилу, что чипы
       // паутины: иначе плашка вела бы к профессии, которой там нет
       for (const badge of badges) {
-        const own = (badge.dataset.directions || '').split('|').filter(Boolean);
-        badge.hidden = !own.some((name) => chosen.includes(name));
+        badge.hidden = !matchesRule(readRule(badge), chosenTags);
       }
 
       for (const group of badgeGroups) {
@@ -285,7 +363,7 @@ const directionTrack = Object.fromEntries(
       // Часть без содержимого прячем вместе с её заголовком: пустая
       // «Проекты» под подписью выглядела бы сломанной. Секцию целиком —
       // когда не осталось ни одной части.
-      const visible = (cards) => cards.some((card) => !card.hidden);
+      const visible = (cards: HTMLElement[]) => cards.some((card) => !card.hidden);
       parts.track.hidden = !visible(trackCards);
       parts.projects.hidden = !visible(projectCards);
       parts.professions.hidden = !visible(professionCards);
@@ -293,13 +371,10 @@ const directionTrack = Object.fromEntries(
       section.hidden = parts.track.hidden && parts.projects.hidden && parts.professions.hidden;
     };
 
-    // Чипы живут в другом блоке, поэтому слушаем клики по документу:
-    // так не нужно связывать компоненты между собой.
-    document.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('button[data-direction]')) {
-        apply();
-      }
-    });
+    // Шаги живут в других блоках, поэтому слушаем клики по документу:
+    // так не нужно связывать компоненты между собой. Слушаем все три —
+    // после ТЗ №4 выбор задачи и уровня тоже меняет подбор профессий.
+    onConstructorChange(apply);
 
     // Плашка профессии уводит к ней в паутине (ТЗ 7.4). Связь через тот же
     // приём, что и остальные блоки конструктора: находим в паутине чип с
@@ -308,7 +383,7 @@ const directionTrack = Object.fromEntries(
     for (const badge of badges) {
       badge.addEventListener('click', () => {
         const id = badge.dataset.professionBadge;
-        const chip = document.querySelector(`.web [data-profession="${id}"]`);
+        const chip = document.querySelector<HTMLElement>(`.web [data-profession="${id}"]`);
         if (!chip) return;
 
         chip.click();
